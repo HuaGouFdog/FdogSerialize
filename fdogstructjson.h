@@ -4,9 +4,42 @@
 #include<vector>
 #include<typeinfo>
 #include<regex>
+#include<map>
 using namespace std;
 
 namespace FdogStruct2Json{
+
+//这个map是起到一个别名作用
+map<string, string> valueType = {
+            {"Pc", "char"}, {"PPc", "char_ptr"}, 
+            {"Ph", "char"}, {"PPh", "char_ptr"}, 
+            {"Pa", "char"}, {"PPa", "char_ptr"}, 
+            {"Pi", "int"}, {"PPi", "int_ptr"}, 
+            {"Pj", "unsigned_int"}, {"PPj", "unsigned_int_ptr"}, 
+            {"Ps", "short_int"}, {"PPs", "short_int_ptr"},
+            {"Pt", "unsigned_short_int"}, {"PPt", "unsigned_short_int_ptr"},
+            {"Pl", "long"}, {"PPl", "long_ptr"},
+            {"Pm", "unsigned_long"}, {"PPm", "unsigned_long_ptr"},
+            {"Pf", "float"}, {"PPf", "float_ptr"},
+            {"Pd", "double"}, {"PPd", "double_ptr"},
+            {"Pe", "long_double"}, {"PPe", "long_double_ptr"}
+};
+
+//这个map是根据类型来使用不同正则表达式的
+map<string, string> typeRegex = {
+            {"char", "1"}, {"char_ptr", "1"}, 
+            {"char", "1"}, {"char_ptr", "1"}, 
+            {"char", "1"}, {"char_ptr", "1"}, 
+            {"int", "(\\d+)"}, {"int_ptr", "1"}, 
+            {"unsigned_int", "(\\d+)"}, {"unsigned_int_ptr", "1"}, 
+            {"short_int", "(\\d+)"}, {"short_int_ptr", "1"},
+            {"unsigned_short_int", "(\\d+)"}, {"unsigned_short_int_ptr", "1"},
+            {"long", "(\\d+)"}, {"long_ptr", "1"},
+            {"unsigned_long", "(\\d+)"}, {"unsigned_long_ptr", "1"},
+            {"float", "(\\d+.\\d+)"}, {"float_ptr", "1"},
+            {"double", "(\\d+.\\d+)"}, {"double_ptr", "1"},
+            {"long_double", "(\\d+.\\d+)"}, {"long_double_ptr", "1"}
+};
 
 typedef struct metaInfo{
     string memberName;      //成员名名称
@@ -36,55 +69,65 @@ structInfo & getStructInfo(string name){
 
 template<class T, class M>
 void setValueByAddress(string type_str, T &info, int vc, M data){
+
     //如果不是基础类型，就必须继续递归。
-    if(type_str == "Pc"){
-        *((char *)((void *)&info + vc)) = ((char*)data)[0];
+    // if(type_str == "Pc"){
+    //     *((char *)((void *)&info + vc)) = ((char*)data)[0];
+    // }
+    // if(type_str == "PPc"){
+    //     *((const char **)((void *)&info + vc)) = (char *)data;
+    // }
+    // if(type_str == "Ph"){
+    //     *((char *)((void *)&info + vc)) = ((char*)data)[0];
+    // }
+    // if(type_str == "Pa"){
+    //     *((char *)((void *)&info + vc)) = ((char*)data)[0];
+    // }
+    if(type_str == "int"){
+        *((int *)((char *)&info + vc)) = data;
     }
-    if(type_str == "PPc"){
-        *((const char **)((void *)&info + vc)) = (char *)data;
+    // if(type_str == "Pj"){
+    //     *((unsigned int *)((char *)&info + vc)) = data;
+    // }
+    // if(type_str == "Ps"){
+    //     *((short *)((char *)&info + vc)) = data;
+    // }
+    // if(type_str == "Pt"){
+    //     *((unsigned short *)((char *)&info + vc)) = data;
+    // }
+    // if(type_str == "Pl"){
+    //     *((long *)((char *)&info + vc)) = data;
+    // }
+    // if(type_str == "Pm"){
+    //     *((unsigned long *)((char *)&info + vc)) = data;
+    // }
+    if(type_str == "float"){
+        *((float *)((char *)&info + vc)) = data;
     }
-    if(type_str == "Ph"){
-        *((char *)((void *)&info + vc)) = ((char*)data)[0];
+    if(type_str == "double"){
+        *((double *)((char *)&info + vc)) = data;
     }
-    if(type_str == "Pa"){
-        *((char *)((void *)&info + vc)) = ((char*)data)[0];
-    }
-    if(type_str == "Pi"){
-        *((int *)((char *)&info + vc)) = (*(int *)&data);
-    }
-    if(type_str == "Pj"){
-        *((unsigned int *)((char *)&info + vc)) = *(unsigned int *)&data;
-    }
-    if(type_str == "Ps"){
-        *((short *)((char *)&info + vc)) = *(short *)&data;
-    }
-    if(type_str == "Pt"){
-        *((unsigned short *)((char *)&info + vc)) = *(unsigned short *)&data;
-    }
-    if(type_str == "Pl"){
-        *((long *)((char *)&info + vc)) = *(long *)&data;
-    }
-    if(type_str == "Pm"){
-        *((unsigned long *)((char *)&info + vc)) = *(unsigned long *)&data;
-    }
-    if(type_str == "Pf"){
-        *((float *)((char *)&info + vc)) = *(float *)&data;
-    }
-    if(type_str == "Pd"){
-        *((double *)((char *)&info + vc)) = *(double *)&data;
-    }
-    if(type_str == "Pe"){
-        *((long double *)((char *)&info + vc)) = *(long double *)&data;
-    }
+    // if(type_str == "Pe"){
+    //     *((long double *)((char *)&info + vc)) = data;
+    // }
 }
 
 template<class T>
 string getValueByAddress(string type_str, T &info, int vc){
-    int value;
-    if(type_str == "Pi"){
-        value = *((int *)((char *)&info + vc));
+    if(type_str == "int"){
+        auto value = *((int *)((char *)&info + vc));
+        return to_string(value);
     }
-    return to_string(value);
+    //浮点数默认小数点后6位，这里可以截断后面的0
+    if(type_str == "float"){
+        auto value = *((float *)((char *)&info + vc));
+        return to_string(value);
+    }
+    if(type_str == "double"){
+        auto value = *((double *)((char *)&info + vc));
+        return to_string(value);
+    }
+    return "";
 }
 
 /*struct转json*/
@@ -96,14 +139,25 @@ structInfo a = getStructInfo(typeid(T).name());
     for(int i = 0; i < a.metainfoStruct.size(); i++){
 
         smatch result;
-        string regex1 = "(\"";
-        string regex_key = regex1 + a.metainfoStruct[i].memberName +"\")";
-        string regex_value = "(\\d+)";
+        string regex_key = "(\"" + a.metainfoStruct[i].memberName +"\")";
+        string regex_value = typeRegex[a.metainfoStruct[i].memberType];
+        //这个正则表达式应该根据类型进行调整
         regex pattern(regex_key + ":" +regex_value);
 
         if(regex_search(json_, result, pattern)){
-            int value = atoi(result.str(2).data());
-            setValueByAddress(a.metainfoStruct[i].memberType, struct_, a.metainfoStruct[i].memberOffset, value);
+            //需要做类型判断
+            if(a.metainfoStruct[i].memberType == "int"){
+                auto value = atoi(result.str(2).data());
+                setValueByAddress(a.metainfoStruct[i].memberType, struct_, a.metainfoStruct[i].memberOffset, value);
+            }
+            if(a.metainfoStruct[i].memberType == "float"){
+                auto value = atof(result.str(2).data());
+                setValueByAddress(a.metainfoStruct[i].memberType, struct_, a.metainfoStruct[i].memberOffset, value);
+            }
+            if(a.metainfoStruct[i].memberType == "double"){
+                auto value = atof(result.str(2).data());
+                setValueByAddress(a.metainfoStruct[i].memberType, struct_, a.metainfoStruct[i].memberOffset, value);
+            }  
         }
     }
 }
@@ -112,19 +166,17 @@ structInfo a = getStructInfo(typeid(T).name());
 template<typename T>
 void FdogJsonToStruct(string & json_, T & struct_){
     //获取传进来结构体对应的元信息
-    structInfo a = getStructInfo(typeid(T).name());
-    string s1 = "{";
-    string s2 = "}";
-    string s3 = "\"";
-    string s4 = "\"";
-    string s5 = "";
-    for(int i = 0; i < a.metainfoStruct.size(); i++){
-        // cout << a.metainfoStruct[i].memberName << endl;
-        string s6 = getValueByAddress(a.metainfoStruct[i].memberType, struct_, a.metainfoStruct[i].memberOffset);
-        s5 = s5 + s3 + a.metainfoStruct[i].memberName + s4 + ":" + s6 + ",";
+    structInfo info = getStructInfo(typeid(T).name());
+    string curlyBracketL = "{";
+    string curlyBracketR = "}";
+    string quotationMark = "\"";
+    string json = "";
+    for(int i = 0; i < info.metainfoStruct.size(); i++){
+        string s6 = getValueByAddress(info.metainfoStruct[i].memberType, struct_, info.metainfoStruct[i].memberOffset);
+        json = json + quotationMark + info.metainfoStruct[i].memberName + quotationMark + ":" + s6 + ",";
     }
-    RemoveLastComma(s5);
-    json_ = s1 +s5 + s2;
+    RemoveLastComma(json);
+    json_ = curlyBracketL + json + curlyBracketR;
 }
 
 #define NAME(x) #x
@@ -137,23 +189,9 @@ void FdogJsonToStruct(string & json_, T & struct_){
 #define ARG_N_(...) \
     ARG_N_M(__VA_ARGS__)
 
-#define ARG_N_M( \
-          _0, _1, _2, _3, _4, _5, _6, _7, _8, _9,_10, \
-         _11,_12,_13,_14,_15,_16,_17,_18,_19,_20, \
-         _21,_22,_23,_24,_25,_26,_27,_28,_29,_30, \
-         _31,_32,_33,_34,_35,_36,_37,_38,_39,_40, \
-         _41,_42,_43,_44,_45,_46,_47,_48,_49,_50, \
-         _51,_52,_53,_54,_55,_56,_57,_58,_59,_60, \
-         _61,_62,_63,N,...) N
+#define ARG_N_M(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9,_10, N,...) N
 
-#define ARG_N_RESQ() \
-         63,62,61,60,                   \
-         59,58,57,56,55,54,53,52,51,50, \
-         49,48,47,46,45,44,43,42,41,40, \
-         39,38,37,36,35,34,33,32,31,30, \
-         29,28,27,26,25,24,23,22,21,20, \
-         19,18,17,16,15,14,13,12,11,10, \
-         9,8,7,6,5,4,3,2,1,0
+#define ARG_N_RESQ() 10,9,8,7,6,5,4,3,2,1,0
 
 
 #define PLACEHOLDER(placeholder, ...) placeholder
@@ -205,7 +243,7 @@ REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1);
         metainfoStruct.push_back(metainfo_one);\
     }while(0);
 
-#define MEMBERTYPE(TYPE, MEMBER) typeid(&((TYPE *)0)->MEMBER).name()//获取类型
+#define MEMBERTYPE(TYPE, MEMBER) valueType[typeid(&((TYPE *)0)->MEMBER).name()]//获取类型
 
 }
 
