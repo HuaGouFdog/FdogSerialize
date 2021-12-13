@@ -124,12 +124,13 @@ map<string, string> OtherRegex = {
 };
 
 /***********************************
-*   存储结构体元信息(成员名， 成员所在偏移量， 成员类型， 数组大小（默认0，若是数组，则存储对应大小）)
+*   存储结构体元信息(成员名， 成员所在偏移量， 成员类型， 成员类型位数， 数组大小（默认0，若是数组，则存储对应大小）)
 ************************************/
 typedef struct metaInfo{
     string memberName;
     size_t memberOffset;
-    string memberType;                                                         
+    string memberType;
+    string memberTypeSize;                                                         
     size_t memberArraySize;                                                                                                                                                                                           
 }metaInfo;
 
@@ -148,7 +149,8 @@ static vector<structInfo> structinfo; //所有结构体信息存储于此
 ************************************/
 struct ValueTyle {
     string valueType;
-    int Size;
+    int valueTypeSize;
+    int ArraySize;
 };
 
 /***********************************
@@ -158,11 +160,13 @@ ValueTyle getValueTyle(string key){
     ValueTyle res;
     if(BaseValueType.count(key) != 0){
         res.valueType = BaseValueType[key];
-        res.Size = 0;
+        res.valueTypeSize = 0;
+        res.ArraySize = 0;
         return res;
     } else if (BasePointerValueType.count(key) != 0){
         res.valueType = BasePointerValueType[key];
-        res.Size = 0;
+        res.valueTypeSize = 0;
+        res.ArraySize = 0;
     } else {
         smatch result;
         regex pattern("((A)(\\d+)_\\d?(\\D+))");
@@ -170,11 +174,13 @@ ValueTyle getValueTyle(string key){
             string str = result.str(2) + result.str(4);
             if(BaseArrayValueType.count(str) != 0){
                 res.valueType = BaseArrayValueType[str];
+                res.valueTypeSize = 0;
             } else {
                 ObjectArrayValueType[str] = result.str(4) + "_array";
                 res.valueType = ObjectArrayValueType[str];
+                res.valueTypeSize = 0;
             }
-            res.Size = atoi(result.str(3).data());
+            res.ArraySize = atoi(result.str(3).data());
             return res;
         } else {
             smatch result;
@@ -182,7 +188,8 @@ ValueTyle getValueTyle(string key){
             if(regex_search(key, result, pattern)){
                 string str = result.str(2) + " " + result.str(3);
                 res.valueType = result.str(3);
-                res.Size = atoi(result.str(3).data());
+                res.valueTypeSize = 0;
+                res.ArraySize = atoi(result.str(3).data());
                 return res;
             }
         }
@@ -308,7 +315,6 @@ void JsonToBase(T & struct_, metaInfo & metainfostruct, string json_){
 ************************************/
 template<class T>
 void JsonToObject(T & struct_, string json_){
-    //只需要考虑对象
     FdogJsonToStruct(struct_, json_);
 }
 
@@ -317,29 +323,35 @@ void JsonToObject(T & struct_, string json_){
 ************************************/
 template<class T>
 void JsonToArray(T & struct_, metaInfo & metainfostruct, string json_){
-    //只考虑是不是数组
-            // else if(a.metainfoStruct[i].memberType == "int_array"){
-            //     string value = result.str(2).c_str();
-            //     cout << "获取到的值："<< value << " 数组长度：" << a.metainfoStruct[i].memberArraySize << endl;
-            //     // 数字已经找出来，然后从字符串中找到数字
-            //     //for(int j = 0; j < a.metainfoStruct[i].memberArraySize; j++){
-            //         //cout << "进入循环" << endl;
-            //         std::regex reg(",");
-            //         std::sregex_token_iterator pos(value.begin(), value.end(), reg, -1);
-            //         decltype(pos) end;
-            //         int j = 0;
-            //         for (; pos != end; ++pos)
-            //         {
-            //             if(j < a.metainfoStruct[i].memberArraySize){
-            //                 setValueByAddress_N(a.metainfoStruct[i].memberType, struct_, a.metainfoStruct[i].memberOffset + (j*4), atoi(pos->str().data()));
-            //             }
-            //             j++;
-            //             //std::cout << "====" << pos->str() << std::endl;
-            //         }
-                
-            //     //}
-            // }
-        //}
+    //只考虑是不是数组，分两种，基础数组直接调用，对象数组分批调用
+    map<string, string>::iterator iter;
+    iter = BaseArrayValueType.begin();
+    bool isBaseArray = false;
+    while(iter != BaseArrayValueType.end()) {
+        if(metainfostruct.memberType == iter->second){
+            isBaseArray = true;
+            break;
+        }
+        iter++;
+    }
+    if (isBaseArray){
+        for(int i = 0; i < metainfostruct.memberArraySize; i++){
+            std::regex reg(",");
+            std::sregex_token_iterator pos(value.begin(), value.end(), reg, -1);
+            decltype(pos) end;
+            int j = 0;
+            for (; pos != end; ++pos){
+                //help 还需要一个计算类型大小的
+                setValueByAddress_N(metainfostruct.memberType, struct_, metainfostruct.memberOffset + (j * metainfostruct.memberTypeSize), atoi(pos->str().data()));
+                j++;
+            }
+        }
+    }else{
+        for(int i = 0; i < metainfostruct.memberArraySize; i++){
+            //还需要对json进行截取
+            FdogJsonToStruct(struct_[i], json_);
+        }
+    }
 }
 
 // template<class T>
@@ -411,13 +423,15 @@ int getMemberVType(string type_str, int Size){
     while(iter != BaseValueType.end()) {
         if(type_str == iter->second){
             isObject = false;
+            break;
         }
         iter++;
     }
     iter = BasePointerValueType.begin();
     while(iter != BasePointerValueType.end()) {
-    if(type_str == iter->second){
-        isObject = false;
+        if(type_str == iter->second){
+            isObject = false;
+            break;
         }
         iter++;
     }
@@ -561,10 +575,33 @@ REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1);
         ValueTyle res = MEMBERTYPE(TYPE, arg);\
         metainfo_one.memberType = res.valueType;\
         cout << "获取到的类型" << res.valueType << endl;\
-        metainfo_one.memberArraySize = res.Size;\
+        metainfo_one.memberTypeSize = res.valueTypeSize;\
+        metainfo_one.memberArraySize = res.ArraySize;\
         metainfoStruct.push_back(metainfo_one);\
     }while(0);
 
 }
 
 #endif
+
+            // else if(a.metainfoStruct[i].memberType == "int_array"){
+            //     string value = result.str(2).c_str();
+            //     cout << "获取到的值："<< value << " 数组长度：" << a.metainfoStruct[i].memberArraySize << endl;
+            //     // 数字已经找出来，然后从字符串中找到数字
+    //     //for(int j = 0; j < a.metainfoStruct[i].memberArraySize; j++){
+            //         //cout << "进入循环" << endl;
+            //         std::regex reg(",");
+            //         std::sregex_token_iterator pos(value.begin(), value.end(), reg, -1);
+            //         decltype(pos) end;
+            //         int j = 0;
+            //         for (; pos != end; ++pos)
+            //         {
+            //             if(j < a.metainfoStruct[i].memberArraySize){
+//         setValueByAddress_N(a.metainfoStruct[i].memberType, struct_, a.metainfoStruct[i].memberOffset + (j*4), atoi(pos->str().data()));
+//             }
+//             j++;
+//             //std::cout << "====" << pos->str() << std::endl;//            }
+                
+   //     //}
+            // }
+        //}
