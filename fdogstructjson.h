@@ -107,6 +107,9 @@ map<string, string> BaseRegex = {
 *   用于提取除基础类型数据的正则表达式
 ************************************/
 map<string, string> OtherRegex = {
+            {"headmaster", "(\\{(.*?)\\})"},
+            //{"teacher", "(\\{(.*?)\\})"},
+            //{"student", "(\\{(.*?)\\})"},
             {"Student", "(\\{(.*?)\\})"},
             {"char_ptr", "\"(.*?)\""}, {"int_array", "\\[(.*?)\\]"},
             {"char_ptr", "\"(.*?)\""}, {"int_array", "\\[(.*?)\\]"},
@@ -124,13 +127,14 @@ map<string, string> OtherRegex = {
 };
 
 /***********************************
-*   存储结构体元信息(成员名， 成员所在偏移量， 成员类型， 成员类型位数， 数组大小（默认0，若是数组，则存储对应大小）)
+*   存储结构体元信息(成员名， 成员别名（默认空，若有内容则使用别名）， 成员所在偏移量， 成员类型， 成员类型位数， 数组大小（默认0，若是数组，则存储对应大小）)
 ************************************/
 typedef struct metaInfo{
     string memberName;
+    string memberAliasName;
     size_t memberOffset;
     string memberType;
-    string memberTypeSize;                                                         
+    size_t memberTypeSize;                                                         
     size_t memberArraySize;                                                                                                                                                                                           
 }metaInfo;
 
@@ -314,7 +318,12 @@ void JsonToBase(T & struct_, metaInfo & metainfostruct, string json_){
 *   解析对象
 ************************************/
 template<class T>
+void FdogJsonToStruct(T & struct_, string json_);
+
+template<class T>
 void JsonToObject(T & struct_, string json_){
+    //这里应该传子对象变量
+    
     FdogJsonToStruct(struct_, json_);
 }
 
@@ -335,21 +344,22 @@ void JsonToArray(T & struct_, metaInfo & metainfostruct, string json_){
         iter++;
     }
     if (isBaseArray){
+        string value = "asd";
         for(int i = 0; i < metainfostruct.memberArraySize; i++){
             std::regex reg(",");
             std::sregex_token_iterator pos(value.begin(), value.end(), reg, -1);
             decltype(pos) end;
             int j = 0;
             for (; pos != end; ++pos){
-                //help 还需要一个计算类型大小的
-                setValueByAddress_N(metainfostruct.memberType, struct_, metainfostruct.memberOffset + (j * metainfostruct.memberTypeSize), atoi(pos->str().data()));
+                //这里需要判断是不是字符串数组
+                setValueByAddress(metainfostruct.memberType, struct_, metainfostruct.memberOffset + (j * metainfostruct.memberTypeSize), atoi(pos->str().data()));
                 j++;
             }
         }
     }else{
         for(int i = 0; i < metainfostruct.memberArraySize; i++){
             //还需要对json进行截取
-            FdogJsonToStruct(struct_[i], json_);
+            FdogJsonToStruct(struct_, json_);
         }
     }
 }
@@ -441,6 +451,10 @@ int getMemberVType(string type_str, int Size){
     return FDOGBASE;
 }
 
+#define TURN_2(x) x
+
+#define TURN(t, x) t.x
+
 /***********************************
 *   Json转Struct接口
 ************************************/
@@ -454,11 +468,18 @@ void FdogJsonToStruct(T & struct_, string json_){
         string regex_key_1 = "(\"" + a.metainfoStruct[i].memberName +"\")";
         string regex_value_1 = BaseRegex[a.metainfoStruct[i].memberType];
         if(regex_value_1 == ""){
-            regex_value_1 = OtherRegex[a.metainfoStruct[i].memberType];
+            if(Vtype == 2){
+                regex_value_1 = "(\\{(.*?)\\})";//OtherRegex[a.metainfoStruct[i].memberType];
+            }else{
+                regex_value_1 = "(\\[(.*?)\\])";//OtherRegex[a.metainfoStruct[i].memberType];
+            }
+            
         }
-        cout << "regex_value_1" << regex_value_1 << endl;
+        //cout << "regex_key_1=" << regex_key_1;
+        //cout << "  regex_value_1=" << a.metainfoStruct[i].memberType << " - - "<< regex_value_1 << endl;
         regex pattern_1(regex_key_1 + ":" +regex_value_1);
         if(regex_search(json_, result_1, pattern_1)){
+            //cout << "-----" << result_1.str(2).c_str() << endl;
         auto value = result_1.str(2).c_str();
             switch(Vtype){
                 case FDOGBASE:
@@ -467,23 +488,17 @@ void FdogJsonToStruct(T & struct_, string json_){
                     JsonToBase(struct_, a.metainfoStruct[i], value); //基础类型 提供数据
                     break;
                 case FDOGOBJECT:
-                    cout << "对象类型" << a.metainfoStruct[i].memberType << "=" << value << endl;
+                /*    这里不知道什么原因，value接受的是空值      */
+                    cout << "对象类型" << a.metainfoStruct[i].memberType << "=" << result_1.str(2).c_str() << endl;
                     JsonToObject(struct_, value); //object类型 本质还是结构体，需要继续调用FdogJsonToStruct
+                    //cout << TURN(struct_, master) << endl;
                     break;
                 case FDOGARRAY:
-                    cout << "数组类型" << a.metainfoStruct[i].memberType << "=" << value << endl;
+                    cout << "数组类型" << a.metainfoStruct[i].memberType << "=" << result_1.str(2).c_str() << endl;
                     JsonToArray(struct_, a.metainfoStruct[i], value); //数组类型 
                     break;
             }
         }
-
-        //第一个是基础类型 比如是int类型 就执行JsonToBase 传数据 "a":1就可以了
-
-        //第二个是自定义的结构体，也可以称之为是对象 需要传{"aa":1,"d":4}
-
-        //第三个是数组 需要传 a:[1,2,3,4]
-
-        //同样的，对象里面可能还包含其他类型，数组也可能包含其他类型，比如对象数组
     }
 }
 
@@ -509,6 +524,40 @@ void FdogStructToJson(string & json_, T & struct_){
     }
     RemoveLastComma(json);
     json_ = curlyBracketL + json + curlyBracketR;
+
+    //这里也分三种类型
+    //基础类型
+    //数组类型
+    //自定义类型
+    // for(int i = 0; i < a.metainfoStruct.size(); i++){
+    //     int Vtype = getMemberVType(a.metainfoStruct[i].memberType, a.metainfoStruct[i].memberArraySize);
+    //     smatch result_1;
+    //     string regex_key_1 = "(\"" + a.metainfoStruct[i].memberName +"\")";
+    //     string regex_value_1 = BaseRegex[a.metainfoStruct[i].memberType];
+    //     if(regex_value_1 == ""){
+    //         regex_value_1 = OtherRegex[a.metainfoStruct[i].memberType];
+    //     }
+    //     cout << "regex_value_1" << regex_value_1 << endl;
+    //     regex pattern_1(regex_key_1 + ":" +regex_value_1);
+    //     if(regex_search(json_, result_1, pattern_1)){
+    //     auto value = result_1.str(2).c_str();
+    //         switch(Vtype){
+    //             case FDOGBASE:
+    //                 cout << "基础类型" << a.metainfoStruct[i].memberType << "=" << value << endl;
+    //                 //规定如果是基础类型，只需要提供值即可
+    //                 //JsonToBase(struct_, a.metainfoStruct[i], value); //基础类型 提供数据
+    //                 break;
+    //             case FDOGOBJECT:
+    //                 cout << "对象类型" << a.metainfoStruct[i].memberType << "=" << value << endl;
+    //                 //JsonToObject(struct_, value); //object类型 本质还是结构体，需要继续调用FdogJsonToStruct
+    //                 break;
+    //             case FDOGARRAY:
+    //                 cout << "数组类型" << a.metainfoStruct[i].memberType << "=" << value << endl;
+    //                 //JsonToArray(struct_, a.metainfoStruct[i], value); //数组类型 
+    //                 break;
+    //         }
+    //     }
+    // }
 }
 
 #define ARG_N(...) \
@@ -521,7 +570,10 @@ void FdogStructToJson(string & json_, T & struct_){
 
 #define ARG_N_RESQ() 10,9,8,7,6,5,4,3,2,1,0
 
+//获取原始名
 #define NAME(x) #x
+//获取别名
+#define ALIASNAME(x) #x
 
 //#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)  //获取偏移值
 
@@ -571,6 +623,7 @@ REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1);
     do{\
         metaInfo metainfo_one;\
         metainfo_one.memberName = NAME(arg);\
+        metainfo_one.memberAliasName = ALIASNAME(arg);\
         metainfo_one.memberOffset = offsetof(TYPE, arg);\
         ValueTyle res = MEMBERTYPE(TYPE, arg);\
         metainfo_one.memberType = res.valueType;\
