@@ -19,6 +19,13 @@ using namespace std;
 
 namespace fsj{
 
+#define NAMESPLIT(x) fdog_##x
+
+#define REGISTERED(TYPE) extern TYPE NAMESPLIT(TYPE);
+
+REGISTERED(headmaster);
+REGISTERED(school);
+
 static vector<structInfo> structinfo; //所有结构体信息存储于此
 
 /***********************************
@@ -28,12 +35,10 @@ valueTyle getValueTyle(string key){
     valueTyle res;
     if(BaseValueType.count(key) != 0){
         res.valueType = BaseValueType[key];
-        res.valueTypeSize = 0;
         res.ArraySize = 0;
         return res;
     } else if (BasePointerValueType.count(key) != 0){
         res.valueType = BasePointerValueType[key];
-        res.valueTypeSize = 0;
         res.ArraySize = 0;
     } else {
         smatch result;
@@ -42,11 +47,9 @@ valueTyle getValueTyle(string key){
             string key_ = result.str(2) + result.str(4);
             if(BaseArrayValueType.count(key_) != 0){
                 res.valueType = BaseArrayValueType[key_];
-                res.valueTypeSize = 0;
             } else {
                 ObjectArrayValueType[key_] = result.str(4) + "_array";
                 res.valueType = ObjectArrayValueType[key_];
-                res.valueTypeSize = 0;
             }
             res.ArraySize = atoi(result.str(3).data());
             return res;
@@ -56,7 +59,6 @@ valueTyle getValueTyle(string key){
             if(regex_search(key, result, pattern)){
                 string str = result.str(2) + " " + result.str(3);
                 res.valueType = result.str(3);
-                res.valueTypeSize = 0;
                 res.ArraySize = atoi(result.str(3).data());
                 return res;
             }
@@ -64,7 +66,6 @@ valueTyle getValueTyle(string key){
     }
     return res;
 }
-
 void RemoveFirstComma(string & return_){
     return_ = return_.substr(1);
 }
@@ -77,37 +78,44 @@ void RemoveLastComma(string & return_){
 
 void RemoveLastZero(string & return_){
 
-	if (NULL == strchr(return_, '.'))
-	{
-        return;
-    }
-	int length = strlen(return_.c_str());
-	for (int i = length - 1; i > 0; --i)
-	{
-		if ('\0' == return_[i])
-		{
-			continue;
-		}
-		else if ('0' == return_[i])
-		{
-			return_[i] = '\0';
-		}
-		else if ('.' == return_[i])// 小数点之后全为零
-		{
-			return_[i] = '\0';
-			break;
-		}
-		else// 小数点后有非零数字
-		{
-			break;
-		}
-	}
+	// if (NULL == strchr(return_, '.'))
+	// {
+    //     return;
+    // }
+	// int length = strlen(return_.c_str());
+	// for (int i = length - 1; i > 0; --i)
+	// {
+	// 	if ('\0' == return_[i])
+	// 	{
+	// 		continue;
+	// 	}
+	// 	else if ('0' == return_[i])
+	// 	{
+	// 		return_[i] = '\0';
+	// 	}
+	// 	else if ('.' == return_[i])// 小数点之后全为零
+	// 	{
+	// 		return_[i] = '\0';
+	// 		break;
+	// 	}
+	// 	else// 小数点后有非零数字
+	// 	{
+	// 		break;
+	// 	}
+	// }
 }
 /***********************************
 *   查询对应的结构体信息 这里有问题，如果是两个一个的数组就存在问题
 ************************************/
 structInfo & getStructInfo(string structName){
-    RemoveFirstComma(structName);
+    string::iterator it = structName.begin();
+    while (it != structName.end()) {
+        if ((*it >= '0') && (*it <= '9')) {
+            it = structName.erase(it);
+        } else { // 必须加else
+            it++;
+        }
+    }
     for(int i = 0; i < structinfo.size(); i++){
         if (structinfo[i].structType == structName){
             return structinfo[i];
@@ -227,6 +235,9 @@ template<class T>
 void JsonToObject(T & struct_, string json_){
     //这里struct代表的是最大的对象，需要解析最小的
     //解析对象先搁置
+    cout << "进入JsonToObject" << "T=" << typeid(struct_).name() << " json=" << json_ << endl;
+    struct_.name = "321";
+    struct_.age = 21;
     FdogJsonToStruct(struct_, json_);
 }
 
@@ -411,7 +422,6 @@ int getMemberVType(string type_str, int Size){
 ************************************/
 template<typename T>
 void FdogJsonToStruct(T & struct_, string json_){
-
     structInfo a = getStructInfo(typeid(T).name());
     for(int i = 0; i < a.metainfoStruct.size(); i++){
         int Vtype = getMemberVType(a.metainfoStruct[i].memberType, a.metainfoStruct[i].memberArraySize);
@@ -440,10 +450,14 @@ void FdogJsonToStruct(T & struct_, string json_){
                     break;
                 case FDOGOBJECT:
                 /*    这里不知道什么原因，value接受的是空值      */
-                    //cout << "对象类型" << a.metainfoStruct[i].memberType << "=" << result_1.str(2).c_str() << endl;
-                    //headmaster & cc = *((headmaster *)((void *)&struct_ + offsetof(T, master)));
-                    //JsonToObject(struct_, value); //object类型 本质还是结构体，需要继续调用FdogJsonToStruct
-                    break;
+                    {cout << "对象类型" << a.metainfoStruct[i].memberType << "=" << result_1.str(2).c_str() << endl;
+                    cout << __FILE__ << "----" << __LINE__ << "----" << __FUNCTION__ << endl;
+                    
+                    decltype(fdog_headmaster) & cc = *((decltype(fdog_headmaster) *)((void *)&struct_ + a.metainfoStruct[i].memberOffset));
+                    cout << "headmaster地址：" << &cc << "--" << typeid(cc).name() << endl;
+                    cout << "偏移值" << offsetof(decltype(fdog_school), master) << endl;
+                    JsonToObject(cc, result_1.str(2).c_str()); //object类型 本质还是结构体，需要继续调用FdogJsonToStruct
+                    break;}
                 case FDOGARRAY:
                     //cout << "数组类型" << a.metainfoStruct[i].memberType << "=" << result_1.str(2).c_str() << endl;
                     JsonToArray(struct_, a.metainfoStruct[i], result_1.str(2).c_str()); //数组类型 
@@ -513,6 +527,8 @@ void FdogStructToJson(string & json_, T & struct_){
 #define NAME(x) #x
 //获取别名
 #define ALIASNAME(x) #x
+//自定义变量名生成
+
 
 //#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)  //获取偏移值
 
@@ -564,13 +580,14 @@ REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1);
         metainfo_one.memberName = NAME(arg);\
         metainfo_one.memberAliasName = ALIASNAME(arg);\
         metainfo_one.memberOffset = offsetof(TYPE, arg);\
+        cout << metainfo_one.memberName << "----pianyizhi:" << metainfo_one.memberOffset << endl;\
         valueTyle res = MEMBERTYPE(TYPE, arg);\
         metainfo_one.memberType = res.valueType;\
-        metainfo_one.memberTypeSize = res.valueTypeSize;\
+        metainfo_one.memberTypeSize = 1;\
         metainfo_one.memberArraySize = res.ArraySize;\
         metainfoStruct.push_back(metainfo_one);\
     }while(0);
 
-}
 
+}
 #endif
