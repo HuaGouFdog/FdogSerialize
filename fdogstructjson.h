@@ -21,10 +21,34 @@ namespace fsj{
 
 #define NAMESPLIT(x) fdog_##x
 
-#define REGISTERED(TYPE) extern TYPE NAMESPLIT(TYPE);
+#define FUNCNAME(x) get##x
+
+#define REGISTERED(TYPE) \
+    extern TYPE NAMESPLIT(TYPE);\
+    TYPE FUNCNAME(TYPE)(){ TYPE value; return value;}\
+
 
 REGISTERED(headmaster);
 REGISTERED(school);
+REGISTERED(teacher);
+REGISTERED(student);
+
+
+enum function {
+    HEADMASTER = 1,
+    SCHOOL,
+};
+
+#define BUILDSWITCH     \
+        switch(value)   \
+        {               \
+        case HEADMASTER:\
+            FdogJsonToStruct(*((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset)), json_);\
+            break;      \
+        case SCHOOL:    \
+            FdogJsonToStruct(*((decltype(getschool()) *)((void *)&struct_ + metainfostruct.memberOffset)), json_);\
+            break;      \
+        };
 
 static vector<structInfo> structinfo; //所有结构体信息存储于此
 
@@ -232,15 +256,23 @@ template<class T>
 void FdogJsonToStruct(T & struct_, string json_);
 
 template<class T>
-void JsonToObject(T & struct_, string json_){
-    //这里struct代表的是最大的对象，需要解析最小的
-    //解析对象先搁置
-    cout << "进入JsonToObject" << "T=" << typeid(struct_).name() << " json=" << json_ << endl;
-    struct_.name = "321";
-    struct_.age = 21;
-    FdogJsonToStruct(struct_, json_);
-}
+void FdogStructToJson(string & json_, T & struct_);
 
+template<class T>
+void JsonToObject(T & struct_, metaInfo & metainfostruct, string json_){
+    if (metainfostruct.memberType == "headmaster"){
+        FdogJsonToStruct(*((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset)), json_);
+    }
+    if (metainfostruct.memberType == "school"){
+        FdogJsonToStruct(*((decltype(getschool()) *)((void *)&struct_ + metainfostruct.memberOffset)), json_);
+    }
+    if (metainfostruct.memberType == "student"){
+        FdogJsonToStruct(*((decltype(fdog_student) *)((void *)&struct_ + metainfostruct.memberOffset)), json_);
+    }
+    if (metainfostruct.memberType == "teather"){
+        FdogJsonToStruct(*((decltype(fdog_teacher) *)((void *)&struct_ + metainfostruct.memberOffset)), json_);
+    }
+}
 /***********************************
 *   解析数组
 ************************************/
@@ -277,8 +309,41 @@ void JsonToArray(T & struct_, metaInfo & metainfostruct, string json_){
             }
     }else{
         for(int i = 0; i < metainfostruct.memberArraySize; i++){
+            cout << "数组类型=" << metainfostruct.memberType << "=== 数组大小=" << metainfostruct.memberArraySize << endl;
+            //考虑如何分割数组
+            if (metainfostruct.memberType == "headmaster_array"){
+                FdogJsonToStruct(*((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_headmaster) * i))), json_);
+            }
+            if (metainfostruct.memberType == "school_array"){
+                FdogJsonToStruct(*((decltype(getschool()) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_headmaster) * i))), json_);
+            }
+            if (metainfostruct.memberType == "student_array"){
+                FdogJsonToStruct(*((decltype(fdog_student) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_headmaster) * i))), json_);
+            }
+            if (metainfostruct.memberType == "teather_array"){
+                FdogJsonToStruct(*((decltype(fdog_teacher) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_headmaster) * i))), json_);
+            }
+
+            //struct_ = {"于静", 21};
+            //FdogJsonToStruct(struct_, "{\"name\":\"于静\",\"age\":21}");
             //解析对象数组先搁置
-            FdogJsonToStruct(struct_, json_);
+            // std::regex reg(",");
+            // std::sregex_token_iterator pos(json_.begin(), json_.end(), reg, -1);
+            // decltype(pos) end;
+            // int j = 0;
+            // for (; pos != end; ++pos){
+            //     cout << "数组类型" << typeid(struct_).name() << "--" << pos->str().data() << endl;
+            //         FdogJsonToStruct(struct_, "{\"name\":\"于静\",\"age\":21}");
+            //     //size_t subscriptValue = metainfostruct.memberType.find("_array");
+                
+            //     // if(metainfostruct.memberType == "char_ptr_array"){
+            //     //     setValueByAddress_S(metainfostruct.memberType.substr(0, subscriptValue), struct_, metainfostruct.memberOffset + (j * 8), pos->str().data());
+            //     // }else{
+            //     //     setValueByAddress(metainfostruct.memberType.substr(0, subscriptValue), struct_, metainfostruct.memberOffset + (j * 4), atoi(pos->str().data()));
+            //     // }
+
+            //     j++;
+            // }
         }
     }
 }
@@ -322,6 +387,7 @@ string getValueByAddress(string type_str, T &info, int vc){
 
 template<class T>
 void BaseToJson(string & json_, metaInfo & metainfostruct, T & struct_){
+    cout << "----------BaseToJson---------" << endl;
     string quotationMark = "\"";
     string value;
         if (metainfostruct.memberType == "char_ptr"){
@@ -334,7 +400,17 @@ void BaseToJson(string & json_, metaInfo & metainfostruct, T & struct_){
 
 template<class T>
 void ObjectToJson(string & json_, metaInfo & metainfostruct, T & struct_){
+    cout << "----------ObjectToJson---------" << metainfostruct.memberType << endl;
     //先搁置
+    if (metainfostruct.memberType == "headmaster"){
+        FdogStructToJson(json_, *((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset)));
+    }
+    if (metainfostruct.memberType == "school"){
+        FdogStructToJson(json_, *((decltype(getschool()) *)((void *)&struct_ + metainfostruct.memberOffset)));
+    }
+    if (metainfostruct.memberType == "student"){
+        FdogStructToJson(json_, *((decltype(fdog_student) *)((void *)&struct_ + metainfostruct.memberOffset)));
+    }
 }
 
 template<class T>
@@ -372,10 +448,20 @@ void ArrayToJson(string & json_, metaInfo & metainfostruct, T & struct_){
     json_ = json_ + json_2 + squareBracketsR + ",";
 
     }else{
+        json_ = json_ + metainfostruct.memberName + ":[";
         for(int i = 0; i < metainfostruct.memberArraySize; i++){
-            //解析对象数组先搁置
-            //FdogJsonToStruct(struct_, json_);
+            if (metainfostruct.memberType == "headmaster_array"){
+                FdogStructToJson(json_, *((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset)));
+            }
+            if (metainfostruct.memberType == "school_array"){
+                FdogStructToJson(json_, *((decltype(getschool()) *)((void *)&struct_ + metainfostruct.memberOffset)));
+            }
+            if (metainfostruct.memberType == "student_array"){
+                FdogStructToJson(json_, *((decltype(fdog_student) *)((void *)&struct_ + metainfostruct.memberOffset)));
+            }
         }
+        RemoveLastComma(json_);
+        json_ = json_ + "],";
     }
 }
 
@@ -436,37 +522,29 @@ void FdogJsonToStruct(T & struct_, string json_){
             }
             
         }
-        //cout << "regex_key_1=" << regex_key_1;
-        //cout << "  regex_value_1=" << a.metainfoStruct[i].memberType << " - - "<< regex_value_1 << endl;
+        //cout << "数组长度" << a.metainfoStruct[i].memberTypeSize << endl;
         regex pattern_1(regex_key_1 + ":" +regex_value_1);
         if(regex_search(json_, result_1, pattern_1)){
-            //cout << "-----" << result_1.str(2).c_str() << endl;
         auto value = result_1.str(2).c_str();
             switch(Vtype){
                 case FDOGBASE:
-                    //cout << "基础类型" << a.metainfoStruct[i].memberType << "=" << value << endl;
-                    //规定如果是基础类型，只需要提供值即可
+                    cout << "基础类型" << a.metainfoStruct[i].memberType << "=" << value << endl;
                     JsonToBase(struct_, a.metainfoStruct[i], value); //基础类型 提供数据
                     break;
                 case FDOGOBJECT:
-                /*    这里不知道什么原因，value接受的是空值      */
-                    {cout << "对象类型" << a.metainfoStruct[i].memberType << "=" << result_1.str(2).c_str() << endl;
-                    cout << __FILE__ << "----" << __LINE__ << "----" << __FUNCTION__ << endl;
-                    
-                    decltype(fdog_headmaster) & cc = *((decltype(fdog_headmaster) *)((void *)&struct_ + a.metainfoStruct[i].memberOffset));
-                    cout << "headmaster地址：" << &cc << "--" << typeid(cc).name() << endl;
-                    cout << "偏移值" << offsetof(decltype(fdog_school), master) << endl;
-                    JsonToObject(cc, result_1.str(2).c_str()); //object类型 本质还是结构体，需要继续调用FdogJsonToStruct
-                    break;}
+                    cout << "对象类型" << a.metainfoStruct[i].memberType << "=" << result_1.str(2).c_str() << endl;
+                    JsonToObject(struct_, a.metainfoStruct[i], result_1.str(2).c_str()); 
+                    break;
                 case FDOGARRAY:
-                    //cout << "数组类型" << a.metainfoStruct[i].memberType << "=" << result_1.str(2).c_str() << endl;
+                    cout << "数组类型" << a.metainfoStruct[i].memberType << "=" << result_1.str(2).c_str() << endl;
                     JsonToArray(struct_, a.metainfoStruct[i], result_1.str(2).c_str()); //数组类型 
                     break;
             }
         }
     }
 }
-
+template<typename T>
+T getheadmaster(T &){}
 /***********************************
 *   Struct转Json接口
 ************************************/
@@ -490,27 +568,28 @@ void FdogStructToJson(string & json_, T & struct_){
             }
         }
         //cout << "regex_value_1" << regex_value_1 << endl;
-        regex pattern_1(regex_key_1 + ":" +regex_value_1);
-        auto value = "dsa";//result_1.str(2).c_str();
+        //regex pattern_1(regex_key_1 + ":" +regex_value_1);
             switch(Vtype){
                 case FDOGBASE:
-                    //cout << "基础类型" << info.metainfoStruct[i].memberType << "=" << value << endl;
+                    cout << "基础类型" << info.metainfoStruct[i].memberType << endl;
                     BaseToJson(json_, info.metainfoStruct[i], struct_);
                     //cout << "json_------ --- -- -- " << json_ << endl;
                     break;
                 case FDOGOBJECT:
-                    //cout << "对象类型" << info.metainfoStruct[i].memberType << "=" << value << endl;
-                    //ObjectToJson(json_, info.metainfoStruct[i], struct_); 
+                    cout << "对象类型" << info.metainfoStruct[i].memberType << endl;
+                    json_ = json_ + info.metainfoStruct[i].memberName + ":{";
+                    ObjectToJson(json_, info.metainfoStruct[i], struct_); 
+                    RemoveLastComma(json_);
+                    json_ = json_ + "},";
                     break;
                 case FDOGARRAY:
-                    //cout << "数组类型" << info.metainfoStruct[i].memberType << "=" << value << endl;
-                    ArrayToJson(json_, info.metainfoStruct[i], struct_); //数组类型 
+                    cout << "数组类型" << info.metainfoStruct[i].memberType << endl;
+                    ArrayToJson(json_, info.metainfoStruct[i], struct_); //数组类型
                     break;
             }
-        //}
     }
-    RemoveLastComma(json_);
-    json_ = curlyBracketL + json_ + curlyBracketR;
+    //RemoveLastComma(json_);
+    //json_ = curlyBracketL + json_ + curlyBracketR;
 }
 
 #define ARG_N(...) \
@@ -580,10 +659,9 @@ REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1);
         metainfo_one.memberName = NAME(arg);\
         metainfo_one.memberAliasName = ALIASNAME(arg);\
         metainfo_one.memberOffset = offsetof(TYPE, arg);\
-        cout << metainfo_one.memberName << "----pianyizhi:" << metainfo_one.memberOffset << endl;\
         valueTyle res = MEMBERTYPE(TYPE, arg);\
         metainfo_one.memberType = res.valueType;\
-        metainfo_one.memberTypeSize = 1;\
+        metainfo_one.memberTypeSize = sizeof(TYPE);\
         metainfo_one.memberArraySize = res.ArraySize;\
         metainfoStruct.push_back(metainfo_one);\
     }while(0);
@@ -591,3 +669,4 @@ REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1);
 
 }
 #endif
+//cout << metainfo_one.memberName << "----pianyizhi:" << metainfo_one.memberOffset << endl;\
