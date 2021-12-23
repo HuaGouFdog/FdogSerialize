@@ -55,18 +55,18 @@ static vector<structInfo> structinfo; //所有结构体信息存储于此
 /***********************************
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
 ************************************/
-valueTyle getValueTyle(string key){
+valueTyle getValueTyle(string key){  // 改  MemberAttribute  getMemberAttribute
     valueTyle res;
     if(BaseValueType.count(key) != 0){
-        res.valueType = BaseValueType[key];
-        res.ArraySize = 0;
-        return res;
+        res.valueType = BaseValueType[key];  //memberType
+        res.ArraySize = 0;                   //memberArraySize
+        return res;                          //Attribute_return
     } else if (BasePointerValueType.count(key) != 0){
         res.valueType = BasePointerValueType[key];
         res.ArraySize = 0;
     } else {
         smatch result;
-        regex pattern("((A)(\\d+)_\\d?(\\D+))");
+        regex pattern("((A)(\\d+)_\\d?(\\D+))"); //这个改成string PatternArray
         if(regex_search(key, result, pattern)){
             string key_ = result.str(2) + result.str(4);
             if(BaseArrayValueType.count(key_) != 0){
@@ -79,7 +79,7 @@ valueTyle getValueTyle(string key){
             return res;
         } else {
             smatch result;
-            regex pattern("((\\d+)(\\D+))");
+            regex pattern("((\\d+)(\\D+))");  //这个改成string PatternObject
             if(regex_search(key, result, pattern)){
                 string str = result.str(2) + " " + result.str(3);
                 res.valueType = result.str(3);
@@ -90,17 +90,17 @@ valueTyle getValueTyle(string key){
     }
     return res;
 }
-void RemoveFirstComma(string & return_){
+void RemoveFirstComma(string & return_){  //第一个字符小写，返回值可以为void 或者bool
     return_ = return_.substr(1);
 }
 /***********************************
 *   删除字符串最后一个逗号
 ************************************/
-void RemoveLastComma(string & return_){
+void RemoveLastComma(string & return_){   //第一个字符小写，返回值可以为void 或者bool
     return_.pop_back();
 }
 
-void RemoveLastZero(string & return_){
+void RemoveLastZero(string & return_){    //删除浮点数后面的0
 
 	// if (NULL == strchr(return_, '.'))
 	// {
@@ -144,7 +144,7 @@ structInfo & getStructInfo(string structName){
         if (structinfo[i].structType == structName){
             return structinfo[i];
         }
-    }
+    } //空怎么办
 }
 
 template<class T, class M>
@@ -310,7 +310,7 @@ void JsonToArray(T & struct_, metaInfo & metainfostruct, string json_){
     }else{
         for(int i = 0; i < metainfostruct.memberArraySize; i++){
             cout << "数组类型=" << metainfostruct.memberType << "=== 数组大小=" << metainfostruct.memberArraySize << endl;
-            //考虑如何分割数组
+            //考虑如何分割数组json {},{}
             if (metainfostruct.memberType == "headmaster_array"){
                 FdogJsonToStruct(*((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_headmaster) * i))), json_);
             }
@@ -323,27 +323,6 @@ void JsonToArray(T & struct_, metaInfo & metainfostruct, string json_){
             if (metainfostruct.memberType == "teather_array"){
                 FdogJsonToStruct(*((decltype(fdog_teacher) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_headmaster) * i))), json_);
             }
-
-            //struct_ = {"于静", 21};
-            //FdogJsonToStruct(struct_, "{\"name\":\"于静\",\"age\":21}");
-            //解析对象数组先搁置
-            // std::regex reg(",");
-            // std::sregex_token_iterator pos(json_.begin(), json_.end(), reg, -1);
-            // decltype(pos) end;
-            // int j = 0;
-            // for (; pos != end; ++pos){
-            //     cout << "数组类型" << typeid(struct_).name() << "--" << pos->str().data() << endl;
-            //         FdogJsonToStruct(struct_, "{\"name\":\"于静\",\"age\":21}");
-            //     //size_t subscriptValue = metainfostruct.memberType.find("_array");
-                
-            //     // if(metainfostruct.memberType == "char_ptr_array"){
-            //     //     setValueByAddress_S(metainfostruct.memberType.substr(0, subscriptValue), struct_, metainfostruct.memberOffset + (j * 8), pos->str().data());
-            //     // }else{
-            //     //     setValueByAddress(metainfostruct.memberType.substr(0, subscriptValue), struct_, metainfostruct.memberOffset + (j * 4), atoi(pos->str().data()));
-            //     // }
-
-            //     j++;
-            // }
         }
     }
 }
@@ -448,16 +427,25 @@ void ArrayToJson(string & json_, metaInfo & metainfostruct, T & struct_){
     json_ = json_ + json_2 + squareBracketsR + ",";
 
     }else{
-        json_ = json_ + metainfostruct.memberName + ":[";
+        json_ = json_ + "\"" + metainfostruct.memberName + "\"" + ":[";
         for(int i = 0; i < metainfostruct.memberArraySize; i++){
             if (metainfostruct.memberType == "headmaster_array"){
-                FdogStructToJson(json_, *((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset)));
+                json_ = json_ + "{"; 
+                FdogStructToJson(json_, *((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_headmaster) * i))));
+                RemoveLastComma(json_);
+                json_ = json_ + "},";
             }
             if (metainfostruct.memberType == "school_array"){
-                FdogStructToJson(json_, *((decltype(getschool()) *)((void *)&struct_ + metainfostruct.memberOffset)));
+                json_ = json_ + "{"; 
+                FdogStructToJson(json_, *((decltype(getschool()) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_school) * i))));
+                RemoveLastComma(json_);
+                json_ = json_ + "},";
             }
             if (metainfostruct.memberType == "student_array"){
-                FdogStructToJson(json_, *((decltype(fdog_student) *)((void *)&struct_ + metainfostruct.memberOffset)));
+                json_ = json_ + "{"; 
+                FdogStructToJson(json_, *((decltype(fdog_student) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_student) * i))));
+                RemoveLastComma(json_);
+                json_ = json_ + "},";
             }
         }
         RemoveLastComma(json_);
@@ -522,7 +510,6 @@ void FdogJsonToStruct(T & struct_, string json_){
             }
             
         }
-        //cout << "数组长度" << a.metainfoStruct[i].memberTypeSize << endl;
         regex pattern_1(regex_key_1 + ":" +regex_value_1);
         if(regex_search(json_, result_1, pattern_1)){
         auto value = result_1.str(2).c_str();
@@ -556,7 +543,6 @@ void FdogStructToJson(string & json_, T & struct_){
     string curlyBracketR = "}";
     for(int i = 0; i < info.metainfoStruct.size(); i++){
         int Vtype = getMemberVType(info.metainfoStruct[i].memberType, info.metainfoStruct[i].memberArraySize);
-        //cout << "类型值：" << Vtype << endl;
         smatch result_1;
         string regex_key_1 = "(\"" + info.metainfoStruct[i].memberName +"\")";
         string regex_value_1 = BaseRegex[info.metainfoStruct[i].memberType];
@@ -567,8 +553,6 @@ void FdogStructToJson(string & json_, T & struct_){
                 regex_value_1 = "(\\[(.*?)\\])";
             }
         }
-        //cout << "regex_value_1" << regex_value_1 << endl;
-        //regex pattern_1(regex_key_1 + ":" +regex_value_1);
             switch(Vtype){
                 case FDOGBASE:
                     cout << "基础类型" << info.metainfoStruct[i].memberType << endl;
@@ -577,7 +561,7 @@ void FdogStructToJson(string & json_, T & struct_){
                     break;
                 case FDOGOBJECT:
                     cout << "对象类型" << info.metainfoStruct[i].memberType << endl;
-                    json_ = json_ + info.metainfoStruct[i].memberName + ":{";
+                    json_ = json_ + "\"" + info.metainfoStruct[i].memberName + "\"" + ":{";
                     ObjectToJson(json_, info.metainfoStruct[i], struct_); 
                     RemoveLastComma(json_);
                     json_ = json_ + "},";
@@ -611,7 +595,7 @@ void FdogStructToJson(string & json_, T & struct_){
 
 //#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)  //获取偏移值
 
-#define MEMBERTYPE(TYPE, MEMBER) getValueTyle(typeid(((TYPE *)0)->MEMBER).name())//获取类型
+#define MEMBERTYPE(TYPE, MEMBER) getValueTyle(typeid(((TYPE *)0)->MEMBER).name())//获取类型  //可以直接使用函数 去掉MEMBERTYPE
 
 #define PLACEHOLDER(placeholder, ...) placeholder
 
@@ -669,4 +653,4 @@ REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1);
 
 }
 #endif
-//cout << metainfo_one.memberName << "----pianyizhi:" << metainfo_one.memberOffset << endl;\
+//cout << metainfo_one.memberName << "----pianyizhi:" << metainfo_one.memberOffset << endl;
