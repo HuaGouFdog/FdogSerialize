@@ -338,27 +338,67 @@ string getValueByAddress_S(string type_str, T &info, int vc){
 }
 template<class T>
 string getValueByAddress(string type_str, T &info, int vc){
-    // if(type_str == "char"){
-    //     auto value = *((char *)((void *)&info + vc));
-    //     string char_value(1,value);
-    //     return char_value;
-    // }
-    // if(type_str == "char"){
-    //     auto value = *((char *)((void *)&info + vc));
-    //     return value;
-    // }
-
-    if(type_str == "int"){
+    if(type_str == "bool"){
+        auto value = *((bool *)((char *)&info + vc));
+        if(value){
+            return "true";
+        }else{
+            return "false";
+        }
+    }
+    if(type_str == "char" || type_str == "signed_char"){
+        auto value = *((char *)((void *)&info + vc));
+        //string char_value(1,value);
+        return to_string((int)value);
+    }
+    if(type_str == "unsigned_char"){
+        auto value = *((char *)((void *)&info + vc));
+        //string char_value(1,value);
+        return to_string((unsigned int)value);
+    }
+    if(type_str == "int" || type_str == "signed_int"){
         auto value = *((int *)((char *)&info + vc));
         return to_string(value);
     }
-    //浮点数默认小数点后6位，这里可以截断后面的0
+    if(type_str == "unsigned_int"){
+        auto value = *((unsigned int *)((char *)&info + vc));
+        return to_string(value);
+    }
+    if(type_str == "short_int" || type_str == "signed_short_int"){
+        auto value = *((short int *)((char *)&info + vc));
+        return to_string(value);
+    }
+    if(type_str == "unsigned_short_int"){
+        auto value = *((unsigned short int *)((char *)&info + vc));
+        return to_string(value);
+    }
+    if(type_str == "long_int" || type_str == "signed_long_int"){
+        auto value = *((long int *)((char *)&info + vc));
+        return to_string(value);
+    }
+    if(type_str == "unsigned_long_int"){
+        auto value = *((unsigned long int *)((char *)&info + vc));
+        return to_string(value);
+    }
+    if(type_str == "long_long_int" || type_str == "signed_long_long_int"){
+        auto value = *((long long int *)((char *)&info + vc));
+        return to_string(value);
+    }
+    if(type_str == "unsigned_long_long_int"){
+        auto value = *((unsigned long long int *)((char *)&info + vc));
+        return to_string(value);
+    }        
     if(type_str == "float"){
         auto value = *((float *)((char *)&info + vc));
+        //浮点数默认小数点后6位，这里可以截断后面的0
         return to_string(value);
     }
     if(type_str == "double"){
         auto value = *((double *)((char *)&info + vc));
+        return to_string(value);
+    }
+    if(type_str == "long_double"){
+        auto value = *((long double *)((char *)&info + vc));
         return to_string(value);
     }
     return "";
@@ -557,7 +597,6 @@ void FdogStructToJson(string & json_, T & struct_){
                 case FDOGBASE:
                     cout << "基础类型" << info.metainfoStruct[i].memberType << endl;
                     BaseToJson(json_, info.metainfoStruct[i], struct_);
-                    //cout << "json_------ --- -- -- " << json_ << endl;
                     break;
                 case FDOGOBJECT:
                     cout << "对象类型" << info.metainfoStruct[i].memberType << endl;
@@ -575,6 +614,18 @@ void FdogStructToJson(string & json_, T & struct_){
     //RemoveLastComma(json_);
     //json_ = curlyBracketL + json_ + curlyBracketR;
 }
+//序列化 struct=>json
+template<typename T>
+void FdogSerialize(string & json_, T & struct_){
+    FdogStructToJson(json_, struct_);
+    RemoveLastComma(json_);
+    json_ = "{" + json_ +"}";
+}
+//反序列化 json=>struct
+template<typename T>
+void FdogDesSerialize(T & struct_, string & json_){
+    FdogJsonToStruct(struct_, json_);
+}
 
 #define ARG_N(...) \
     ARG_N_(0, ##__VA_ARGS__, ARG_N_RESQ()) 
@@ -582,9 +633,9 @@ void FdogStructToJson(string & json_, T & struct_){
 #define ARG_N_(...) \
     ARG_N_M(__VA_ARGS__)
 
-#define ARG_N_M(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9,_10, N,...) N
+#define ARG_N_M(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9,_10, _11, _12, _13, _14, _15, _16, _17, _18, _19,_20, N,...) N
 
-#define ARG_N_RESQ() 10,9,8,7,6,5,4,3,2,1,0
+#define ARG_N_RESQ() 20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
 
 //获取原始名
 #define NAME(x) #x
@@ -635,6 +686,36 @@ REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1); if (size > 0) REGISTEREDMEMBER_s
 REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1); if (size > 0) REGISTEREDMEMBER_s_10(TYPE, PLACE, metainfoStruct, size-1, ##__VA_ARGS__, PLACE);
 
 #define REGISTEREDMEMBER_s_10(TYPE, PLACE, metainfoStruct, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1); if (size > 0) REGISTEREDMEMBER_s_11(TYPE, PLACE, metainfoStruct, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_11(TYPE, PLACE, metainfoStruct, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1); if (size > 0) REGISTEREDMEMBER_s_12(TYPE, PLACE, metainfoStruct, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_12(TYPE, PLACE, metainfoStruct, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1); if (size > 0) REGISTEREDMEMBER_s_13(TYPE, PLACE, metainfoStruct, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_13(TYPE, PLACE, metainfoStruct, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1); if (size > 0) REGISTEREDMEMBER_s_14(TYPE, PLACE, metainfoStruct, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_14(TYPE, PLACE, metainfoStruct, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1); if (size > 0) REGISTEREDMEMBER_s_15(TYPE, PLACE, metainfoStruct, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_15(TYPE, PLACE, metainfoStruct, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1); if (size > 0) REGISTEREDMEMBER_s_16(TYPE, PLACE, metainfoStruct, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_16(TYPE, PLACE, metainfoStruct, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1); if (size > 0) REGISTEREDMEMBER_s_17(TYPE, PLACE, metainfoStruct, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_17(TYPE, PLACE, metainfoStruct, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1); if (size > 0) REGISTEREDMEMBER_s_18(TYPE, PLACE, metainfoStruct, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_18(TYPE, PLACE, metainfoStruct, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1); if (size > 0) REGISTEREDMEMBER_s_19(TYPE, PLACE, metainfoStruct, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_19(TYPE, PLACE, metainfoStruct, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1); if (size > 0) REGISTEREDMEMBER_s_20(TYPE, PLACE, metainfoStruct, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_20(TYPE, PLACE, metainfoStruct, size, arg1, ...) \
 REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1);
 
 #define REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg) \
@@ -654,3 +735,27 @@ REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1);
 }
 #endif
 //cout << metainfo_one.memberName << "----pianyizhi:" << metainfo_one.memberOffset << endl;
+
+// template<class Type, class ...Args>
+// void register_member(Args... rest){
+//     structInfo structinfo_one;
+//     structinfo_one.structType = NAME(Type);
+//     //递归执行
+//     register_member_s()
+//     structinfo_one.push_back(structinfo_one);
+// }
+
+// template<class Type, class Place, class MetainfoStruct, class Size, class Arg, class ...Args>
+// void register_member_s(){
+//     metaInfo metainfo_one;
+//     metainfo_one.memberName = NAME(Arg);
+//     metainfo_one.memberAliasName = ALIASNAME(Arg);
+//     metainfo_one.memberOffset = offsetof(Type, Arg);
+//     valueTyle res = getValueTyle(typeid(((Type *)0)->Arg).name());
+//     metainfo_one.memberType = res.valueType;
+//     metainfo_one.memberTypeSize = sizeof(Type);
+//     metainfo_one.memberArraySize = res.ArraySize;
+//     metainfoStruct.push_back(metainfo_one);
+//     //递归本函数
+//     register_member_s(type, place, metainfoStruct, size, args...);
+// }

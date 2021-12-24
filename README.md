@@ -6,23 +6,18 @@
 
 ---
 
+### 目录
 
-
-#### 目录
-
-
-
-
-
-
-
-
+- [背景](#%E8%83%8C%E6%99%AF)
+- [类型支持](#%E7%B1%BB%E5%9E%8B%E6%94%AF%E6%8C%81)
+- [使用说明](#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E)
+- [作者](#%E4%BD%9C%E8%80%85)
+- [许可](#%E8%AE%B8%E5%8F%AF)
+- [其他](#%E5%85%B6%E4%BB%96)
 
 ---
 
 ### 背景
-
-
 
 ​		经常使用java或者go的人应该知道这些语言在进行序列化和反序列化是很容易的，但是对于伟大的C++而言，这是困难的，根本原因是C++不支持反射，基于c++的语言哲学，C++宁死也要坚守的zero overhead，不为用不到的特性付出任何代价，不管这个代价有多小，也不管是怎样的语言特性，都不会妥协。
 
@@ -60,20 +55,13 @@
 杂项支持：
 
 1. 支持别名【未完成】
-
-
+1. 
 
 暂时就想到怎么多，欢迎补充！
 
-
-
 ---
 
-
-
 ### 类型支持
-
-
 
 | 序号 |      基础类型      |          说明          | 序号 |        基础类型        |       说明       |
 | :--: | :----------------: | :--------------------: | :--: | :--------------------: | :--------------: |
@@ -156,36 +144,113 @@ struct school{
 
 
 
-
-
 ---
 
 
 
 ### 使用说明
 
-##### 1. Struct与Json互转
+1. 不包含结构体嵌套的转换
+
+```cpp
+//该结构体包含基础类型
+struct baseTest{
+    bool bool_b;
+    char * char_str;
+    char char_c;
+    signed char char_s;
+    unsigned char char_u;
+    int int_i;
+    signed int int_s;
+    unsigned int int_u;
+    short int short_i;
+    signed short int short_s;
+    unsigned short int short_u;
+    long int long_i;
+    signed long int long_s;
+    unsigned long int long_u;
+    long long int long_li;
+    signed long long int long_ls;
+    unsigned long long int long_lu;
+    float float_f;
+    double double_d;
+    long double double_l;
+};
+
+//注册
+REGISTEREDMEMBER(baseTest, bool_b, char_str, char_c, char_s, char_u, int_i, int_s, int_u, short_i, short_s, short_u, long_i, long_s, long_u, long_li, long_ls, long_lu, float_f, double_d, double_l);
+
+//调用序列化接口
+baseTest test = {true, "花狗", 'A', 'A', 'A', -123, -123, 123, -123, -123, 123, -123, -123, 123, -123, -123, 123, 158.132f, 132.45, 11654.32131};
+string json_1;
+FdogSerialize(json_1, test);
+```
+
+输出：
+
+```JSON
+{
+    "bool_b":true,
+    "char_str":"花狗",
+    "char_c":65,
+    "char_s":65,
+    "char_u":65,
+    "int_i":-123,
+    "int_s":-123,
+    "int_u":123,
+    "short_i":-123,
+    "short_s":-123,
+    "short_u":123,
+    "long_i":-123,
+    "long_s":-123,
+    "long_u":123,
+    "long_li":-123,
+    "long_ls":-123,
+    "long_lu":123,
+    "float_f":158.132004,
+    "double_d":132.45,
+    "double_l":11654.32131
+}
+```
+
+
+
+2. 包含结构体嵌套的转换
+
+相当于普通结构体的转换，包含结构体嵌套的结构体需要多做一步
 
 ```
+struct headmaster{
+	char * name;
+	int age;
+};
+
+struct student{
+	char * name;
+	int age;
+};
+
+struct school{
+	char * schoolName;
+	headmaster master;
+    int number [3];
+	student stu[2];
+};
+
 //注册结构体
 REGISTEREDMEMBER(headmaster, name, age);
 REGISTEREDMEMBER(student, name, age);
-REGISTEREDMEMBER(teacher, name, age);
 REGISTEREDMEMBER(school, schoolName, master, stu, tea);
 
-//完成json转struct
-school sch;
-std::string json = "{\"schoolName\":\"wyai\",\"master\":\"花狗Fdog\",\"stu\":[{\"name\":\"于静\",\"age\":21},{\"name\":\"二狗\",\"age\":21}],\"tea\":[{\"name\":\"李四\",\"age\":21},{\"name\":\"王五\",\"age\":21}]}";
-FdogJsonToStruct(sch, json);
+//声明自定义变量
+REGISTERED(headmaster)
+REGISTERED(student)
+REGISTERED(school)
 
-//完成struct转json
-school sch_2;
-sch_2.schoolName = "wyai";
-sch_2.master = "花狗Fdog";
-sch_2.stu = {{"于静", 21}, {"二狗", 21}};
-sch_2.tea = {{"李四", 21}, {"王五", 21}};
-std::string json_2
-FdogStructToJson(json_2, sch_2);
+//调用序列化接口
+baseTest test = xxxx
+string json_1;
+FdogSerialize(json_1, test);
 ```
 
 
@@ -225,19 +290,7 @@ Copyright © 2021 花狗Fdog(张旭)
 
 如果觉得它好用的话，可以推广给你的朋友们！
 
-
-
 ---
-
-
-
-
-
-
-
-
-
-
 
 
 

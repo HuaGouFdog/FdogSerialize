@@ -18,44 +18,50 @@
 using namespace std;
 
 /***********************************
-*            存储基础类型            *
+*         基础存储基础类型            *
 ************************************/
 map<string, string> BaseValueType = {
-            {"b", "bool"},//1111111
-            {"c", "char"}, 
-            {"h", "char"}, 
-            {"a", "char"},
-            {"i", "int"}, 
-            {"j", "signed_int"}, //1111
-            {"j", "unsigned_int"}, 
+            {"b", "bool"},
+            {"c", "char"},
+            {"h", "signed_char"},
+            {"a", "unsigned_char"},
+            {"i", "int"},
+            {"i", "signed_int"},
+            {"j", "unsigned_int"},
             {"s", "short_int"},
-            {"t", "signed_short_int"}, //1111
+            {"s", "signed_short_int"},
             {"t", "unsigned_short_int"}, 
             {"l", "long_int"}, 
-            {"m", "signed_long_int"}, //101111
+            {"l", "signed_long_int"},
             {"m", "unsigned_long_int"}, 
+            {"x", "long_long_int"}, 
+            {"x", "signed_long_long_int"},
+            {"y", "unsigned_long_long_int"}, 
             {"f", "float"},
             {"d", "double"}, 
             {"e", "long_double"},
 };
 
 /***********************************
-*         存储基础指针类型
+*         存储基础指针类型            *
 ************************************/
 map<string, string> BasePointerValueType = {
-            {"Pb", "bool_ptr"},//111111
+            {"Pb", "bool_ptr"},
             {"Pc", "char_ptr"},
-            {"Ph", "char_ptr"}, 
-            {"Pa", "char_ptr"},
+            {"Ph", "signed_char_ptr"}, 
+            {"Pa", "unsigned_char_ptr"},
             {"Pi", "int_ptr"},
-            {"Pj", "signed_int_ptr"},//11111
+            {"Pi", "signed_int_ptr"},
             {"Pj", "unsigned_int_ptr"},
             {"Ps", "short_int_ptr"},
-            {"Pt", "signed_short_int_ptr"}, //111111
+            {"Ps", "signed_short_int_ptr"},
             {"Pt", "unsigned_short_int_ptr"},
             {"Pl", "long_int_ptr"},
-            {"Pm", "signed_long_int_ptr"},//11111111
+            {"Pl", "signed_long_int_ptr"},
             {"Pm", "unsigned_long_int_ptr"},
+            {"Px", "long_long_int_ptr"}, 
+            {"Px", "signed_long_long_int_ptr"},
+            {"Py", "unsigned_long_long_ptr"}, 
             {"Pf", "float_ptr"}, 
             {"Pd", "double_ptr"},
             {"Pe", "long_double_ptr"},
@@ -66,19 +72,22 @@ map<string, string> BasePointerValueType = {
 *         存储基础数组类型
 ************************************/
 map<string, string> BaseArrayValueType = {
-            {"Ab", "bool_array"},//111111
+            {"Ab", "bool_array"},
             {"Ac", "char_array"},
             {"Ah", "char_array"},
             {"Aa", "char_array"},
             {"Ai", "int_array"},
-            {"Aj", "signed_int_array"}, //11111
+            {"Ai", "signed_int_array"},
             {"Aj", "unsigned_int_array"},
             {"As", "short_int_array"},
-            {"At", "signed_short_int_array"}, //111111
+            {"As", "signed_short_int_array"},
             {"At", "unsigned_short_int_array"},
             {"Al", "long_int_array"},
-            {"Am", "signed_long_int_array"},//11111111
+            {"Al", "signed_long_int_array"},
             {"Am", "unsigned_long_int_array"},
+            {"Ax", "long_long_int_array"}, 
+            {"Ax", "signed_long_long_int_array"},
+            {"Ay", "unsigned_long_long_int_array"}, 
             {"Af", "float_array"},
             {"Ad", "double_array"},
             {"Ae", "long_double_array"},
@@ -120,8 +129,18 @@ map<string, string> BaseRegex = {
             {"double", "(\\d+.\\d+)"},
             {"long_double", "(\\d+.\\d+)"},
             {"char_ptr", "\"(.*?)\""},
-            {"int_array", "(\\[(.*?)\\])"},
+            //{"int_array", "(\\[(.*?)\\])"},
 };
+
+//用于数组整体提取
+const string ArrayRegex = "(\\[(.*?)\\])";
+//用于结构体整体提取
+const string ObjectRegex = "(\\{(.*?)\\})";
+
+const string curlyBracketL = "{";
+const string curlyBracketR = "}";
+const string squareBracketsL = "[";
+const string squareBracketsR = "]";
 
 /***********************************
 *   用于提取除基础类型数据的正则表达式
@@ -171,8 +190,74 @@ typedef struct structInfo{
 ************************************/
 struct valueTyle {
     string valueType;
-    int valueTypeSize;
     int ArraySize;
+};
+
+struct Student{
+    int name;
+    int mail;
+};
+
+struct Bxy{
+    int dd;
+};
+
+struct Info{
+    char * name;
+    char zimu;
+    int    age;
+    float  sex;
+    double mail;
+    int    number[5];
+    Student stu;
+    int    addr;
+};
+
+struct headmaster{
+	char * name;
+	int age;
+};
+
+struct student{
+	char * name;
+	int age;
+};
+
+struct teacher{
+	char * name;
+	int age;
+};
+
+struct school{
+	char * schoolName;
+	headmaster master;
+    int number [3];
+	student stu[2];
+	//teacher tea[1];
+};
+
+//基础类型测试
+struct baseTest{
+    bool bool_b;
+    char * char_str;
+    char char_c;
+    signed char char_s;
+    unsigned char char_u;
+    int int_i;
+    signed int int_s;
+    unsigned int int_u;
+    short int short_i;
+    signed short int short_s;
+    unsigned short int short_u;
+    long int long_i;
+    signed long int long_s;
+    unsigned long int long_u;
+    long long int long_li;
+    signed long long int long_ls;
+    unsigned long long int long_lu;
+    float float_f;
+    double double_d;
+    long double double_l;
 };
 
 #endif
