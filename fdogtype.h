@@ -20,7 +20,7 @@ using namespace std;
 /***********************************
 *         基础存储基础类型            *
 ************************************/
-map<string, string> BaseValueType = {
+map<string, string> baseType = {
             {"b", "bool"},
             {"c", "char"},
             {"h", "signed_char"},
@@ -45,7 +45,7 @@ map<string, string> BaseValueType = {
 /***********************************
 *         存储基础指针类型            *
 ************************************/
-map<string, string> BasePointerValueType = {
+map<string, string> basePointerType = {
             {"Pb", "bool_ptr"},
             {"Pc", "char_ptr"},
             {"Ph", "signed_char_ptr"}, 
@@ -71,7 +71,7 @@ map<string, string> BasePointerValueType = {
 /***********************************
 *         存储基础数组类型
 ************************************/
-map<string, string> BaseArrayValueType = {
+map<string, string> baseArrayType = {
             {"Ab", "bool_array"},
             {"Ac", "char_array"},
             {"Ah", "char_array"},
@@ -98,24 +98,24 @@ map<string, string> BaseArrayValueType = {
 *   用于存储自定义类型(结构体/对象)
 *   自定义类型需要在运行中动态增加，任何类型都会转成基础类型,无需手动添加
 ************************************/
-map<string, string> ObjectValueType;
+map<string, string> objectType;
 
 /***********************************
 *   用于存储自定义数组类型
 *   自定义类型需要在运行中动态增加，任何类型都会转成基础类型,无需手动添加
 ************************************/
-map<string, string> ObjectArrayValueType;
+map<string, string> objectArrayType;
 
 /***********************************
 *   用于存储自定义指针类型
 *   自定义类型需要在运行中动态增加，任何类型都会转成基础类型,无需手动添加
 ************************************/
-map<string, string> ObjectPointerValueType;
+map<string, string> objectPointerType;
 
 /***********************************
 *   用于提取基础类型数据的正则表达式
 ************************************/
-map<string, string> BaseRegex = {
+map<string, string> baseRegex = {
             {"char", "(\\d+)"}, 
             {"char", "(\\d+)"}, 
             {"char", "(\\d+)"},
@@ -133,14 +133,20 @@ map<string, string> BaseRegex = {
 };
 
 //用于数组整体提取
-const string ArrayRegex = "(\\[(.*?)\\])";
+const string arrayRegex = "(\\[(.*?)\\])";
+//匹配数组
+const string patternArray = "((A)(\\d+)_\\d?(\\D+))";
+
 //用于结构体整体提取
-const string ObjectRegex = "(\\{(.*?)\\})";
+const string objectRegex = "(\\{(.*?)\\})";
+//匹配结构体
+const string patternObject = "((\\d+)(\\D+))";
 
 const string curlyBracketL = "{";
 const string curlyBracketR = "}";
 const string squareBracketsL = "[";
 const string squareBracketsR = "]";
+const string aQuotationMark = "\"";
 
 /***********************************
 *   用于提取除基础类型数据的正则表达式
@@ -188,7 +194,7 @@ typedef struct structInfo{
 /***********************************
 *   存储成员类型，数组大小
 ************************************/
-struct valueTyle {
+struct memberAttribute {
     string valueType;
     int ArraySize;
 };
