@@ -8,12 +8,14 @@
 
 ### 目录
 
-- [背景](#%E8%83%8C%E6%99%AF)
-- [类型支持](#%E7%B1%BB%E5%9E%8B%E6%94%AF%E6%8C%81)
-- [使用说明](#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E)
-- [作者](#%E4%BD%9C%E8%80%85)
-- [许可](#%E8%AE%B8%E5%8F%AF)
-- [其他](#%E5%85%B6%E4%BB%96)
+- [FdogSerialize](#FdogSerialize)
+    - [目录](#%E7%9B%AE%E5%BD%95)
+    - [背景](#%E8%83%8C%E6%99%AF)
+    - [类型支持](#%E7%B1%BB%E5%9E%8B%E6%94%AF%E6%8C%81)
+    - [使用说明](#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E)
+    - [作者](#%E4%BD%9C%E8%80%85)
+    - [许可](#%E8%AE%B8%E5%8F%AF)
+    - [其他](#%E5%85%B6%E4%BB%96)
 
 ---
 
@@ -44,8 +46,8 @@
 
 暂时分成五期：
 
-1. 支持由基础类型组合成结构体和Json互转【未完成】
-2. 支持由复杂类型组合成结构体和Json互转【未完成】
+1. 支持由基础类型组合成结构体和Json互转【完成】
+2. 支持由复杂类型组合成结构体和Json互转【完成】
 3. 支持类和Json互转【未完成】
 4. 支持vector，map，list等数据类型和Json互转【未完成】
 5. 支持XML数据格式【未完成】
@@ -140,7 +142,7 @@ struct school{
    
    ```
    
-3. xxxxxxxxx
+3. 目前支持20个成员的结构体。
 
 
 
@@ -180,7 +182,7 @@ struct baseTest{
 //注册
 REGISTEREDMEMBER(baseTest, bool_b, char_str, char_c, char_s, char_u, int_i, int_s, int_u, short_i, short_s, short_u, long_i, long_s, long_u, long_li, long_ls, long_lu, float_f, double_d, double_l);
 
-//调用序列化接口
+//调用接口
 baseTest test = {true, "花狗", 'A', 'A', 'A', -123, -123, 123, -123, -123, 123, -123, -123, 123, -123, -123, 123, 158.132f, 132.45, 11654.32131};
 string json_1;
 FdogSerialize(json_1, test);
@@ -219,7 +221,7 @@ FdogSerialize(json_1, test);
 
 相当于普通结构体的转换，包含结构体嵌套的结构体需要多做一步
 
-```
+```cpp
 struct headmaster{
 	char * name;
 	int age;
@@ -242,15 +244,63 @@ REGISTEREDMEMBER(headmaster, name, age);
 REGISTEREDMEMBER(student, name, age);
 REGISTEREDMEMBER(school, schoolName, master, stu, tea);
 
-//声明自定义变量
-REGISTERED(headmaster)
-REGISTERED(student)
-REGISTERED(school)
+//如若存在嵌套结构体需要序列化应在此添加
+#define REGISTERED_OBJECT_SERIALIZE_ALL\
+    REGISTERED_OBJECT_SERIALIZE(headmaster)\
+    REGISTERED_OBJECT_SERIALIZE(school)\
+    REGISTERED_OBJECT_SERIALIZE(teacher)\
+    REGISTERED_OBJECT_SERIALIZE(student)\
 
-//调用序列化接口
-baseTest test = xxxx
-string json_1;
-FdogSerialize(json_1, test);
+//如若存在嵌套结构体数组需要序列化应在此添加
+#define REGISTERED_OBJECT_ARRAY_SERIALIZE_ALL\
+    REGISTERED_OBJECT_ARRAY_SERIALIZE(headmaster)\
+    REGISTERED_OBJECT_ARRAY_SERIALIZE(school)\
+    REGISTERED_OBJECT_ARRAY_SERIALIZE(teacher)\
+    REGISTERED_OBJECT_ARRAY_SERIALIZE(student)\
+
+//如若存在嵌套结构体需要反序列化应在此添加
+#define REGISTERED_OBJECT_DESSERIALIZE_ALL\
+    REGISTERED_OBJECT_DESSERIALIZE(headmaster)\
+    REGISTERED_OBJECT_DESSERIALIZE(school)\
+    REGISTERED_OBJECT_DESSERIALIZE(teacher)\
+    REGISTERED_OBJECT_DESSERIALIZE(student)\
+
+//如若存在嵌套结构体数组需要反序列化应在此添加
+#define REGISTERED_OBJECT_ARRAY_DESSERIALIZE_ALL\
+    REGISTERED_OBJECT_ARRAY_DESSERIALIZE(headmaster)\
+    REGISTERED_OBJECT_ARRAY_DESSERIALIZE(school)\
+    REGISTERED_OBJECT_ARRAY_DESSERIALIZE(teacher)\
+    REGISTERED_OBJECT_ARRAY_DESSERIALIZE(student)\
+
+//调用接口
+string json_ = "{\"schoolName\":\"wyai\",\"master\":{\"name\":\"花狗Fdog\",\"age\":21},\"number\":[1,2,3],\"stu\":[{\"name\":\"于静\",\"age\":21},{\"name\":\"二狗\",\"age\":21}]}";
+school sch;
+FdogDesSerialize(sch, json_);
+cout << "schoolName=" << sch.schoolName << endl;
+cout << "master.name=" << sch.master.name << endl;
+cout << "master.age=" << sch.master.age << endl;
+cout << "number[0]=" << sch.number[0] << endl;
+cout << "number[1]=" << sch.number[1] << endl;
+cout << "number[2]=" << sch.number[2] << endl;
+cout << "stu[0]=" << sch.stu[0].name << "," << sch.stu[0].age << endl;
+cout << "stu[1]=" << sch.stu[1].name << "," << sch.stu[1].age << endl;
+string json_2 = "";
+FdogSerialize(json_2, sch);
+cout << "json=" << json_2 << endl;
+```
+
+输出：
+
+```cpp
+schoolName=scjxy
+master.name=花狗Fdog
+master.age=21
+number[0]=1
+number[1]=2
+number[2]=3
+stu[0]=于静,21
+stu[1]=二狗,21
+json={"schoolName":"scjxy","master":{"name":"花狗Fdog","age":21},"number":[1,2,3],"stu":[{"name":"于静","age":21},{"name":"二狗","age":21}]}
 ```
 
 

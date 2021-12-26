@@ -19,36 +19,71 @@ using namespace std;
 
 namespace fsj{
 
+//获取原始名
+#define NAME(x) #x
+
+#define NAME_ARRAY(x) #x"_array"
+
+//获取别名
+#define ALIASNAME(x) #x
+
 #define NAMESPLIT(x) fdog_##x
 
 #define FUNCNAME(x) get##x
 
-#define REGISTERED(TYPE) \
-    extern TYPE NAMESPLIT(TYPE);\
-    TYPE FUNCNAME(TYPE)(){ TYPE value; return value;}\
+//结构体转json
+#define REGISTERED_OBJECT_SERIALIZE(TYPE)\
+if (metainfostruct.memberType == NAME(TYPE)){\
+    FdogStructToJson(json_, *((TYPE *)((void *)&struct_ + metainfostruct.memberOffset)));\
+}
 
+#define REGISTERED_OBJECT_ARRAY_SERIALIZE(TYPE)\
+if (metainfostruct.memberType == NAME_ARRAY(TYPE)){\
+    json_ = json_ + "{"; \
+    FdogStructToJson(json_, *((TYPE *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(TYPE) * i))));\
+    removeLastComma(json_);\
+    json_ = json_ + "},";\
+}
 
-REGISTERED(headmaster);
-REGISTERED(school);
-REGISTERED(teacher);
-REGISTERED(student);
+//json转结构体
+#define REGISTERED_OBJECT_DESSERIALIZE(TYPE)\
+if (metainfostruct.memberType == NAME(TYPE)){\
+    FdogJsonToStruct(*((TYPE *)((void *)&struct_ + metainfostruct.memberOffset)), json_);\
+}
 
+#define REGISTERED_OBJECT_ARRAY_DESSERIALIZE(TYPE)\
+if (metainfostruct.memberType ==  NAME_ARRAY(TYPE)){\
+    FdogJsonToStruct(*((TYPE *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(TYPE) * i))), json_);\
+}
 
-enum function {
-    HEADMASTER = 1,
-    SCHOOL,
-};
+//如若存在嵌套结构体需要序列化应在此添加
+#define REGISTERED_OBJECT_SERIALIZE_ALL\
+    REGISTERED_OBJECT_SERIALIZE(headmaster)\
+    REGISTERED_OBJECT_SERIALIZE(school)\
+    REGISTERED_OBJECT_SERIALIZE(teacher)\
+    REGISTERED_OBJECT_SERIALIZE(student)\
 
-#define BUILDSWITCH     \
-        switch(value)   \
-        {               \
-        case HEADMASTER:\
-            FdogJsonToStruct(*((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset)), json_);\
-            break;      \
-        case SCHOOL:    \
-            FdogJsonToStruct(*((decltype(getschool()) *)((void *)&struct_ + metainfostruct.memberOffset)), json_);\
-            break;      \
-        };
+//如若存在嵌套结构体数组需要序列化应在此添加
+#define REGISTERED_OBJECT_ARRAY_SERIALIZE_ALL\
+    REGISTERED_OBJECT_ARRAY_SERIALIZE(headmaster)\
+    REGISTERED_OBJECT_ARRAY_SERIALIZE(school)\
+    REGISTERED_OBJECT_ARRAY_SERIALIZE(teacher)\
+    REGISTERED_OBJECT_ARRAY_SERIALIZE(student)\
+
+//如若存在嵌套结构体需要反序列化应在此添加
+#define REGISTERED_OBJECT_DESSERIALIZE_ALL\
+    REGISTERED_OBJECT_DESSERIALIZE(headmaster)\
+    REGISTERED_OBJECT_DESSERIALIZE(school)\
+    REGISTERED_OBJECT_DESSERIALIZE(teacher)\
+    REGISTERED_OBJECT_DESSERIALIZE(student)\
+
+//如若存在嵌套结构体数组需要反序列化应在此添加
+#define REGISTERED_OBJECT_ARRAY_DESSERIALIZE_ALL\
+    REGISTERED_OBJECT_ARRAY_DESSERIALIZE(headmaster)\
+    REGISTERED_OBJECT_ARRAY_DESSERIALIZE(school)\
+    REGISTERED_OBJECT_ARRAY_DESSERIALIZE(teacher)\
+    REGISTERED_OBJECT_ARRAY_DESSERIALIZE(student)\
+
 
 static vector<structInfo> structinfo; //所有结构体信息存储于此
 
@@ -223,18 +258,7 @@ void FdogStructToJson(string & json_, T & struct_);
 
 template<class T>
 void JsonToObject(T & struct_, metaInfo & metainfostruct, string json_){
-    if (metainfostruct.memberType == "headmaster"){
-        FdogJsonToStruct(*((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset)), json_);
-    }
-    if (metainfostruct.memberType == "school"){
-        FdogJsonToStruct(*((decltype(getschool()) *)((void *)&struct_ + metainfostruct.memberOffset)), json_);
-    }
-    if (metainfostruct.memberType == "student"){
-        FdogJsonToStruct(*((decltype(fdog_student) *)((void *)&struct_ + metainfostruct.memberOffset)), json_);
-    }
-    if (metainfostruct.memberType == "teather"){
-        FdogJsonToStruct(*((decltype(fdog_teacher) *)((void *)&struct_ + metainfostruct.memberOffset)), json_);
-    }
+    REGISTERED_OBJECT_DESSERIALIZE_ALL
 }
 /***********************************
 *   解析数组
@@ -272,20 +296,8 @@ void JsonToArray(T & struct_, metaInfo & metainfostruct, string json_){
             }
     }else{
         for(int i = 0; i < metainfostruct.memberArraySize; i++){
-            //cout << "数组类型=" << metainfostruct.memberType << "=== 数组大小=" << metainfostruct.memberArraySize << endl;
             //考虑如何分割数组json {},{}
-            if (metainfostruct.memberType == "headmaster_array"){
-                FdogJsonToStruct(*((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_headmaster) * i))), json_);
-            }
-            if (metainfostruct.memberType == "school_array"){
-                FdogJsonToStruct(*((decltype(getschool()) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_headmaster) * i))), json_);
-            }
-            if (metainfostruct.memberType == "student_array"){
-                FdogJsonToStruct(*((decltype(fdog_student) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_headmaster) * i))), json_);
-            }
-            if (metainfostruct.memberType == "teather_array"){
-                FdogJsonToStruct(*((decltype(fdog_teacher) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_headmaster) * i))), json_);
-            }
+            REGISTERED_OBJECT_ARRAY_DESSERIALIZE_ALL
         }
     }
 }
@@ -311,12 +323,10 @@ string getValueByAddress(string type_str, T &info, int vc){
     }
     if(type_str == "char" || type_str == "signed_char"){
         auto value = *((char *)((void *)&info + vc));
-        //string char_value(1,value);
         return to_string((int)value);
     }
     if(type_str == "unsigned_char"){
         auto value = *((char *)((void *)&info + vc));
-        //string char_value(1,value);
         return to_string((unsigned int)value);
     }
     if(type_str == "int" || type_str == "signed_int"){
@@ -368,7 +378,6 @@ string getValueByAddress(string type_str, T &info, int vc){
 
 template<class T>
 void BaseToJson(string & json_, metaInfo & metainfostruct, T & struct_){
-    //cout << "----------BaseToJson---------" << endl;
     string value;
     if (metainfostruct.memberType == "char_ptr"){
         value = getValueByAddress_S(metainfostruct.memberType, struct_, metainfostruct.memberOffset);
@@ -380,17 +389,7 @@ void BaseToJson(string & json_, metaInfo & metainfostruct, T & struct_){
 
 template<class T>
 void ObjectToJson(string & json_, metaInfo & metainfostruct, T & struct_){
-    //cout << "----------ObjectToJson---------" << metainfostruct.memberType << endl;
-    //先搁置
-    if (metainfostruct.memberType == "headmaster"){
-        FdogStructToJson(json_, *((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset)));
-    }
-    if (metainfostruct.memberType == "school"){
-        FdogStructToJson(json_, *((decltype(getschool()) *)((void *)&struct_ + metainfostruct.memberOffset)));
-    }
-    if (metainfostruct.memberType == "student"){
-        FdogStructToJson(json_, *((decltype(fdog_student) *)((void *)&struct_ + metainfostruct.memberOffset)));
-    }
+    REGISTERED_OBJECT_SERIALIZE_ALL
 }
 
 template<class T>
@@ -426,24 +425,7 @@ void ArrayToJson(string & json_, metaInfo & metainfostruct, T & struct_){
     }else{
         json_ = json_ + "\"" + metainfostruct.memberName + "\"" + ":[";
         for(int i = 0; i < metainfostruct.memberArraySize; i++){
-            if (metainfostruct.memberType == "headmaster_array"){
-                json_ = json_ + "{"; 
-                FdogStructToJson(json_, *((decltype(getheadmaster()) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_headmaster) * i))));
-                removeLastComma(json_);
-                json_ = json_ + "},";
-            }
-            if (metainfostruct.memberType == "school_array"){
-                json_ = json_ + "{"; 
-                FdogStructToJson(json_, *((decltype(getschool()) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_school) * i))));
-                removeLastComma(json_);
-                json_ = json_ + "},";
-            }
-            if (metainfostruct.memberType == "student_array"){
-                json_ = json_ + "{"; 
-                FdogStructToJson(json_, *((decltype(fdog_student) *)((void *)&struct_ + metainfostruct.memberOffset + (sizeof(fdog_student) * i))));
-                removeLastComma(json_);
-                json_ = json_ + "},";
-            }
+            REGISTERED_OBJECT_ARRAY_SERIALIZE_ALL
         }
         removeLastComma(json_);
         json_ = json_ + "],";
@@ -553,7 +535,7 @@ void FdogStructToJson(string & json_, T & struct_){
                     break;
                 case FDOGARRAY:
                     //cout << "数组类型" << info.metainfoStruct[i].memberType << endl;
-                    ArrayToJson(json_, info.metainfoStruct[i], struct_); //数组类型
+                    ArrayToJson(json_, info.metainfoStruct[i], struct_); 
                     break;
             }
     }
@@ -581,13 +563,6 @@ void FdogDesSerialize(T & struct_, string & json_){
 #define ARG_N_M(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9,_10, _11, _12, _13, _14, _15, _16, _17, _18, _19,_20, N,...) N
 
 #define ARG_N_RESQ() 20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
-
-//获取原始名
-#define NAME(x) #x
-//获取别名
-#define ALIASNAME(x) #x
-//自定义变量名生成
-
 
 //#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)  //获取偏移值
 
@@ -675,31 +650,5 @@ REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1);
         metainfo_one.memberArraySize = resReturn.ArraySize;\
         metainfoStruct.push_back(metainfo_one);\
     }while(0);
-
-
 }
 #endif
-
-// template<class Type, class ...Args>
-// void register_member(Args... rest){
-//     structInfo structinfo_one;
-//     structinfo_one.structType = NAME(Type);
-//     //递归执行
-//     register_member_s()
-//     structinfo_one.push_back(structinfo_one);
-// }
-
-// template<class Type, class Place, class MetainfoStruct, class Size, class Arg, class ...Args>
-// void register_member_s(){
-//     metaInfo metainfo_one;
-//     metainfo_one.memberName = NAME(Arg);
-//     metainfo_one.memberAliasName = ALIASNAME(Arg);
-//     metainfo_one.memberOffset = offsetof(Type, Arg);
-//     memberAttribute resReturn = getMemberAttribute(typeid(((Type *)0)->Arg).name());
-//     metainfo_one.memberType = resReturn.valueType;
-//     metainfo_one.memberTypeSize = sizeof(Type);
-//     metainfo_one.memberArraySize = resReturn.ArraySize;
-//     metainfoStruct.push_back(metainfo_one);
-//     //递归本函数
-//     register_member_s(type, place, metainfoStruct, size, args...);
-// }
