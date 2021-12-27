@@ -24,9 +24,6 @@ namespace fsj{
 
 #define NAME_ARRAY(x) #x"_array"
 
-//获取别名
-#define ALIASNAME(x) #x
-
 #define NAMESPLIT(x) fdog_##x
 
 #define FUNCNAME(x) get##x
@@ -384,7 +381,11 @@ void BaseToJson(string & json_, metaInfo & metainfostruct, T & struct_){
     } else{
         value = getValueByAddress(metainfostruct.memberType, struct_, metainfostruct.memberOffset);
     }
-    json_ = json_ + aQuotationMark + metainfostruct.memberName + aQuotationMark + ":" + value + ",";
+    if(metainfostruct.memberAliasName != ""){
+        json_ = json_ + aQuotationMark + metainfostruct.memberAliasName + aQuotationMark + ":" + value + ",";
+    }else{
+        json_ = json_ + aQuotationMark + metainfostruct.memberName + aQuotationMark + ":" + value + ",";
+    }
 }
 
 template<class T>
@@ -407,7 +408,11 @@ void ArrayToJson(string & json_, metaInfo & metainfostruct, T & struct_){
     if (isBaseArray){
         string quotationMark = "\"";
         string json_2;
-        json_2 =  json_2 + aQuotationMark + metainfostruct.memberName + aQuotationMark + ":" + squareBracketsL;
+        if(metainfostruct.memberAliasName != ""){
+            json_2 =  json_2 + aQuotationMark + metainfostruct.memberAliasName + aQuotationMark + ":" + squareBracketsL;
+        }else{
+            json_2 =  json_2 + aQuotationMark + metainfostruct.memberName + aQuotationMark + ":" + squareBracketsL;
+        }
         for(int i = 0; i < metainfostruct.memberArraySize; i++){
             //这里要按照类型选取不同的值
             string value;
@@ -423,7 +428,11 @@ void ArrayToJson(string & json_, metaInfo & metainfostruct, T & struct_){
     json_ = json_ + json_2 + squareBracketsR + ",";
 
     }else{
-        json_ = json_ + "\"" + metainfostruct.memberName + "\"" + ":[";
+        if(metainfostruct.memberAliasName != ""){
+            json_ = json_ + "\"" + metainfostruct.memberAliasName + "\"" + ":[";
+        }else{
+            json_ = json_ + "\"" + metainfostruct.memberName + "\"" + ":[";
+        }
         for(int i = 0; i < metainfostruct.memberArraySize; i++){
             REGISTERED_OBJECT_ARRAY_SERIALIZE_ALL
         }
@@ -475,12 +484,12 @@ int getMemberVType(string type_str, int Size){
 ************************************/
 template<typename T>
 void FdogJsonToStruct(T & struct_, string json_){
-    structInfo a = getStructInfo(typeid(T).name());
-    for(int i = 0; i < a.metainfoStruct.size(); i++){
-        int Vtype = getMemberVType(a.metainfoStruct[i].memberType, a.metainfoStruct[i].memberArraySize);
+    structInfo & info = getStructInfo(typeid(T).name());
+    for(int i = 0; i < info.metainfoStruct.size(); i++){
+        int Vtype = getMemberVType(info.metainfoStruct[i].memberType, info.metainfoStruct[i].memberArraySize);
         smatch result;
-        string regex_key = "(\"" + a.metainfoStruct[i].memberName +"\")";
-        string regex_value = baseRegex[a.metainfoStruct[i].memberType];
+        string regex_key = "(\"" + info.metainfoStruct[i].memberName +"\")";
+        string regex_value = baseRegex[info.metainfoStruct[i].memberType];
         if(regex_value == ""){
             if(Vtype == 2){
                 regex_value = objectRegex;
@@ -493,16 +502,16 @@ void FdogJsonToStruct(T & struct_, string json_){
         auto value = result.str(2).c_str();
             switch(Vtype){
                 case FDOGBASE:
-                    //cout << "基础类型" << a.metainfoStruct[i].memberType << "=" << value << endl;
-                    JsonToBase(struct_, a.metainfoStruct[i], value); //基础类型 提供数据
+                    //cout << "基础类型" << info.metainfoStruct[i].memberType << "=" << value << endl;
+                    JsonToBase(struct_, info.metainfoStruct[i], value); //基础类型 提供数据
                     break;
                 case FDOGOBJECT:
-                    //cout << "对象类型" << a.metainfoStruct[i].memberType << "=" << result.str(2).c_str() << endl;
-                    JsonToObject(struct_, a.metainfoStruct[i], result.str(2).c_str()); 
+                    //cout << "对象类型" << info.metainfoStruct[i].memberType << "=" << result.str(2).c_str() << endl;
+                    JsonToObject(struct_, info.metainfoStruct[i], result.str(2).c_str()); 
                     break;
                 case FDOGARRAY:
-                    //cout << "数组类型" << a.metainfoStruct[i].memberType << "=" << result.str(2).c_str() << endl;
-                    JsonToArray(struct_, a.metainfoStruct[i], result.str(2).c_str()); //数组类型 
+                    //cout << "数组类型" << info.metainfoStruct[i].memberType << "=" << result.str(2).c_str() << endl;
+                    JsonToArray(struct_, info.metainfoStruct[i], result.str(2).c_str()); //数组类型 
                     break;
             }
         }
@@ -516,7 +525,7 @@ T getheadmaster(T &){}
 template<typename T>
 void FdogStructToJson(string & json_, T & struct_){
     //获取传进来结构体对应的元信息
-    structInfo info = getStructInfo(typeid(T).name());
+    structInfo & info = getStructInfo(typeid(T).name());
     string curlyBracketL = "{";
     string curlyBracketR = "}";
     for(int i = 0; i < info.metainfoStruct.size(); i++){
@@ -528,7 +537,11 @@ void FdogStructToJson(string & json_, T & struct_){
                     break;
                 case FDOGOBJECT:
                     //cout << "对象类型" << info.metainfoStruct[i].memberType << endl;
-                    json_ = json_ + aQuotationMark + info.metainfoStruct[i].memberName + aQuotationMark + ":" + curlyBracketL;
+                    if(info.metainfoStruct[i].memberAliasName != ""){
+                        json_ = json_ + aQuotationMark + info.metainfoStruct[i].memberAliasName + aQuotationMark + ":" + curlyBracketL;
+                    }else{
+                        json_ = json_ + aQuotationMark + info.metainfoStruct[i].memberName + aQuotationMark + ":" + curlyBracketL;
+                    }
                     ObjectToJson(json_, info.metainfoStruct[i], struct_); 
                     removeLastComma(json_);
                     json_ = json_ + curlyBracketR + ",";
@@ -642,7 +655,7 @@ REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1);
     do{\
         metaInfo metainfo_one;\
         metainfo_one.memberName = NAME(arg);\
-        metainfo_one.memberAliasName = ALIASNAME(arg);\
+        metainfo_one.memberAliasName = "";\
         metainfo_one.memberOffset = offsetof(TYPE, arg);\
         memberAttribute resReturn = MEMBERTYPE(TYPE, arg);\
         metainfo_one.memberType = resReturn.valueType;\
@@ -651,4 +664,15 @@ REGISTEREDMEMBER_s(TYPE, metainfoStruct, arg1);
         metainfoStruct.push_back(metainfo_one);\
     }while(0);
 }
+
+#define SET_ALIAS_NAME(Type, Name, AliasName)\
+    structInfo & info = getStructInfo(NAME(Type));\
+    for(int i = 0; i < info.metainfoStruct.size(); i++){\
+        if(info.metainfoStruct[i].memberName == NAME(Name)){\
+            cout << "找到并设置:";\
+            info.metainfoStruct[i].memberAliasName = NAME(AliasName);\
+            cout << "类型：" << info.structType << "---" << info.metainfoStruct[i].memberAliasName << "--" << &(info.metainfoStruct[i].memberName) << "原名：" << info.metainfoStruct[i].memberName << endl;\
+            break;\
+        }\
+    }
 #endif

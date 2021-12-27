@@ -137,6 +137,9 @@ const string arrayRegex = "(\\[(.*?)\\])";
 //匹配数组
 const string patternArray = "((A)(\\d+)_\\d?(\\D+))";
 
+//匹配别名
+const string patterAlias = "(\\(A:(.*?)\\))";
+
 //用于结构体整体提取
 const string objectRegex = "(\\{(.*?)\\})";
 //匹配结构体
