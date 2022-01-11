@@ -10,11 +10,25 @@ using namespace std;
 
 namespace fsj{
 
+/***********************************
+*   存储结构体元信息
+*   成员名， 别名， 成员类型, 成员所在偏移量，成员类型位数， 数组大小
+************************************/
+typedef struct MetaInfo{
+    string memberName;
+    string memberAliasName;
+    string memberType;
+    size_t memberOffset;
+    size_t memberTypeSize;                                                         
+    size_t memberArraySize;
+    bool memberIsIgnore;                                                                                                                                                                                           
+}MetaInfo;
+
 //声明序列化base类
 class FdogSerializeBase {
     private:
-    mutex * mutex_base;
-    FdogSerializeBase * fdogserializebase;
+    static mutex * mutex_base;
+    static FdogSerializeBase * fdogserializebase;
 
     public:
     static FdogSerializeBase * Instance();
@@ -146,18 +160,19 @@ class FdogSerializeBase {
 
     // //基础类型转json
     template<class T>
-    void BaseToJson(string & json_, MetaInfo & metainfoobject, T & object_){
-        string value = getValueByAddress(metainfoobject.memberType, object_, metainfoobject.memberOffset);
-        if(metainfoobject.memberAliasName != ""){
-            json_ = json_ + "\"" + metainfoobject.memberAliasName + "\"" + ":" + value + ",";
+    void BaseToJson(string & json_, MetaInfo * metainfoobject, T & object_){
+        string value = getValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset);
+        if(metainfoobject->memberAliasName != ""){
+            json_ = json_ + "\"" + metainfoobject->memberAliasName + "\"" + ":" + value + ",";
         }else{
-            json_ = json_ + "\"" + metainfoobject.memberName + "\"" + ":" + value + ",";
+            json_ = json_ + "\"" + metainfoobject->memberName + "\"" + ":" + value + ",";
         }
     }
     // //json转基础类型
     template<class T>
-    void JsonToBase(T & object_, MetaInfo & metainfoobject, string json_){
-        setValueByAddress(metainfoobject.memberType, object_, metainfoobject.memberOffset, json_);
+    void JsonToBase(T & object_, MetaInfo * metainfoobject, string json_){
+        cout << "进入JsonToBase" << "json_:" << json_ << "metainfoobject->memberName:" << metainfoobject->memberName << endl;
+        setValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset, json_);
     }
 };
 
@@ -169,22 +184,22 @@ class FdogSerializeBase {
 // };
 
 //序列化struct类
-class FdogSerializeStruct{
+// class FdogSerializeStruct{
     
-    private:
-    static mutex * mutex_struct;
-    static FdogSerializeStruct * fdogserializestruct;
+//     private:
+//     static mutex * mutex_struct;
+//     static FdogSerializeStruct * fdogserializestruct;
 
-    //FdogObjectInfo();
-    //~FdogObjectInfo();
+//     //FdogObjectInfo();
+//     //~FdogObjectInfo();
 
-    public:
+//     public:
     
-    static FdogSerializeStruct * Instance();
+//     static FdogSerializeStruct * Instance();
 
-    void StructToJson();
-    void jsonToStruct();
-};
+//     void StructToJson();
+//     void jsonToStruct();
+// };
 
 //序列化class类
 // class FdogSerializeClass : public FdogSerializeBase {

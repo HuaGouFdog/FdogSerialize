@@ -1,21 +1,21 @@
 #include "fdogserialize.h"
 
-FdogObjectInfo * FdogSerialize::fdogserialize = nullptr;
+FdogSerialize * FdogSerialize::fdogserialize = nullptr;
 mutex * FdogSerialize::mutex_serialize = new(mutex);
 
 FdogSerialize::FdogSerialize(){
-    ObjectInfo objectinfo;
-    objectinfo.objectType = "NULL";
+    ObjectInfo * objectinfo = new ObjectInfo();
+    objectinfo->objectType = "NULL";
     this->objectInfoList.push_back(objectinfo);
 }
 
-~FdogSerialize(){
+FdogSerialize::~FdogSerialize(){
     //释放内存
-    delete(FdogObjectInfo::mutex_object);
-    delete(FdogObjectInfo::fdogobjectinfo);
+    delete(FdogSerialize::mutex_serialize);
+    delete(FdogSerialize::fdogserialize);
 }
 
-static FdogSerialize * FdogSerialize::Instance(){
+FdogSerialize * FdogSerialize::Instance(){
     mutex_serialize->lock();
     if(fdogserialize == nullptr){
         fdogserialize = new FdogSerialize();
@@ -24,30 +24,38 @@ static FdogSerialize * FdogSerialize::Instance(){
     return fdogserialize;
 }
 
+void FdogSerialize::addObjectInfo(ObjectInfo * objectinfo){
+    //cout << "addObjectInfo-----"  << &objectinfo << endl;
+    this->objectInfoList.push_back(objectinfo);
+}
+
 ObjectInfo & FdogSerialize::getObjectInfo(string objectName){
+    removeNumbers(objectName);
     for(auto objectinfo : this->objectInfoList){
-        if(objectinfo.objectType == objectName){
-            return objectinfo;
+        //cout << "getObjectInfo:" << objectName << "---" << &objectinfo << "--" << objectinfo->objectType<< endl;
+        if(objectinfo->objectType == objectName){
+            //cout << "找到" << endl;
+            return *objectinfo;
         }
     }
-    return this->objectInfoList[0];
+    return *(this->objectInfoList[0]);
 }
 
 void FdogSerialize::setAliasName(string type, string name, string aliasName){
     ObjectInfo & objectinfo = this->getObjectInfo(type);
-    for(auto metainfoObject : objectinfo.metainfoObjectList){
-        if(metainfoObject.memberName == name){
-            metainfoObject.memberAliasName = aliasName;
+    for(auto metainfoObject : objectinfo.metaInfoObjectList){
+        if(metainfoObject->memberName == name){
+            metainfoObject->memberAliasName = aliasName;
             break;
         }
     }
 }
 
 void FdogSerialize::setIgnoreField(string Type, string Name){
-    ObjectInfo & objectinfo = this->getObjectInfo(type);
-    for(auto metainfoObject : objectinfo.metainfoObjectList){
-        if(metainfoObject.memberName == Name){
-            metainfoObject.memberIsIgnore = true;
+    ObjectInfo & objectinfo = this->getObjectInfo(Type);
+    for(auto metainfoObject : objectinfo.metaInfoObjectList){
+        if(metainfoObject->memberName == Name){
+            metainfoObject->memberIsIgnore = true;
             break;
         }
     }
@@ -93,5 +101,10 @@ memberAttribute FdogSerialize::getMemberAttribute(string key){
 }
 
 int FdogSerialize::getObjectType(string objectName){
-    return getObjectInfo(objectName).objectType;
+    //cout << objectName << "--getObjectType类型--：" << &(getObjectInfo(objectName)) << endl;
+    return getObjectInfo(objectName).objectTypeInt;
+}
+
+void * getInstance(){
+    return FdogSerialize::Instance();
 }
