@@ -5,8 +5,8 @@ using namespace fsj;
 FdogSerializeBase * FdogSerializeBase::fdogserializebase = nullptr;
 mutex * FdogSerializeBase::mutex_base = new(mutex);
 
-FdogSerializeStruct * FdogSerializeStruct::fdogserializestruct = nullptr;
-mutex * FdogSerializeStruct::mutex_struct = new(mutex);
+// FdogSerializeStruct * FdogSerializeStruct::fdogserializestruct = nullptr;
+// mutex * FdogSerializeStruct::mutex_struct = new(mutex);
 
 FdogSerializeBase * FdogSerializeBase::Instance(){
     mutex_base->lock();
@@ -17,14 +17,11 @@ FdogSerializeBase * FdogSerializeBase::Instance(){
     return fdogserializebase;
 }
 
-FdogSerializeStruct * FdogSerializeStruct::Instance(){
-    mutex_struct->lock();
-    if(fdogserializestruct == nullptr){
-        fdogserializestruct = new FdogSerializeStruct();
-    }
-    mutex_struct->unlock();
-    return fdogserializestruct;
-}
-
-void * func(){
-}
+// FdogSerializeStruct * FdogSerializeStruct::Instance(){
+//     mutex_struct->lock();
+//     if(fdogserializestruct == nullptr){
+//         fdogserializestruct = new FdogSerializeStruct();
+//     }
+//     mutex_struct->unlock();
+//     return fdogserializestruct;
+// }
