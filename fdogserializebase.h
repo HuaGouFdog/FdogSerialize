@@ -21,6 +21,7 @@ typedef struct MetaInfo{
     size_t memberOffset;
     size_t memberTypeSize;                                                         
     size_t memberArraySize;
+    int memberTypeInt;
     bool memberIsIgnore;                                                                                                                                                                                           
 }MetaInfo;
 
@@ -171,7 +172,7 @@ class FdogSerializeBase {
     // //json转基础类型
     template<class T>
     void JsonToBase(T & object_, MetaInfo * metainfoobject, string json_){
-        cout << "进入JsonToBase" << "json_:" << json_ << "metainfoobject->memberName:" << metainfoobject->memberName << endl;
+        //cout << "进入JsonToBase" << "json_:" << json_ << "metainfoobject->memberName:" << metainfoobject->memberName << endl;
         setValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset, json_);
     }
 };

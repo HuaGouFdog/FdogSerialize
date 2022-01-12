@@ -3,23 +3,25 @@
 //#include "fdogserialize.h"
 #include <typeinfo>
 #include <iostream>
+#include <list>
 using namespace std;
 
-struct school{
-    char * name;
-    int age;
-};
+void FdogSerializeInit(){
+    REGISTEREDMEMBER(student, name, age);
+    REGISTEREDMEMBER(school, name, age, stu);
+}
 
 int main()
 {
-    REGISTEREDMEMBER(school, name, age);
+    FdogSerializeInit();
     school sch;
-    string json_ = "{\"name\":\"张旭\",\"age\":23}";
-    FdogSerialize::Instance()->DesSerialize(sch, json_);
-    cout << json_ << endl;
-    cout << sch.name << "--" << sch.age << endl;
+    string json_ = "{\"name\":\"张旭\",\"age\":23,\"stu\":{\"name\":\"yujing\",\"age\":21}}";
     string json_2 ="";
-    FdogSerialize::Instance()->Serialize(json_2, sch);
+    //cout << "地址：" << &(sch.stu) << "--"<< &(sch.stu.name) << "--" << &(sch.stu.age) << endl;
+    FdogSerialize::Instance()->FDesSerialize(sch, json_);
+    cout << json_ << endl;
+    //cout << sch.name << "--" << sch.age << "--" << sch.stu.name << "--"  << sch.stu.age << endl;
+    FdogSerialize::Instance()->FSerialize(json_2, sch);
     cout << json_2 << endl;
     return 0;
 }
