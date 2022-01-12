@@ -6,6 +6,7 @@ mutex * FdogSerialize::mutex_serialize = new(mutex);
 FdogSerialize::FdogSerialize(){
     ObjectInfo * objectinfo = new ObjectInfo();
     objectinfo->objectType = "NULL";
+    objectinfo->objectTypeInt = -1;
     this->objectInfoList.push_back(objectinfo);
 }
 
@@ -30,7 +31,7 @@ void FdogSerialize::addObjectInfo(ObjectInfo * objectinfo){
 }
 
 ObjectInfo & FdogSerialize::getObjectInfo(string objectName){
-    removeNumbers(objectName);
+    //removeNumbers(objectName);
     for(auto objectinfo : this->objectInfoList){
         //cout << "getObjectInfo:" << objectName << "---" << &objectinfo << "--" << objectinfo->objectType<< endl;
         if(objectinfo->objectType == objectName){
@@ -65,14 +66,17 @@ void FdogSerialize::setIgnoreField(string Type, string Name){
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
 ************************************/
 memberAttribute FdogSerialize::getMemberAttribute(string key){
+    cout << "getMemberAttribute----------"<<key <<endl;
     memberAttribute resReturn;
     if(baseType.count(key) != 0){
         resReturn.valueType = baseType[key];  
         resReturn.ArraySize = 0;
+        resReturn.valueTypeInt = MEMBER_BASE;
         return resReturn;
     } else if (basePointerType.count(key) != 0){
         resReturn.valueType = basePointerType[key];
         resReturn.ArraySize = 0;
+        resReturn.valueTypeInt = MEMBER_BASE;
     } else {
         smatch result;
         regex pattern(patternArray);
@@ -85,6 +89,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string key){
                 resReturn.valueType = objectArrayType[key_];
             }
             resReturn.ArraySize = atoi(result.str(3).data());
+            resReturn.valueTypeInt = MEMBER_ARRAY;
             return resReturn;
         } else {
             smatch result;
@@ -93,6 +98,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string key){
                 string str = result.str(2) + " " + result.str(3);
                 resReturn.valueType = result.str(3);
                 resReturn.ArraySize = atoi(result.str(3).data());
+                resReturn.valueTypeInt = MEMBER_STRUCT;
                 return resReturn;
             }
         }
@@ -101,8 +107,9 @@ memberAttribute FdogSerialize::getMemberAttribute(string key){
 }
 
 int FdogSerialize::getObjectType(string objectName){
-    //cout << objectName << "--getObjectType类型--：" << &(getObjectInfo(objectName)) << endl;
-    return getObjectInfo(objectName).objectTypeInt;
+    //cout << objectName << "--getObjectType类型--：" << getObjectInfo(objectName).objectTypeInt << endl;
+    return OBJECT_STRUCT;
+    //return getObjectInfo(objectName).objectTypeInt;
 }
 
 void * getInstance(){

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cxxabi.h>
 using namespace std;
 
 const string comma = ",";
@@ -14,6 +15,16 @@ const string curlyBracketR = "}";
 const string squareBracketsL = "[";
 const string squareBracketsR = "]";
 const string aQuotationMark = "\"";
+
+struct student{
+    char * name;
+    int age;
+};
+struct school{
+    char * name;
+    int age;
+    student stu;
+};
 
 
 /***********************************

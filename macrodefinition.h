@@ -21,7 +21,7 @@
 
 #define ARG_N_RESQ() 20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
 
-#define MEMBERTYPE(TYPE, MEMBER) FdogSerialize::Instance()->getMemberAttribute(typeid(((TYPE *)0)->MEMBER).name())
+#define MEMBERTYPE(TYPE, MEMBER) FdogSerialize::Instance()->getMemberAttribute(abi::__cxa_demangle(typeid(((TYPE *)0)->MEMBER).name(),0,0,0))
 
 #define PLACEHOLDER(placeholder, ...) placeholder
 
@@ -29,10 +29,9 @@
 do{ \
     ObjectInfo * objectinfo_one = new ObjectInfo();\
     objectinfo_one->objectType = NAME(TYPE);\
-    objectinfo_one->objectTypeInt = 1;\
-    cout << "原地址：" << &(objectinfo_one) << endl;\
-    REGISTEREDMEMBER_s_1(TYPE, PLACEHOLDER(__VA_ARGS__), objectinfo_one->metaInfoObjectList, ARG_N(__VA_ARGS__) - 1, ##__VA_ARGS__, PLACEHOLDER(__VA_ARGS__));\
+    objectinfo_one->objectTypeInt = FdogSerialize::Instance()->getObjectType(abi::__cxa_demangle(typeid(TYPE).name(),0,0,0));\
     FdogSerialize::Instance()->addObjectInfo(objectinfo_one);\
+    REGISTEREDMEMBER_s_1(TYPE, PLACEHOLDER(__VA_ARGS__), objectinfo_one->metaInfoObjectList, ARG_N(__VA_ARGS__) - 1, ##__VA_ARGS__, PLACEHOLDER(__VA_ARGS__));\
 }while(0);
 
 #define REGISTEREDMEMBER_s_1(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
@@ -105,6 +104,7 @@ REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
         metainfo_one->memberType = resReturn.valueType;\
         metainfo_one->memberTypeSize = sizeof(TYPE);\
         metainfo_one->memberArraySize = resReturn.ArraySize;\
+        metainfo_one->memberTypeInt = resReturn.valueTypeInt;\
         metainfo_one->memberIsIgnore = false;\
         metaInfoObjectList.push_back(metainfo_one);\
     }while(0);
