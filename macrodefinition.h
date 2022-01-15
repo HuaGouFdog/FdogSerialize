@@ -29,7 +29,8 @@
 do{ \
     ObjectInfo * objectinfo_one = new ObjectInfo();\
     objectinfo_one->objectType = NAME(TYPE);\
-    objectinfo_one->objectTypeInt = FdogSerialize::Instance()->getObjectType(abi::__cxa_demangle(typeid(TYPE).name(),0,0,0));\
+    objectinfo_one->objectTypeInt = FdogSerialize::Instance()->getObjectTypeInt(objectinfo_one->objectType, abi::__cxa_demangle(typeid(TYPE).name(),0,0,0));\
+    objectinfo_one->objectSize = sizeof(TYPE);\
     FdogSerialize::Instance()->addObjectInfo(objectinfo_one);\
     REGISTEREDMEMBER_s_1(TYPE, PLACEHOLDER(__VA_ARGS__), objectinfo_one->metaInfoObjectList, ARG_N(__VA_ARGS__) - 1, ##__VA_ARGS__, PLACEHOLDER(__VA_ARGS__));\
 }while(0);
