@@ -36,7 +36,7 @@ class FdogSerializeBase {
 
     template<class T>
     string getValueByAddress(string valueType, T & object, int offsetValue){
-        if(valueType == "char_ptr"){
+        if(valueType == "char*"){
             auto value = *((const char **)((void *)&object + offsetValue));
             string str_value = value;
             return aQuotationMark + str_value  + aQuotationMark;
@@ -49,43 +49,43 @@ class FdogSerializeBase {
                 return "false";
             }
         }
-        if(valueType == "char" || valueType == "signed_char"){
+        if(valueType == "char"){
             auto value = *((char *)((void *)&object + offsetValue));
             return to_string((int)value);
         }
-        if(valueType == "unsigned_char"){
+        if(valueType == "unsigned char"){
             auto value = *((char *)((void *)&object + offsetValue));
             return to_string((unsigned int)value);
         }
-        if(valueType == "int" || valueType == "signed_int"){
+        if(valueType == "int"){
             auto value = *((int *)((char *)&object + offsetValue));
             return to_string(value);
         }
-        if(valueType == "unsigned_int"){
+        if(valueType == "unsigned int"){
             auto value = *((unsigned int *)((char *)&object + offsetValue));
             return to_string(value);
         }
-        if(valueType == "short_int" || valueType == "signed_short_int"){
+        if(valueType == "short"){
             auto value = *((short int *)((char *)&object + offsetValue));
             return to_string(value);
         }
-        if(valueType == "unsigned_short_int"){
+        if(valueType == "unsigned short"){
             auto value = *((unsigned short int *)((char *)&object + offsetValue));
             return to_string(value);
         }
-        if(valueType == "long_int" || valueType == "signed_long_int"){
+        if(valueType == "long"){
             auto value = *((long int *)((char *)&object + offsetValue));
             return to_string(value);
         }
-        if(valueType == "unsigned_long_int"){
+        if(valueType == "unsigned long"){
             auto value = *((unsigned long int *)((char *)&object + offsetValue));
             return to_string(value);
         }
-        if(valueType == "long_long_int" || valueType == "signed_long_long_int"){
+        if(valueType == "long long"){
             auto value = *((long long int *)((char *)&object + offsetValue));
             return to_string(value);
         }
-        if(valueType == "unsigned_long_long_int"){
+        if(valueType == "unsigned long long"){
             auto value = *((unsigned long long int *)((char *)&object + offsetValue));
             return to_string(value);
         }        
@@ -97,7 +97,7 @@ class FdogSerializeBase {
             auto value = *((double *)((char *)&object + offsetValue));
             return removeLastZero(value);
         }
-        if(valueType == "long_double"){
+        if(valueType == "long double"){
             auto value = *((long double *)((char *)&object + offsetValue));
             return removeLastZero(value);
         }
@@ -106,7 +106,7 @@ class FdogSerializeBase {
 
     template<class T>
     void setValueByAddress(string valueType, T &object, int offsetValue, string value){
-        if(valueType == "char_ptr"){
+        if(valueType == "char*"){
             *((char **)((void *)&object + offsetValue)) = new char[strlen(value.c_str())];
             strcpy(*((char **)((void *)&object + offsetValue)), value.c_str());
         }
@@ -116,7 +116,7 @@ class FdogSerializeBase {
         if(valueType == "bool"){
             ss >> *((bool *)((void *)&object + offsetValue));
         }
-        if(valueType == "char" || valueType == "signed char"){
+        if(valueType == "char"){
             //可能溢出
             ss >> *((char *)((void *)&object + offsetValue));
         }
@@ -124,28 +124,28 @@ class FdogSerializeBase {
             //可能溢出
             ss >> *((unsigned char *)((void *)&object + offsetValue));
         }
-        if(valueType == "int" || valueType == "signed int"){
+        if(valueType == "int"){
             ss >> *((int *)((char *)&object + offsetValue));
         }
-        if(valueType == "unsigned_int"){
+        if(valueType == "unsigned int"){
             ss >> *((unsigned int *)((char *)&object + offsetValue));
         }
-        if(valueType == "short_int" || valueType == "signed_short_int"){
+        if(valueType == "short"){
             ss >> *((short int *)((char *)&object + offsetValue));
         }
-        if(valueType == "unsigned_short_int"){
+        if(valueType == "unsigned short"){
             ss >> *((unsigned short int *)((char *)&object + offsetValue));
         }
-        if(valueType == "long_int" || valueType == "signed_long_int"){
+        if(valueType == "long"){
             ss >> *((long int *)((char *)&object + offsetValue));
         }
-        if(valueType == "unsigned_long_int"){
+        if(valueType == "unsigned long"){
             ss >> *((unsigned long int *)((char *)&object + offsetValue));
         }
-        if(valueType == "long_long_int" || valueType == "signed_long_long_int"){
+        if(valueType == "long long"){
             ss >> *((long long int *)((char *)&object + offsetValue));
         }
-        if(valueType == "unsigned_long_int"){
+        if(valueType == "unsigned long long"){
             ss >> *((unsigned long long  int *)((char *)&object + offsetValue));
         }  
         if(valueType == "float"){
@@ -154,7 +154,7 @@ class FdogSerializeBase {
         if(valueType == "double"){
             ss >> *((double *)((char *)&object + offsetValue));
         }
-        if(valueType == "long_double"){
+        if(valueType == "long double"){
             ss >> *((long double *)((char *)&object + offsetValue));
         }
     }
