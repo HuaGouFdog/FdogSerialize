@@ -169,6 +169,7 @@ class FdogSerializeBase {
             json_ = json_ + "\"" + metainfoobject->memberName + "\"" + ":" + value + ",";
         }
     }
+    
     // //json转基础类型
     template<class T>
     void JsonToBase(T & object_, MetaInfo * metainfoobject, string json_){

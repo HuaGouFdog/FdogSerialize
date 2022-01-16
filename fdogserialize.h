@@ -158,29 +158,41 @@ class FdogSerialize {
     bool isArrayType(string objectName, string typeName);
 
     //根据复合类型获取struct
-    
 
     //序列化
     template<typename T>
-    void Serialize(string & json_, T & object_){
+    void Serialize(string & json_, T & object_, void * ptr = 0, int size = 0){
+        cout << "@@@@1" << endl;
         //通过传进来的T判断是什么复合类型，ObjectInfo只保存结构体,如果是NULL可以确定传进来的不是struct类型
-        ObjectInfo objectinfo = getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        ObjectInfo objectinfo = FdogSerialize::Instance()->getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        cout << "@@@@2" << endl;
         //获取的只能是结构体的信息，无法知道是什么复合类型，尝试解析类型 objectType其实是一个结构体类型名称
         int objectType = getObjectTypeInt(objectinfo.objectType, abi::__cxa_demangle(typeid(T).name(),0,0,0));
-
+        cout << "@@@@3" << endl;
         if(objectinfo.objectType == "NULL" && objectType != OBJECT_BASE && objectType != OBJECT_STRUCT){
             //说明不是struct类型和base类型尝试，尝试解析类型
             objectinfo = getObjectInfoByType(abi::__cxa_demangle(typeid(T).name(),0,0,0), objectType);
+            objectType = getObjectTypeInt(objectinfo.objectType, abi::__cxa_demangle(typeid(T).name(),0,0,0));
         }
-        cout <<"objectinfo.objectType:" << objectinfo.objectType << endl;
-        cout << "objectType值：" << objectType << endl;
+        cout <<"---------objectinfo.objectType:" << objectinfo.objectType << endl;
+        cout << "-----------objectType值：" << objectType << endl;
         int sum = objectinfo.metaInfoObjectList.size();
         int i = 1;
         //获取到的objectType才是真正的类型，根据这个类型进行操作
         switch(objectType){
             case OBJECT_BASE:
-            break;
+                {cout << "begin base---" << endl;
+                MetaInfo * metainfo1 = new MetaInfo();
+                metainfo1->memberName = "dsa";
+                metainfo1->memberType = "int";
+                metainfo1->memberTypeSize = 4;
+                //想办法赋值
+                FdogSerializeBase::Instance()->BaseToJson(json_, metainfo1, object_);
+                //removeLastComma(json_);
+                }
+                break;
             case OBJECT_STRUCT:
+            cout << "begin struct---" << endl;
             for(auto metainfoObject : objectinfo.metaInfoObjectList){
                 
                 string json_s;
@@ -199,14 +211,21 @@ class FdogSerialize {
             }
             break;
             case OBJECT_VECTOR:
+            cout << "begin vector---" << endl;
                 //考虑将vector转换成单独base或者单独struct
                 //将vector通过
-                for(int i =0; i < 1; i++){
-                    if(objectinfo.objectType == "school"){
-                        cout << "进入vector" << endl;
-                        //Serialize(json_s, *(school *)((void *)&object_ + (objectinfo.objectSize + i)));
+                cout << "------vector=" << objectinfo.objectType << "--地址：" << &object_ << "--size=" <<size << endl;
+                for(int i =0; i < size; i++){
+                    if(objectinfo.objectType == "NULL"){
+                        int * a = (int *)(ptr + (sizeof(int) * i));
+                        cout << *(int *)(ptr + (sizeof(int) * i)) << endl;
+                        //cout << "vector-----1--" << *(int *)(ptr + (sizeof(int) * i)) << endl;
+                        //json_ = json_ + to_string(*(int *)(ptr + (sizeof(int) * i))) + ",";
+                        Serialize(json_, *(int *)(ptr + (sizeof(int) * 0)));
+                        //cout << "vector-----2--" << &*(int *)(ptr + (sizeof(int) * i)) << endl;
                     }
                 }
+                removeLastComma(json_);
             break;
             case OBJECT_MAP:
             break;
@@ -217,11 +236,16 @@ class FdogSerialize {
             case OBJECT_CLASS:
             break;
         }
+        cout << "-------------" << endl;
+        if (OBJECT_BASE == objectType){
+            cout << "11111111111111111111111111111" <<endl;
+            return ;
+        }
     }
 
     template<typename T>
-    void FSerialize(string & json_, T & object_){
-        Serialize(json_, object_);
+    void FSerialize(string & json_, T & object_, void * ptr = 0, int size = 0){
+        Serialize(json_, object_, ptr, size);
         json_ = "{" + json_ + "}";
         //这里需要判断类型
     }
@@ -230,7 +254,7 @@ class FdogSerialize {
     template<typename T>
     void DesSerialize(T & object_, string & json_){
         //cout << "地址：--" << &object_ << endl;
-        ObjectInfo & objectinfo = getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        ObjectInfo & objectinfo = FdogSerialize::Instance()->getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
         int objectType = getObjectTypeInt(objectinfo.objectType, abi::__cxa_demangle(typeid(T).name(),0,0,0));
         for(auto metainfoObject : objectinfo.metaInfoObjectList){
             //通过正则表达式获取对应的json

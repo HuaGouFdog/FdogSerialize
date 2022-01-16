@@ -32,14 +32,18 @@ void FdogSerialize::addObjectInfo(ObjectInfo * objectinfo){
 
 ObjectInfo & FdogSerialize::getObjectInfo(string objectName){
     //removeNumbers(objectName);
-    for(auto objectinfo : this->objectInfoList){
+    cout << "---getObjectInfo==" << objectName << endl;
+    cout << "size=" << FdogSerialize::Instance()->objectInfoList.size();
+    for(auto objectinfo : FdogSerialize::Instance()->objectInfoList){
+        cout << "---end111" << endl;
         //cout << "getObjectInfo:" << objectName << "---" << &objectinfo << "--" << objectinfo->objectType<< endl;
         if(objectinfo->objectType == objectName){
             //cout << "找到" << endl;
             return *objectinfo;
         }
     }
-    return *(this->objectInfoList[0]);
+    cout << "---end==" << endl;
+    return *(FdogSerialize::Instance()->objectInfoList[0]);
 }
 
 void FdogSerialize::setAliasName(string type, string name, string aliasName){
@@ -141,7 +145,8 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
 }
 
 int FdogSerialize::getObjectTypeInt(string objectName, string typeName){
-    if(FdogSerialize::Instance()->isBaseType(objectName)){
+    cout << "zhangx = " << typeName << endl;
+    if(FdogSerialize::Instance()->isBaseType(typeName)){
         return OBJECT_BASE;
     }
     if(FdogSerialize::Instance()->isVectorType(objectName, typeName)){
@@ -164,6 +169,7 @@ int FdogSerialize::getObjectTypeInt(string objectName, string typeName){
 ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt){
     smatch result;
     regex pattern(complexRegex[objectTypeInt]);
+    cout << "typeName" << typeName << "-objectTypeInt" << objectTypeInt << endl;
     switch (objectTypeInt)
     {
     case OBJECT_VECTOR:
@@ -172,12 +178,14 @@ ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt
             string value = result.str(1).c_str();
             return getObjectInfo(value);
         }
+        cout << "------1" << endl;
         break;
     case OBJECT_LIST:
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
             return getObjectInfo(value);
         }
+        cout << "------2" << endl;
         break;        
     case OBJECT_MAP:
         break;
@@ -186,6 +194,7 @@ ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt
     default:
         break;
     }
+    cout << "------3" << endl;
 }
 
 void * getInstance(){

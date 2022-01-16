@@ -22,14 +22,22 @@ int main()
 {
     FdogSerializeInit();
     cool sch;
+    vector<int> a = {1,2,3,4,5,6};
     string json_ = "{\"age\":31,\"fdog\":{\"name\":\"张旭\",\"age\":23,\"stu\":{\"name\":\"yujing\",\"age\":21}}}";
     string json_2 ="";
     //cout << "地址：" << &(sch.stu) << "--"<< &(sch.stu.name) << "--" << &(sch.stu.age) << endl;
-    FdogSerialize::Instance()->FDesSerialize(sch, json_);
-    cout << json_ << endl;
-    cout << sch.age << "--" << sch.fdog.age << "--" << sch.fdog.name << "--"  << sch.fdog.stu.age << "--"  << sch.fdog.stu.name << endl;
-    FdogSerialize::Instance()->FSerialize(json_2, sch);
+    // FdogSerialize::Instance()->FDesSerialize(sch, json_);
+    // cout << json_ << endl;
+    // cout << sch.age << "--" << sch.fdog.age << "--" << sch.fdog.name << "--"  << sch.fdog.stu.age << "--"  << sch.fdog.stu.name << endl;
+    int a2 = 10;
+    //cout << *(int *)( + (sizeof(int) * 0));
+    FdogSerialize::Instance()->FSerialize(json_2, a, (void *)&a[0], a.size());
+    //FdogSerialize::Instance()->FSerialize(json_2, a[0]);
+    //FdogSerialize::Instance()->FSerialize(json_2, *(int *)((void *)&a[0] + (sizeof(int) * 0)));
+    //vector list
+    //map
     cout << json_2 << endl;
+    //cout << &a << "---" << &a[0] << "---" << &a[1] << "---" << &a[2] << "---" << &a[3] << "---" << &a[4] << endl;
     // vector<int> a;
     // cout << sizeof(a)<< endl;
     //cout << FdogSerialize::Instance()->isStructType("school", abi::__cxa_demangle(typeid(sch).name(),0,0,0)) << endl;
