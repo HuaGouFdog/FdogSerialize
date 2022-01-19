@@ -169,7 +169,14 @@ class FdogSerializeBase {
             json_ = json_ + "\"" + metainfoobject->memberName + "\"" + ":" + value + ",";
         }
     }
-    
+
+    // //基础类型转json
+    template<class T>
+    void BaseToJsonA(string & json_, MetaInfo * metainfoobject, T & object_){
+        string value = getValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset);
+        json_ = json_ + value + ",";
+    }    
+
     // //json转基础类型
     template<class T>
     void JsonToBase(T & object_, MetaInfo * metainfoobject, string json_){
@@ -177,59 +184,6 @@ class FdogSerializeBase {
         setValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset, json_);
     }
 };
-
-//序列化Array类
-// class FdogSerializeArray : public FdogSerializeBase {
-//     public:
-//     void ArrayToJson();
-//     void jsonToArray();
-// };
-
-//序列化struct类
-// class FdogSerializeStruct{
-    
-//     private:
-//     static mutex * mutex_struct;
-//     static FdogSerializeStruct * fdogserializestruct;
-
-//     //FdogObjectInfo();
-//     //~FdogObjectInfo();
-
-//     public:
-    
-//     static FdogSerializeStruct * Instance();
-
-//     void StructToJson();
-//     void jsonToStruct();
-// };
-
-//序列化class类
-// class FdogSerializeClass : public FdogSerializeBase {
-//     public:
-//     void ClassToJson();
-//     void jsonToClass();
-// };
-
-//序列化vector类
-// class FdogSerializeVector : public FdogSerializeBase {
-//     public:
-//     void vectorToJson();
-//     void jsonToVector();
-// };
-
-//序列化list类
-// class FdogSerializeList : public FdogSerializeBase {
-//     public:
-//     void ListToJson();
-//     void jsonToList();
-// };
-
-//序列化map类
-// class FdogSerializeMap : public FdogSerializeBase {
-//     public:
-//     void MapToJson();
-//     void jsonToMap();
-// };
 
 }
 

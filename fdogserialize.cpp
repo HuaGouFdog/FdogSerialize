@@ -8,6 +8,54 @@ FdogSerialize::FdogSerialize(){
     objectinfo->objectType = "NULL";
     objectinfo->objectTypeInt = -1;
     this->objectInfoList.push_back(objectinfo);
+
+    //对基础类型做初始化
+    MetaInfo * metainfo = nullptr;
+    metainfo = new MetaInfo();
+    metainfo->memberType = "bool";
+    metainfo->memberTypeSize = sizeof(bool);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
+    metainfo->memberType = "char";
+    metainfo->memberTypeSize = sizeof(char);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
+    metainfo->memberType = "int";
+    metainfo->memberTypeSize = sizeof(int);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
+    metainfo->memberType = "short";
+    metainfo->memberTypeSize = sizeof(short);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
+    metainfo->memberType = "long";
+    metainfo->memberTypeSize = sizeof(long);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
+    metainfo->memberType = "long long";
+    metainfo->memberTypeSize = sizeof(long long);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
+    metainfo->memberType = "float";
+    metainfo->memberTypeSize = sizeof(float);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
+    metainfo->memberType = "double";
+    metainfo->memberTypeSize = sizeof(double);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
+    metainfo->memberType = "long double";
+    metainfo->memberTypeSize = sizeof(long double);
+    this->baseInfoList.push_back(metainfo);
+
 }
 
 FdogSerialize::~FdogSerialize(){
@@ -32,19 +80,24 @@ void FdogSerialize::addObjectInfo(ObjectInfo * objectinfo){
 
 ObjectInfo & FdogSerialize::getObjectInfo(string objectName){
     //removeNumbers(objectName);
-    cout << "---getObjectInfo==" << objectName << endl;
-    cout << "size=" << FdogSerialize::Instance()->objectInfoList.size();
     for(auto objectinfo : FdogSerialize::Instance()->objectInfoList){
-        cout << "---end111" << endl;
         //cout << "getObjectInfo:" << objectName << "---" << &objectinfo << "--" << objectinfo->objectType<< endl;
         if(objectinfo->objectType == objectName){
             //cout << "找到" << endl;
             return *objectinfo;
         }
     }
-    cout << "---end==" << endl;
     return *(FdogSerialize::Instance()->objectInfoList[0]);
 }
+
+MetaInfo * FdogSerialize::getMetaInfo(string TypeName){
+    for(auto metainfo : FdogSerialize::Instance()->baseInfoList){
+        if(metainfo->memberType == TypeName){
+            return metainfo;
+        }
+    }
+}
+
 
 void FdogSerialize::setAliasName(string type, string name, string aliasName){
     ObjectInfo & objectinfo = this->getObjectInfo(type);
@@ -70,7 +123,6 @@ void FdogSerialize::setIgnoreField(string Type, string Name){
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
 ************************************/
 memberAttribute FdogSerialize::getMemberAttribute(string typeName){
-    cout << "getMemberAttribute----------"<<typeName <<endl;
     memberAttribute resReturn;
 
     if(FdogSerialize::isBaseType(typeName)){
@@ -145,7 +197,6 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
 }
 
 int FdogSerialize::getObjectTypeInt(string objectName, string typeName){
-    cout << "zhangx = " << typeName << endl;
     if(FdogSerialize::Instance()->isBaseType(typeName)){
         return OBJECT_BASE;
     }
@@ -169,7 +220,6 @@ int FdogSerialize::getObjectTypeInt(string objectName, string typeName){
 ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt){
     smatch result;
     regex pattern(complexRegex[objectTypeInt]);
-    cout << "typeName" << typeName << "-objectTypeInt" << objectTypeInt << endl;
     switch (objectTypeInt)
     {
     case OBJECT_VECTOR:
@@ -177,15 +227,14 @@ ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
             return getObjectInfo(value);
+            //除了复杂类型，还应该有基础类型
         }
-        cout << "------1" << endl;
         break;
     case OBJECT_LIST:
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
             return getObjectInfo(value);
         }
-        cout << "------2" << endl;
         break;        
     case OBJECT_MAP:
         break;
@@ -194,7 +243,6 @@ ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt
     default:
         break;
     }
-    cout << "------3" << endl;
 }
 
 void * getInstance(){

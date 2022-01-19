@@ -31,7 +31,8 @@ int main()
     // cout << sch.age << "--" << sch.fdog.age << "--" << sch.fdog.name << "--"  << sch.fdog.stu.age << "--"  << sch.fdog.stu.name << endl;
     int a2 = 10;
     //cout << *(int *)( + (sizeof(int) * 0));
-    FdogSerialize::Instance()->FSerialize(json_2, a, (void *)&a[0], a.size());
+    //FdogSerialize::Instance()->FSerialize(json_2, a, &a[0], a.size(), "a");
+    FdogSerialize::Instance()->FSerialize(json_2, a2);
     //FdogSerialize::Instance()->FSerialize(json_2, a[0]);
     //FdogSerialize::Instance()->FSerialize(json_2, *(int *)((void *)&a[0] + (sizeof(int) * 0)));
     //vector list
