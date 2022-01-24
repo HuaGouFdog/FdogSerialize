@@ -300,3 +300,24 @@ bool FdogSerialize::isArrayType(string objectName, string typeName){
     
     return false;
 }
+
+vector<string> FdogSerialize::CuttingArray(string data){
+    //[{{}},{},{}]
+    //第一步：查找第一个{     并计数
+    //再找第二个，如果期间有{ 继续计数
+    //直到知道}并且计数要对应 作为第一组
+    // int sumL = 0; //记录左
+    // int sumR = 0; //记录右
+    // int sum = 0;
+    // while(1){
+    //     int tag = data.find("{", sum);
+    //     if(tag != data.npos){
+    //         sumL = sumL + 1；
+    //         sum = tag;
+
+    //     }
+    //     break;
+    // }
+    vector<string> a;
+    return a;
+}
