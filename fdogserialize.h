@@ -10,6 +10,8 @@
 #include <algorithm>
 using namespace fsj;
 
+using namespace std;
+
 static vector<string> baseType1 = {
         "bool", "bool*"
         "char", "unsigned char", "char*", "unsigned char*",
@@ -161,11 +163,14 @@ class FdogSerialize {
     //判断是否是数组
     bool isArrayType(string objectName, string typeName);
 
+    //解析数组
+    vector<string> CuttingArray(string data);
+
     //根据复合类型获取struct
 
     //序列化
     template<typename T>
-    void Serialize(string & json_, T & object_, void * ptr = 0, int size = 0, string name = ""){
+    void Serialize(string & json_, T & object_, string name = ""){
         //通过传进来的T判断是什么复合类型，ObjectInfo只保存结构体,如果是NULL可以确定传进来的不是struct类型
         ObjectInfo objectinfo = FdogSerialize::Instance()->getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
         //获取的只能是结构体的信息，无法知道是什么复合类型，尝试解析类型 objectType其实是一个结构体类型名称
@@ -185,7 +190,7 @@ class FdogSerialize {
                     //cout << "begin base---" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl;
                     MetaInfo * metainfo1 = getMetaInfo(abi::__cxa_demangle(typeid(object_).name(),0,0,0));
                     FdogSerializeBase::Instance()->BaseToJsonA(json_, metainfo1, object_);
-                    removeLastComma(json_);
+                    //removeLastComma(json_);
                 }
                 break;
             case OBJECT_STRUCT:
@@ -206,48 +211,87 @@ class FdogSerialize {
             }
             break;
             case OBJECT_VECTOR:
-                for(int i =0; i < size; i++){
-                    //等于 NULL 说明是基础类型
-                    if(objectinfo.objectType == "NULL"){
-                        string typeName = abi::__cxa_demangle(typeid(object_).name(),0,0,0);
-                        string typeName_2;
-                        smatch result;
-                        regex pattern(complexRegex[5]);
-                        if(regex_search(typeName, result, pattern)){
-                            typeName_2 = result.str(1).c_str();
-                        }
-                        MetaInfo * metainfo1 = getMetaInfo(typeName_2);
-                        if( metainfo1->memberType == "bool"){
-                            Serialize(json_, *(bool *)(ptr + (metainfo1->memberTypeSize * i)));
-                        }
-                        if( metainfo1->memberType == "short"){
-                            Serialize(json_, *(short *)(ptr + (metainfo1->memberTypeSize * i)));
-                        }
-                        if( metainfo1->memberType == "int"){
-                            Serialize(json_, *(int *)(ptr + (metainfo1->memberTypeSize * i)));
-                        }
-                        if( metainfo1->memberType == "long"){
-                            Serialize(json_, *(long *)(ptr + (metainfo1->memberTypeSize * i)));
-                        }
-                        if( metainfo1->memberType == "long long"){
-                            Serialize(json_, *(long long *)(ptr + (metainfo1->memberTypeSize * i)));
-                        }
-                        if( metainfo1->memberType == "float"){
-                            Serialize(json_, *(float *)(ptr + (metainfo1->memberTypeSize * i)));
-                        }
-                    }else{
-                        //这里需要人为添加了
-                        // if( objectinfo.objectType == "float"){
-                        //     Serialize(json_, *(float *)(ptr + (metainfo1->memberTypeSize * i)));
-                        // }
-                    }
-                }
-                removeLastComma(json_);
-                json_ = name + ":" + "[" + json_ + "]";
+                // for(int i =0; i < size; i++){
+                //     //等于 NULL 说明是基础类型
+                //     if(objectinfo.objectType == "NULL"){
+                //         string typeName = abi::__cxa_demangle(typeid(object_).name(),0,0,0);
+                //         string typeName_2;
+                //         smatch result;
+                //         regex pattern(complexRegex[5]);
+                //         if(regex_search(typeName, result, pattern)){
+                //             typeName_2 = result.str(1).c_str();
+                //         }
+                //         MetaInfo * metainfo1 = getMetaInfo(typeName_2);
+                //         if( metainfo1->memberType == "bool"){
+                //             Serialize(json_, *(bool *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         }
+                //         if( metainfo1->memberType == "short"){
+                //             Serialize(json_, *(short *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         }
+                //         if( metainfo1->memberType == "int"){
+                //             Serialize(json_, *(int *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         }
+                //         if( metainfo1->memberType == "long"){
+                //             Serialize(json_, *(long *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         }
+                //         if( metainfo1->memberType == "long long"){
+                //             Serialize(json_, *(long long *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         }
+                //         if( metainfo1->memberType == "float"){
+                //             Serialize(json_, *(float *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         }
+                //     }else{
+                //         //这里需要人为添加了
+                //         // if( objectinfo.objectType == "float"){
+                //         //     Serialize(json_, *(float *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         // }
+                //     }
+                // }
+                // removeLastComma(json_);
+                // json_ = name + ":" + "[" + json_ + "]";
             break;
             case OBJECT_MAP:
             break;
             case OBJECT_LIST:
+                // T listObject = object_;
+                // for(int i =0; i < size; i++){
+                //     //等于 NULL 说明是基础类型
+                //     if(objectinfo.objectType == "NULL"){
+                //         string typeName = abi::__cxa_demangle(typeid(object_).name(),0,0,0);
+                //         string typeName_2;
+                //         smatch result;
+                //         regex pattern(complexRegex[7]);
+                //         if(regex_search(typeName, result, pattern)){
+                //             typeName_2 = result.str(1).c_str();
+                //         }
+                //         MetaInfo * metainfo1 = getMetaInfo(typeName_2);
+                //         if( metainfo1->memberType == "bool"){
+                //             Serialize(json_, *(bool *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         }
+                //         if( metainfo1->memberType == "short"){
+                //             Serialize(json_, *(short *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         }
+                //         if( metainfo1->memberType == "int"){
+                //             Serialize(json_, *(int *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         }
+                //         if( metainfo1->memberType == "long"){
+                //             Serialize(json_, *(long *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         }
+                //         if( metainfo1->memberType == "long long"){
+                //             Serialize(json_, *(long long *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         }
+                //         if( metainfo1->memberType == "float"){
+                //             Serialize(json_, *(float *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         }
+                //     }else{
+                //         //这里需要人为添加了
+                //         // if( objectinfo.objectType == "float"){
+                //         //     Serialize(json_, *(float *)(ptr + (metainfo1->memberTypeSize * i)));
+                //         // }
+                //     }
+                // }
+                // removeLastComma(json_);
+                // json_ = name + ":" + "[" + json_ + "]";
             break;
             case OBJECT_ARRAY:
             break;
@@ -257,10 +301,62 @@ class FdogSerialize {
     }
 
     template<typename T>
-    void FSerialize(string & json_, T & object_, void * ptr = 0, int size = 0, string name = ""){
-        Serialize(json_, object_, ptr, size, name);
+    void FSerialize(string & json_, T & object_, string name = ""){
+        Serialize(json_, object_, name);
         json_ = "{" + json_ + "}";
         //这里需要判断类型
+    }
+
+    //基于基础类型 for range最快
+    template<typename T>
+    void FSerializeV(string & json_, T & object_, string name = ""){
+        for(auto & object_one : object_){
+            json_ = json_ + "{";
+            Serialize(json_, object_);
+            json_ = json_ + "},";
+        }
+        removeLastComma(json_);
+        json_ = "{" + name + ":[" + json_ + "]}";
+    }
+
+    template<typename T>
+    void FSerializeL(string & json_, T & object_, string name = ""){
+        for(auto & object_one : object_){
+            //这里需要对类型做
+            json_ = json_ + "{";
+            Serialize(json_, object_one);
+            json_ = json_ + "},";
+        }
+        removeLastComma(json_);
+        json_ = "{" + name + ":[" + json_ + "]}";
+    }
+
+    template<typename T>
+    void FSerializeS(string & json_, T & object_, string name = ""){
+        for(auto & object_one : object_){
+            json_ = json_ + "{";
+            Serialize(json_, object_);
+            json_ = json_ + "},";
+        }
+        removeLastComma(json_);
+        json_ = "{" + name + ":[" + json_ + "]}";
+    }
+
+    template<typename T>
+    void FSerializeM(string & json_, T & object_, string name = ""){
+        typename T::iterator it;
+
+        it = object_.begin();
+
+        while(it != object_.end())
+        {
+            json_ = json_ + "\"" + it->first + "\"" + ":{";
+            Serialize(json_, it->second);
+            json_ = json_ + "},";
+            it ++;         
+        }
+        removeLastComma(json_);
+        json_ = "{" + name + ":[" + json_ + "]}";
     }
 
     //反序列化
@@ -301,6 +397,34 @@ class FdogSerialize {
     template<typename T>
     void FDesSerialize(T & object_, string & json_){
         DesSerialize(object_, json_);
+    }
+
+    template<typename T>
+    void FDesSerializeV(T & object_, string & json_){
+        for(auto & object_one : object_){
+            
+        }
+    }
+
+    template<typename T>
+    void FDesSerializeL(T & object_, string & json_){
+        for(auto & object_one : object_){
+            
+        }
+    }
+
+    template<typename T>
+    void FDesSerializeM(T & object_, string & json_){
+        for(auto & object_one : object_){
+            
+        }
+    }
+
+    template<typename T>
+    void FDesSerializeS(T & object_, string & json_){
+        for(auto & object_one : object_){
+            
+        }
     }
 
 };

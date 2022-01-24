@@ -56,6 +56,8 @@
 5. 支持vector类型和json互转【完成】
 6. 支持list类型和json互转【完成】
 7. 支持map类型和json互转【完成】
+7. 支持set类型和json互转【完成】
+7. 支持STL和自定义类型多层嵌套【完成】
 5. 支持XML数据格式【未完成】
 
 
@@ -181,7 +183,7 @@ int main()
     stu.age = 22;
     string json_;
     //将value转为json格式数据
-    FdogSerialize::Instance()->FSerialize(json_, value, "stu");   //json值为"{{"name":"花狗Fdog","age":22}}"
+    FdogSerialize::Instance()->FSerialize(json_, value, "stu");   //json值为"{"stu":{"name":"花狗Fdog","age":22}}"
 
     //将json格式数据转为value 需保证json_为正确格式字符串
     FdogSerialize::Instance()->FDesSerialize(value, json_);
@@ -229,8 +231,8 @@ int main()
     sch.stu.age = 22;
     string json_;
     //将value转为json格式数据
-    FdogSerialize::Instance()->FSerialize(json_, value, "stu");   
-    //json值为"{{"schoolName":"fzyz","stu":{"name":"花狗Fdog","age":21}}}"
+    FdogSerialize::Instance()->FSerialize(json_, value, "sch");   
+    //json值为"{"sch":{"schoolName":"fzyz","stu":{"name":"花狗Fdog","age":21}}}"
 
     //将json格式数据转为value 需保证json_为正确格式字符串
     FdogSerialize::Instance()->FDesSerialize(value, json_);
@@ -252,14 +254,14 @@ struct student{
     int age;
 };
 
-//需要在宏Serialize_vector_all定义下添加vector结构体
-#define Serialize_vector_all\
-    Serialize_vector(student)
+//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
+#define Serialize_type_judgment_all\
+    Serialize_type_judgment(student)
 	//依次添加
     
-//需要在宏DesSerialize_vector_all定义下添加vector结构体
-#define DesSerialize_vector_all\
-    DesSerialize_vector(student)
+//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
+#define DesSerialize_type_judgment_all\
+    DesSerialize_type_judgment(student)
 	//依次添加
 
 int main()
@@ -279,11 +281,11 @@ int main()
     
     string json_;
     //将value转为json格式数据
-    FdogSerialize::Instance()->FSerialize(json_, stu, "stu", &stu[0], stu.size());   
+    FdogSerialize::Instance()->FSerializeV(json_, stu, "stu");   
     //json值为"{"stu":[{"name":"花狗Fdog","age":22},{"name":"黑狗Fdog","age":23}]}"
 
     //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerialize(value, json_);
+    FdogSerialize::Instance()->FDesSerializeV(value, json_);
 }
 ```
 
@@ -293,13 +295,101 @@ int main()
 
 #### 6. list类型的序列化
 
-暂无
+```Cpp
+#include "macrodefinition.h" //添加序列化所需头文件
+
+//自定义基础类型结构体
+struct student{
+    char * name;
+    int age;
+};
+
+//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
+#define Serialize_type_judgment_all\
+    Serialize_type_judgment(student)
+	//依次添加
+    
+//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
+#define DesSerialize_type_judgment_all\
+    DesSerialize_type_judgment(student)
+	//依次添加
+
+int main()
+{
+    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
+    list<student> stu;
+    struct stu_1;
+    stu_1.name = "花狗Fdog";
+    stu_1.age = 22;
+    
+    struct stu_2;
+    stu_2.name = "黑狗Fdog";
+    stu_2.age = 23;
+    
+    stu.push_back(stu_1);
+    stu.push_back(stu_2);
+    
+    string json_;
+    //将value转为json格式数据
+    FdogSerialize::Instance()->FSerializeL(json_, stu, "stu");   
+    //json值为"{"stu":[{"name":"花狗Fdog","age":22},{"name":"黑狗Fdog","age":23}]}"
+
+    //将json格式数据转为value 需保证json_为正确格式字符串
+    FdogSerialize::Instance()->FDesSerializeL(value, json_);
+}
+```
+
+
 
 ---
 
 #### 7. map类型的序列化
 
-暂无
+```cpp
+#include "macrodefinition.h" //添加序列化所需头文件
+
+//自定义基础类型结构体
+struct student{
+    char * name;
+    int age;
+};
+
+//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
+#define Serialize_type_judgment_all\
+    Serialize_type_judgment(student)
+	//依次添加
+    
+//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
+#define DesSerialize_type_judgment_all\
+    DesSerialize_type_judgment(student)
+	//依次添加
+
+int main()
+{
+    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
+    vector<student> stu;
+    struct stu_1;
+    stu_1.name = "花狗Fdog";
+    stu_1.age = 22;
+    
+    struct stu_2;
+    stu_2.name = "黑狗Fdog";
+    stu_2.age = 23;
+    
+    stu.push_back(stu_1);
+    stu.push_back(stu_2);
+    
+    string json_;
+    //将value转为json格式数据
+    FdogSerialize::Instance()->FSerializeM(json_, stu, "stu");   
+    //json值为"{"stu":[{"name":"花狗Fdog","age":22},{"name":"黑狗Fdog","age":23}]}"
+
+    //将json格式数据转为value 需保证json_为正确格式字符串
+    FdogSerialize::Instance()->FDesSerializeM(value, json_);
+}
+```
+
+
 
 ---
 
