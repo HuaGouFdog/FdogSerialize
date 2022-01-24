@@ -1,14 +1,13 @@
 #ifndef FDOGSERIALIZE_H
 #define FDOGSERIALIZE_H
 
-#include "fdogserializebase.h"
 #include "behavior.h"
-#include "macrodefinition.h"
+#include "utils.h"
 #include <map>
 #include <vector>
 #include <regex>
 #include <algorithm>
-using namespace fsj;
+#include <mutex>
 
 using namespace std;
 
@@ -77,6 +76,21 @@ enum MemberType{
 };
 
 /***********************************
+*   存储结构体元信息
+*   成员名， 别名， 成员类型, 成员所在偏移量，成员类型位数， 数组大小
+************************************/
+typedef struct MetaInfo{
+    string memberName;
+    string memberAliasName;
+    string memberType;
+    size_t memberOffset;
+    size_t memberTypeSize;                                                         
+    size_t memberArraySize;
+    int memberTypeInt;
+    bool memberIsIgnore;                                                                                                                                                                                           
+}MetaInfo;
+
+/***********************************
 *   存储结构体结构体类型，以及元信息
 ************************************/
 typedef struct ObjectInfo{
@@ -93,6 +107,166 @@ struct memberAttribute {
     string valueType;
     int valueTypeInt; //类型 数值表示
     int ArraySize;
+};
+
+//声明序列化base类
+class FdogSerializeBase {
+    private:
+    static mutex * mutex_base;
+    static FdogSerializeBase * fdogserializebase;
+
+    public:
+    static FdogSerializeBase * Instance();
+
+    template<class T>
+    string getValueByAddress(string valueType, T & object, int offsetValue){
+        if(valueType == "char*"){
+            auto value = *((const char **)((void *)&object + offsetValue));
+            string str_value = value;
+            return aQuotationMark + str_value  + aQuotationMark;
+        }
+        if(valueType == "bool"){
+            auto value = *((bool *)((char *)&object + offsetValue));
+            if(value){
+                return "true";
+            }else{
+                return "false";
+            }
+        }
+        if(valueType == "char"){
+            auto value = *((char *)((void *)&object + offsetValue));
+            return to_string((int)value);
+        }
+        if(valueType == "unsigned char"){
+            auto value = *((char *)((void *)&object + offsetValue));
+            return to_string((unsigned int)value);
+        }
+        if(valueType == "int"){
+            auto value = *((int *)((char *)&object + offsetValue));
+            return to_string(value);
+        }
+        if(valueType == "unsigned int"){
+            auto value = *((unsigned int *)((char *)&object + offsetValue));
+            return to_string(value);
+        }
+        if(valueType == "short"){
+            auto value = *((short int *)((char *)&object + offsetValue));
+            return to_string(value);
+        }
+        if(valueType == "unsigned short"){
+            auto value = *((unsigned short int *)((char *)&object + offsetValue));
+            return to_string(value);
+        }
+        if(valueType == "long"){
+            auto value = *((long int *)((char *)&object + offsetValue));
+            return to_string(value);
+        }
+        if(valueType == "unsigned long"){
+            auto value = *((unsigned long int *)((char *)&object + offsetValue));
+            return to_string(value);
+        }
+        if(valueType == "long long"){
+            auto value = *((long long int *)((char *)&object + offsetValue));
+            return to_string(value);
+        }
+        if(valueType == "unsigned long long"){
+            auto value = *((unsigned long long int *)((char *)&object + offsetValue));
+            return to_string(value);
+        }        
+        if(valueType == "float"){
+            auto value = *((float *)((char *)&object + offsetValue));
+            return removeLastZero(value);
+        }
+        if(valueType == "double"){
+            auto value = *((double *)((char *)&object + offsetValue));
+            return removeLastZero(value);
+        }
+        if(valueType == "long double"){
+            auto value = *((long double *)((char *)&object + offsetValue));
+            return removeLastZero(value);
+        }
+        return "";
+    }
+
+    template<class T>
+    void setValueByAddress(string valueType, T &object, int offsetValue, string value){
+        if(valueType == "char*"){
+            *((char **)((void *)&object + offsetValue)) = new char[strlen(value.c_str())];
+            strcpy(*((char **)((void *)&object + offsetValue)), value.c_str());
+        }
+        std::stringstream ss;
+        ss.str(value);
+        //好像需要清理缓存
+        if(valueType == "bool"){
+            ss >> *((bool *)((void *)&object + offsetValue));
+        }
+        if(valueType == "char"){
+            //可能溢出
+            ss >> *((char *)((void *)&object + offsetValue));
+        }
+        if(valueType == "unsigned char"){
+            //可能溢出
+            ss >> *((unsigned char *)((void *)&object + offsetValue));
+        }
+        if(valueType == "int"){
+            ss >> *((int *)((char *)&object + offsetValue));
+        }
+        if(valueType == "unsigned int"){
+            ss >> *((unsigned int *)((char *)&object + offsetValue));
+        }
+        if(valueType == "short"){
+            ss >> *((short int *)((char *)&object + offsetValue));
+        }
+        if(valueType == "unsigned short"){
+            ss >> *((unsigned short int *)((char *)&object + offsetValue));
+        }
+        if(valueType == "long"){
+            ss >> *((long int *)((char *)&object + offsetValue));
+        }
+        if(valueType == "unsigned long"){
+            ss >> *((unsigned long int *)((char *)&object + offsetValue));
+        }
+        if(valueType == "long long"){
+            ss >> *((long long int *)((char *)&object + offsetValue));
+        }
+        if(valueType == "unsigned long long"){
+            ss >> *((unsigned long long  int *)((char *)&object + offsetValue));
+        }  
+        if(valueType == "float"){
+            ss >> *((float *)((char *)&object + offsetValue));
+        }
+        if(valueType == "double"){
+            ss >> *((double *)((char *)&object + offsetValue));
+        }
+        if(valueType == "long double"){
+            ss >> *((long double *)((char *)&object + offsetValue));
+        }
+    }
+
+    // //基础类型转json
+    template<class T>
+    void BaseToJson(string & json_, MetaInfo * metainfoobject, T & object_){
+        string value = getValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset);
+        if(metainfoobject->memberAliasName != ""){
+            json_ = json_ + "\"" + metainfoobject->memberAliasName + "\"" + ":" + value + ",";
+        }else{
+            json_ = json_ + "\"" + metainfoobject->memberName + "\"" + ":" + value + ",";
+        }
+    }
+
+    // //基础类型转json
+    template<class T>
+    void BaseToJsonA(string & json_, MetaInfo * metainfoobject, T & object_){
+        string value = getValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset);
+        json_ = json_ + value + ",";
+    }    
+
+    // //json转基础类型
+    template<class T>
+    void JsonToBase(T & object_, MetaInfo * metainfoobject, string json_){
+        //cout << "进入JsonToBase" << "json_:" << json_ << "metainfoobject->memberName:" << metainfoobject->memberName << endl;
+        setValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset, json_);
+    }
 };
 
 class FdogSerialize {
@@ -430,5 +604,112 @@ class FdogSerialize {
 };
 
 void * getInstance();
+
+#define NAME(x) #x
+
+#define NAME_ARRAY(x) #x"_array"
+
+#define NAMESPLIT(x) fdog_##x
+
+#define FUNCNAME(x) get##x
+
+#define ARG_N(...) \
+    ARG_N_(0, ##__VA_ARGS__, ARG_N_RESQ()) 
+
+#define ARG_N_(...) \
+    ARG_N_M(__VA_ARGS__)
+
+#define ARG_N_M(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9,_10, _11, _12, _13, _14, _15, _16, _17, _18, _19,_20, N,...) N
+
+#define ARG_N_RESQ() 20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
+
+#define MEMBERTYPE(TYPE, MEMBER) FdogSerialize::Instance()->getMemberAttribute(abi::__cxa_demangle(typeid(((TYPE *)0)->MEMBER).name(),0,0,0))
+
+#define PLACEHOLDER(placeholder, ...) placeholder
+
+#define REGISTEREDMEMBER(TYPE, ...) \
+do{ \
+    ObjectInfo * objectinfo_one = new ObjectInfo();\
+    objectinfo_one->objectType = NAME(TYPE);\
+    objectinfo_one->objectTypeInt = FdogSerialize::Instance()->getObjectTypeInt(objectinfo_one->objectType, abi::__cxa_demangle(typeid(TYPE).name(),0,0,0));\
+    objectinfo_one->objectSize = sizeof(TYPE);\
+    FdogSerialize::Instance()->addObjectInfo(objectinfo_one);\
+    REGISTEREDMEMBER_s_1(TYPE, PLACEHOLDER(__VA_ARGS__), objectinfo_one->metaInfoObjectList, ARG_N(__VA_ARGS__) - 1, ##__VA_ARGS__, PLACEHOLDER(__VA_ARGS__));\
+}while(0);
+
+#define REGISTEREDMEMBER_s_1(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_2(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_2(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_3(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_3(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_4(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_4(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_5(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_5(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_6(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_6(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_7(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_7(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_8(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_8(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_9(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_9(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_10(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_10(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_11(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_11(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_12(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_12(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_13(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_13(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_14(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_14(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_15(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_15(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_16(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_16(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_17(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_17(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_18(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_18(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_19(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_19(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_20(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_20(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
+
+#define REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg) \
+    do{\
+        MetaInfo * metainfo_one = new MetaInfo();\
+        metainfo_one->memberName = NAME(arg);\
+        metainfo_one->memberAliasName = "";\
+        metainfo_one->memberOffset = offsetof(TYPE, arg);\
+        memberAttribute resReturn = MEMBERTYPE(TYPE, arg);\
+        metainfo_one->memberType = resReturn.valueType;\
+        metainfo_one->memberTypeSize = sizeof(TYPE);\
+        metainfo_one->memberArraySize = resReturn.ArraySize;\
+        metainfo_one->memberTypeInt = resReturn.valueTypeInt;\
+        metainfo_one->memberIsIgnore = false;\
+        metaInfoObjectList.push_back(metainfo_one);\
+    }while(0);
 
 #endif
