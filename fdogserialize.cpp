@@ -1,5 +1,18 @@
 #include "fdogserialize.h"
 
+FdogSerializeBase * FdogSerializeBase::fdogserializebase = nullptr;
+mutex * FdogSerializeBase::mutex_base = new(mutex);
+
+FdogSerializeBase * FdogSerializeBase::Instance(){
+    mutex_base->lock();
+    if(fdogserializebase == nullptr){
+        fdogserializebase = new FdogSerializeBase();
+    }
+    mutex_base->unlock();
+    return fdogserializebase;
+}
+
+
 FdogSerialize * FdogSerialize::fdogserialize = nullptr;
 mutex * FdogSerialize::mutex_serialize = new(mutex);
 
