@@ -210,6 +210,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
 }
 
 int FdogSerialize::getObjectTypeInt(string objectName, string typeName){
+    cout << objectName << "--" << typeName << endl;
     if(FdogSerialize::Instance()->isBaseType(typeName)){
         return OBJECT_BASE;
     }
@@ -250,6 +251,10 @@ ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt
         }
         break;        
     case OBJECT_MAP:
+        if(regex_search(typeName, result, pattern)){
+            string value = result.str(1).c_str();
+            return getObjectInfo(value);
+        }
         break;
     case OBJECT_ARRAY:
         break;
