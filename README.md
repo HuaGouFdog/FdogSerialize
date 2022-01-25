@@ -117,6 +117,24 @@ struct school{
 
 ### 示例说明
 
+序列化和反序列化各提供两个函数
+
+| 序列化调用函数                                             | 说明                                 |
+| ---------------------------------------------------------- | ------------------------------------ |
+| FSerialize(string & json_, T & object_, string name = "")  | 基础类型及结构体类型调用             |
+| FSerializeA(string & json_, T & object_, string name = "") | 数组，vector，list，set，map类型调用 |
+
+| 反序列化调用函数                                            | 说明                                 |
+| ----------------------------------------------------------- | ------------------------------------ |
+| FSerialize( T & object_, string & json_, string name = "")  | 基础类型及结构体类型调用             |
+| FSerializeA( T & object_, string & json_, string name = "") | 数组，vector，list，set，map类型调用 |
+
+| 杂项函数支持   | 说明 |
+| -------------- | ---- |
+| setAliasName   |      |
+| setIgnoreField |      |
+|                |      |
+
 
 
 #### 1. 基础类型序列化

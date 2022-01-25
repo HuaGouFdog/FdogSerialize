@@ -1,6 +1,5 @@
 #include <iostream>
-#include "macrodefinition.h"
-//#include "fdogserialize.h"
+#include "fdogserialize.h"
 #include <typeinfo>
 #include <iostream>
 #include <list>
@@ -11,9 +10,9 @@ struct cool {
     school fdog;
 };
 void FdogSerializeInit(){
-    REGISTEREDMEMBER(student, name, age);
-    REGISTEREDMEMBER(school, name, age, stu);
-    REGISTEREDMEMBER(cool, age, fdog);
+    // REGISTEREDMEMBER(student, name, age);
+    // REGISTEREDMEMBER(school, name, age, stu);
+    // REGISTEREDMEMBER(cool, age, fdog);
 }
 
 
@@ -38,18 +37,22 @@ int main()
     // cout << sch.age << "--" << sch.fdog.age << "--" << sch.fdog.name << "--"  << sch.fdog.stu.age << "--"  << sch.fdog.stu.name << endl;
     int a2 = 10;
     //cout << *(int *)( + (sizeof(int) * 0));
-
+    int a3[5]={1,2,3,4,5};
+    FdogSerialize::Instance()->FSerializeA(json_2, a3);
+    cout << json_2 << endl;
     //FdogSerialize::Instance()->FSerialize(json_2, a, &a[0], a.size(), "a");
     //FdogSerialize::Instance()->FSerialize(json_2, a2);
-    FdogSerialize::Instance()->FSerializeM(json_2, mapstu, "mapstu");
-    //FdogSerialize::Instance()->FSerialize(json_2, *(int *)((void *)&a[0] + (sizeof(int) * 0)));
-    //vector list
-    //map
-    cout << json_2 << endl;
-    //cout << &a << "---" << &a[0] << "---" << &a[1] << "---" << &a[2] << "---" << &a[3] << "---" << &a[4] << endl;
-    // vector<int> a;
-    // cout << sizeof(a)<< endl;
-    //cout << FdogSerialize::Instance()->isStructType("school", abi::__cxa_demangle(typeid(sch).name(),0,0,0)) << endl;
+    // time_t begin,end;
+    // double ret;
+    // begin=clock();
+    // for(int i = 0; i< 100000; i++){
+    //     json_2 = "";
+    //     FdogSerialize::Instance()->FSerializeM(json_2, mapstu, "mapstu");
+    //     cout << json_2 << endl;
+    // }
+    // end=clock();
+    // ret=double(end-begin)/CLOCKS_PER_SEC;
+    // cout<<"runtime:   "<<ret<<endl;
     return 0;
 }
 //先找vrctor map list三个关键字
