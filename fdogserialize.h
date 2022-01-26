@@ -65,15 +65,6 @@ enum ObjectType{
     OBJECT_MAP,
     OBJECT_LIST,
 };
-enum MemberType{
-    MEMBER_BASE = 1,
-    MEMBER_STRUCT,
-    MEMBER_CLASS,
-    MEMBER_ARRAY,
-    MEMBER_VECTOR,
-    MEMBER_MAP,
-    MEMBER_LIST,
-};
 
 /***********************************
 *   存储结构体元信息
@@ -87,7 +78,8 @@ typedef struct MetaInfo{
     size_t memberTypeSize;                                                         
     size_t memberArraySize;
     int memberTypeInt;
-    bool memberIsIgnore;                                                                                                                                                                                           
+    bool memberIsIgnore;
+    bool memberIsIgnoreLU;                                                                                                                                                                                 
 }MetaInfo;
 
 /***********************************
@@ -264,7 +256,6 @@ class FdogSerializeBase {
     // //json转基础类型
     template<class T>
     void JsonToBase(T & object_, MetaInfo * metainfoobject, string json_){
-        //cout << "进入JsonToBase" << "json_:" << json_ << "metainfoobject->memberName:" << metainfoobject->memberName << endl;
         setValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset, json_);
     }
 };
@@ -294,10 +285,12 @@ class FdogSerialize {
     MetaInfo * getMetaInfo(string TypeName);
 
     //设置别名
-    void setAliasName(string Type, string Name, string AliasName);
+    void setAliasName(string Type, string memberName, string AliasName);
 
     //设置是否忽略该字段序列化
-    void setIgnoreField(string Type, string Name);
+    void setIgnoreField(string Type, string memberName);
+
+    void setIgnoreLU(string Type, string memberName);
 
     //一次性设置多个别名
     template<class T, class ...Args>
@@ -306,6 +299,9 @@ class FdogSerialize {
     //一次性设置忽略多个字段序列化
     template<class T, class ...Args>
     void setIgnoreField();
+
+    template<class T, class ...Args>
+    void setIgnoreLU();
 
     //获取成员属性
     memberAttribute getMemberAttribute(string key);
@@ -340,8 +336,6 @@ class FdogSerialize {
     //解析数组
     vector<string> CuttingArray(string data);
 
-    //根据复合类型获取struct
-
     //序列化
     template<typename T>
     void Serialize(string & json_, T & object_, string name = ""){
@@ -357,29 +351,26 @@ class FdogSerialize {
         int sum = objectinfo.metaInfoObjectList.size();
         int i = 1;
         //获取到的objectType才是真正的类型，根据这个类型进行操作
-        cout << "objectinfo:" << objectinfo.objectType <<" objectType:" << objectType << endl; 
         switch(objectType){
             case OBJECT_BASE:
                 {
-                    //从这里走的都是数组类型的数据，不需要一个一个等于
-                    //cout << "begin base---" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl;
                     MetaInfo * metainfo1 = getMetaInfo(abi::__cxa_demangle(typeid(object_).name(),0,0,0));
                     FdogSerializeBase::Instance()->BaseToJsonA(json_, metainfo1, object_);
-                    //removeLastComma(json_);
                 }
                 break;
             case OBJECT_STRUCT:
                 {
                     for(auto metainfoObject : objectinfo.metaInfoObjectList){
-                        
                         string json_s;
-                        if(metainfoObject->memberTypeInt == MEMBER_BASE){
+                        if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
                             FdogSerializeBase::Instance()->BaseToJson(json_s, metainfoObject, object_);
                             json_ = json_ + json_s;
                         }
                         Serialize_type_judgment_all;
                         if(i == sum){
-                            removeLastComma(json_);
+                            if(json_.length() > 0){
+                                removeLastComma(json_);
+                            }
                         }
                         json_s = "";
                         i++;
@@ -398,72 +389,36 @@ class FdogSerialize {
 
     template<typename T>
     void FSerializeA(string & json_, T & object_, string name = ""){
-        cout << "A类型：" << typeid(T).name() << endl;
         for(auto & object_one : object_){
-            json_ = json_ + "{";
+            //加不加花括号根据类型来决定
+            //json_ = json_ + "{";
             Serialize(json_, object_one);
-            json_ = json_ + "},";
+            //json_ = json_ + "},";
+        }
+        if(json_.length() > 0){
+            removeLastComma(json_);
+        }
+        json_ = "{" + name + ":[" + json_ + "]}";
+    }
+
+        template<typename T>
+    void FSerializeS(string & json_, T & object_, string name = ""){
+        typename T::iterator it;
+        it = object_.begin();
+
+        while(it != object_.end())
+        {
+            json_ = json_ + "\"" + it->first + "\"" + ":";
+            Serialize(json_, it->second);
+            it ++;         
         }
         removeLastComma(json_);
         json_ = "{" + name + ":[" + json_ + "]}";
     }
 
-    // //基于基础类型 for range最快
-    // template<typename T>
-    // void FSerializeV(string & json_, T & object_, string name = ""){
-    //     for(auto & object_one : object_){
-    //         json_ = json_ + "{";
-    //         Serialize(json_, object_one);
-    //         json_ = json_ + "},";
-    //     }
-    //     removeLastComma(json_);
-    //     json_ = "{" + name + ":[" + json_ + "]}";
-    // }
-
-    // template<typename T>
-    // void FSerializeL(string & json_, T & object_, string name = ""){
-    //     for(auto & object_one : object_){
-    //         //这里需要对类型做
-    //         json_ = json_ + "{";
-    //         Serialize(json_, object_one);
-    //         json_ = json_ + "},";
-    //     }
-    //     removeLastComma(json_);
-    //     json_ = "{" + name + ":[" + json_ + "]}";
-    // }
-
-    // template<typename T>
-    // void FSerializeS(string & json_, T & object_, string name = ""){
-    //     for(auto & object_one : object_){
-    //         json_ = json_ + "{";
-    //         Serialize(json_, object_one);
-    //         json_ = json_ + "},";
-    //     }
-    //     removeLastComma(json_);
-    //     json_ = "{" + name + ":[" + json_ + "]}";
-    // }
-
-    // template<typename T>
-    // void FSerializeM(string & json_, T & object_, string name = ""){
-    //     typename T::iterator it;
-
-    //     it = object_.begin();
-
-    //     while(it != object_.end())
-    //     {
-    //         json_ = json_ + "\"" + it->first + "\"" + ":{";
-    //         Serialize(json_, it->second);
-    //         json_ = json_ + "},";
-    //         it ++;         
-    //     }
-    //     removeLastComma(json_);
-    //     json_ = "{" + name + ":[" + json_ + "]}";
-    // }
-
     //反序列化
     template<typename T>
     void DesSerialize(T & object_, string & json_){
-        //cout << "地址：--" << &object_ << endl;
         ObjectInfo & objectinfo = FdogSerialize::Instance()->getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
         int objectType = getObjectTypeInt(objectinfo.objectType, abi::__cxa_demangle(typeid(T).name(),0,0,0));
         for(auto metainfoObject : objectinfo.metaInfoObjectList){
@@ -486,7 +441,7 @@ class FdogSerialize {
             regex pattern(regex_key + ":" +regex_value);
             if(regex_search(json_, result, pattern)){
                 string value = result.str(2).c_str();
-                if(metainfoObject->memberTypeInt == MEMBER_BASE){
+                if(metainfoObject->memberTypeInt == OBJECT_BASE){
                     cout << "类型：" << metainfoObject->memberType << endl;
                     FdogSerializeBase::Instance()->JsonToBase(object_, metainfoObject, value);
                 }
@@ -501,28 +456,7 @@ class FdogSerialize {
     }
 
     template<typename T>
-    void FDesSerializeV(T & object_, string & json_){
-        for(auto & object_one : object_){
-            
-        }
-    }
-
-    template<typename T>
-    void FDesSerializeL(T & object_, string & json_){
-        for(auto & object_one : object_){
-            
-        }
-    }
-
-    template<typename T>
-    void FDesSerializeM(T & object_, string & json_){
-        for(auto & object_one : object_){
-            
-        }
-    }
-
-    template<typename T>
-    void FDesSerializeS(T & object_, string & json_){
+    void FDesSerializeA(T & object_, string & json_){
         for(auto & object_one : object_){
             
         }
@@ -636,6 +570,7 @@ REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
         metainfo_one->memberArraySize = resReturn.ArraySize;\
         metainfo_one->memberTypeInt = resReturn.valueTypeInt;\
         metainfo_one->memberIsIgnore = false;\
+        metainfo_one->memberIsIgnoreLU = false;\
         metaInfoObjectList.push_back(metainfo_one);\
     }while(0);
 
