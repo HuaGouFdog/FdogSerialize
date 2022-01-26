@@ -87,16 +87,12 @@ FdogSerialize * FdogSerialize::Instance(){
 }
 
 void FdogSerialize::addObjectInfo(ObjectInfo * objectinfo){
-    //cout << "addObjectInfo-----"  << &objectinfo << endl;
     this->objectInfoList.push_back(objectinfo);
 }
 
 ObjectInfo & FdogSerialize::getObjectInfo(string objectName){
-    //removeNumbers(objectName);
     for(auto objectinfo : FdogSerialize::Instance()->objectInfoList){
-        //cout << "getObjectInfo:" << objectName << "---" << &objectinfo << "--" << objectinfo->objectType<< endl;
         if(objectinfo->objectType == objectName){
-            //cout << "找到" << endl;
             return *objectinfo;
         }
     }
@@ -111,22 +107,31 @@ MetaInfo * FdogSerialize::getMetaInfo(string TypeName){
     }
 }
 
-
-void FdogSerialize::setAliasName(string type, string name, string aliasName){
+void FdogSerialize::setAliasName(string type, string memberName, string aliasName){
     ObjectInfo & objectinfo = this->getObjectInfo(type);
     for(auto metainfoObject : objectinfo.metaInfoObjectList){
-        if(metainfoObject->memberName == name){
+        if(metainfoObject->memberName == memberName){
             metainfoObject->memberAliasName = aliasName;
             break;
         }
     }
 }
 
-void FdogSerialize::setIgnoreField(string Type, string Name){
+void FdogSerialize::setIgnoreField(string Type, string memberName){
     ObjectInfo & objectinfo = this->getObjectInfo(Type);
     for(auto metainfoObject : objectinfo.metaInfoObjectList){
-        if(metainfoObject->memberName == Name){
+        if(metainfoObject->memberName == memberName){
             metainfoObject->memberIsIgnore = true;
+            break;
+        }
+    }
+}
+
+void FdogSerialize::setIgnoreLU(string Type, string memberName){
+    ObjectInfo & objectinfo = this->getObjectInfo(Type);
+    for(auto metainfoObject : objectinfo.metaInfoObjectList){
+        if(metainfoObject->memberName == memberName){
+            metainfoObject->memberIsIgnoreLU = true;
             break;
         }
     }
@@ -141,76 +146,40 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
     if(FdogSerialize::isBaseType(typeName)){
         resReturn.valueType = typeName;
         resReturn.ArraySize = 0;
-        resReturn.valueTypeInt = MEMBER_BASE;
+        resReturn.valueTypeInt = OBJECT_BASE;
     }
     else if(FdogSerialize::isVectorType("", typeName)){
-        ObjectInfo objectinfo = getObjectInfoByType(typeName, MEMBER_VECTOR);  
+        ObjectInfo objectinfo = getObjectInfoByType(typeName, OBJECT_VECTOR);  
         resReturn.valueType = objectinfo.objectType;
         resReturn.ArraySize = 0;
-        resReturn.valueTypeInt = MEMBER_VECTOR;
+        resReturn.valueTypeInt = OBJECT_VECTOR;
     }
     else if(FdogSerialize::isListType("", typeName)){
-        ObjectInfo objectinfo = getObjectInfoByType(typeName, MEMBER_LIST);  
+        ObjectInfo objectinfo = getObjectInfoByType(typeName, OBJECT_LIST);  
         resReturn.valueType = objectinfo.objectType;
         resReturn.ArraySize = 0;
-        resReturn.valueTypeInt = MEMBER_LIST;
+        resReturn.valueTypeInt = OBJECT_LIST;
     }
     else if(FdogSerialize::isMapType("", typeName)){
-        ObjectInfo objectinfo = getObjectInfoByType(typeName, MEMBER_MAP);  
+        ObjectInfo objectinfo = getObjectInfoByType(typeName, OBJECT_MAP);  
         resReturn.valueType = objectinfo.objectType;
         resReturn.ArraySize = 0;
-        resReturn.valueTypeInt = MEMBER_MAP;
+        resReturn.valueTypeInt = OBJECT_MAP;
     }
     else if(FdogSerialize::isArrayType("", typeName)){
-        ObjectInfo objectinfo = getObjectInfoByType(typeName, MEMBER_ARRAY);  
+        ObjectInfo objectinfo = getObjectInfoByType(typeName, OBJECT_ARRAY);  
         resReturn.valueType = objectinfo.objectType;
         resReturn.ArraySize = 0;
-        resReturn.valueTypeInt = MEMBER_ARRAY;
+        resReturn.valueTypeInt = OBJECT_ARRAY;
     }else{
         resReturn.valueType = typeName;
         resReturn.ArraySize = 0;
-        resReturn.valueTypeInt = MEMBER_STRUCT;
+        resReturn.valueTypeInt = OBJECT_STRUCT;
     }
-    // if(baseType.count(typeName) != 0){
-    //     resReturn.valueType = baseType[typeName];  
-    //     resReturn.ArraySize = 0;
-    //     resReturn.valueTypeInt = MEMBER_BASE;
-    //     return resReturn;
-    // } else if (basePointerType.count(typeName) != 0){
-    //     resReturn.valueType = basePointerType[typeName];
-    //     resReturn.ArraySize = 0;
-    //     resReturn.valueTypeInt = MEMBER_BASE;
-    // } else {
-    //     smatch result;
-    //     regex pattern(patternArray);
-    //     if(regex_search(typeName, result, pattern)){
-    //         string typeName_ = result.str(2) + result.str(4);
-    //         if(baseArrayType.count(typeName_) != 0){
-    //             resReturn.valueType = baseArrayType[typeName_];
-    //         } else {
-    //             objectArrayType[typeName_] = result.str(4) + "_array";
-    //             resReturn.valueType = objectArrayType[typeName_];
-    //         }
-    //         resReturn.ArraySize = atoi(result.str(3).data());
-    //         resReturn.valueTypeInt = MEMBER_ARRAY;
-    //         return resReturn;
-    //     } else {
-    //         smatch result;
-    //         regex pattern(patternObject);
-    //         if(regex_search(typeName, result, pattern)){
-    //             string str = result.str(2) + " " + result.str(3);
-    //             resReturn.valueType = result.str(3);
-    //             resReturn.ArraySize = atoi(result.str(3).data());
-    //             resReturn.valueTypeInt = MEMBER_STRUCT;
-    //             return resReturn;
-    //         }
-    //     }
-    // }
     return resReturn;
 }
 
 int FdogSerialize::getObjectTypeInt(string objectName, string typeName){
-    cout << objectName << "--" << typeName << endl;
     if(FdogSerialize::Instance()->isBaseType(typeName)){
         return OBJECT_BASE;
     }

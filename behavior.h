@@ -4,13 +4,13 @@
 #define TYPE_NAME(name) #name
 
 #define Serialize_type_judgment(TYPE)\
-    if(metainfoObject->memberType == TYPE_NAME(TYPE)){\
+    if(metainfoObject->memberType == TYPE_NAME(TYPE) && metainfoObject->memberIsIgnore != true){\
         Serialize(json_s, *(TYPE *)((void *)&object_ + metainfoObject->memberOffset));\
         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";\
     }
 
 #define DesSerialize_type_judgment(TYPE)\
-    if(metainfoObject->memberType == TYPE_NAME(TYPE)){\
+    if(metainfoObject->memberType == TYPE_NAME(TYPE) && metainfoObject->memberIsIgnore != true){\
         DesSerialize(*((TYPE *)((void *)&object_ + metainfoObject->memberOffset)), value);\
     }
 
