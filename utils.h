@@ -4,7 +4,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <cxxabi.h>
 using namespace std;
 
 const string comma = ",";
@@ -26,33 +25,35 @@ struct school{
     student stu;
 };
 
+//测试数据
 
-/***********************************
-*   删除字符串第一个字符
-************************************/
-void removeFirstComma(string & return_);
+//基础类型
 
-// /***********************************
-// *   删除字符串最后一个字符
-// ************************************/
-void removeLastComma(string & return_);
+int baseInt = 10;
 
-// /***********************************
-// *   删除浮点数后面多余的0
-// ************************************/
-template<class T>
-string removeLastZero(T & return_){
-    std::ostringstream oss; 
-    oss << return_;
-    return oss.str();
-}
+//基础数组类型
+int baseArray[5] = { 1,2,3,4,5 };
 
-// /***********************************
-// *   删除字符串的数字 这个有一些问题，名字中不能包含数字，要改
-// ************************************/
-void removeNumbers(string & return_);
+//结构体
 
-//根据参数生成数据
+struct baseObject {
+	char * name;
+	int age;
+};
+
+baseObject bo = {"张旭"}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #endif

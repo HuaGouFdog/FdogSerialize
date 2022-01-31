@@ -35,8 +35,18 @@ FdogSerialize::FdogSerialize(){
     this->baseInfoList.push_back(metainfo);
 
     metainfo = new MetaInfo();
+    metainfo->memberType = "unsigned char";
+    metainfo->memberTypeSize = sizeof(unsigned char);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
     metainfo->memberType = "int";
     metainfo->memberTypeSize = sizeof(int);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
+    metainfo->memberType = "unsigned int";
+    metainfo->memberTypeSize = sizeof(unsigned int);
     this->baseInfoList.push_back(metainfo);
 
     metainfo = new MetaInfo();
@@ -45,13 +55,28 @@ FdogSerialize::FdogSerialize(){
     this->baseInfoList.push_back(metainfo);
 
     metainfo = new MetaInfo();
+    metainfo->memberType = "unsigned short";
+    metainfo->memberTypeSize = sizeof(unsigned short);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
     metainfo->memberType = "long";
     metainfo->memberTypeSize = sizeof(long);
     this->baseInfoList.push_back(metainfo);
 
     metainfo = new MetaInfo();
+    metainfo->memberType = "unsigned long";
+    metainfo->memberTypeSize = sizeof(unsigned long);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
     metainfo->memberType = "long long";
     metainfo->memberTypeSize = sizeof(long long);
+    this->baseInfoList.push_back(metainfo);
+
+    metainfo = new MetaInfo();
+    metainfo->memberType = "unsigned long long";
+    metainfo->memberTypeSize = sizeof(unsigned long long);
     this->baseInfoList.push_back(metainfo);
 
     metainfo = new MetaInfo();
@@ -135,6 +160,10 @@ void FdogSerialize::setIgnoreLU(string Type, string memberName){
             break;
         }
     }
+}
+
+void FdogSerialize::setFuzzy(string Type, string memberName) {
+
 }
 
 /***********************************
@@ -288,23 +317,47 @@ bool FdogSerialize::isArrayType(string objectName, string typeName){
     return false;
 }
 
-vector<string> FdogSerialize::CuttingArray(string data){
-    //[{{}},{},{}]
-    //第一步：查找第一个{     并计数
-    //再找第二个，如果期间有{ 继续计数
-    //直到知道}并且计数要对应 作为第一组
-    // int sumL = 0; //记录左
-    // int sumR = 0; //记录右
-    // int sum = 0;
-    // while(1){
-    //     int tag = data.find("{", sum);
-    //     if(tag != data.npos){
-    //         sumL = sumL + 1；
-    //         sum = tag;
+void FdogSerialize::removeFirstComma(string & return_){
+    return_ = return_.substr(1);
+}
 
-    //     }
-    //     break;
-    // }
-    vector<string> a;
-    return a;
+void FdogSerialize::removeLastComma(string & return_){
+    return_.pop_back();
+}
+
+void FdogSerialize::removeNumbers(string & return_){
+    string::iterator it = return_.begin();
+    while (it != return_.end()) {
+        if ((*it >= '0') && (*it <= '9')) {
+            it = return_.erase(it);
+        } else {
+            it++;
+        }
+    }
+}
+
+vector<string> FdogSerialize::CuttingArray(string data){
+    //[{{},{}},{},{}]
+    int sum = 0;
+    int first = 0;
+    int end = 0;
+    vector<string> StrArray;
+    for(int i=0; i<= data.length(); i++){
+        //一个一个遍历
+        if(data[i] == '{'){
+            sum++;
+            first = i;
+        }
+        if(data[i]) == '}'){
+            sum--;
+            if(sum == 0){
+                //归零
+                end = i;
+                //将这个放入vector
+                string da = data.substr(first,end);
+                StrArray.push_back(da);
+            }
+        }
+    }
+    return StrArray;
 }

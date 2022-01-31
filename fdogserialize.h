@@ -2,13 +2,21 @@
 #define FDOGSERIALIZE_H
 
 #include "behavior.h"
+//在此添加用到的类型头文件
 #include "utils.h"
 #include <map>
 #include <vector>
 #include <regex>
 #include <algorithm>
 #include <mutex>
+#include <sstream>
+#include <string>
 
+#ifdef __linux__
+#include <cxxabi.h>
+#elif _WIN32
+#include <string>
+#endif
 using namespace std;
 
 static vector<string> baseType1 = {
@@ -18,28 +26,28 @@ static vector<string> baseType1 = {
         "short", "unsigned short", "short*", "unsigned short*",
         "long", "unsigned long int", "long*", "unsigned long*",
         "long long", "unsigned long long", "long long*", "unsigned long long*",
-        "float", "double", "long double"
+        "float", "double", "long double", "float*", "double*", "long double*"
 };
 
-//有符号类型应该拥有正负号，正号忽视
+//有符号类型应该拥有正负号，正号忽视 ^(-|+)? 匹配负号
 static map<string, string> baseRegex = {
-            {"bool", "(\\d+)"},
-            {"char", "(\\d+)"}, {"unsigned char", "(\\d+)"}, 
-            {"int", "(\\d+)"}, {"unsigned int", "(\\d+)"},
-            {"short", "(\\d+)"}, {"unsigned short", "(\\d+)"}, 
-            {"long", "(\\d+)"}, {"unsigned long", "(\\d+)"}, 
-            {"float", "(\\d+.\\d+)"}, 
-            {"double", "(\\d+.\\d+)"},
-            {"long double", "(\\d+.\\d+)"},
-            {"char*", "\"(.*?)\""},
-            //{"int_array", "(\\[(.*?)\\])"},
+        {"bool", "(\\d+)"},
+        {"float", "(\\d+.\\d+)"}, 
+        {"double", "(\\d+.\\d+)"},
+        {"long double", "(\\d+.\\d+)"},
+        {"char*", "\"(.*?)\""},
+        {"char", "(\\d+)"}, {"unsigned char", "(\\d+)"}, 
+        {"int", "(\\d+)"}, {"unsigned int", "(\\d+)"},
+        {"short", "(\\d+)"}, {"unsigned short", "(\\d+)"}, 
+        {"long", "(\\d+)"}, {"unsigned long", "(\\d+)"},
+        {"long long", "(\\d+)"}, {"unsigned long long", "(\\d+)"}, 
 };
 
 static map<int, string> complexRegex = {
     {5, "std::vector<(.*?),"},
     {6, "std::map<(.*?),(.*?),"},
     {7, "std::__cxx11::list<(.*?),"},
-    {4, ""},
+    {8, "匹配set"},
 };
 
 
@@ -290,7 +298,12 @@ class FdogSerialize {
     //设置是否忽略该字段序列化
     void setIgnoreField(string Type, string memberName);
 
+	//设置是否忽略大小写
     void setIgnoreLU(string Type, string memberName);
+
+	//设置进行模糊转换 结构体转json不存在这个问题主要是针对json转结构体的问题，如果存在分歧，可以尝试进行模糊转换
+	void setFuzzy(string Type, string memberName);
+
 
     //一次性设置多个别名
     template<class T, class ...Args>
@@ -300,8 +313,21 @@ class FdogSerialize {
     template<class T, class ...Args>
     void setIgnoreField();
 
+    void removeFirstComma(string & return_);
+
+    void removeLastComma(string & return_);
+
+    void removeNumbers(string & return_);
+
     template<class T, class ...Args>
     void setIgnoreLU();
+
+    template<class T>
+    string removeLastZero(T & return_){
+        std::ostringstream oss; 
+        oss << return_;
+        return oss.str();
+    }
 
     //获取成员属性
     memberAttribute getMemberAttribute(string key);
@@ -401,8 +427,8 @@ class FdogSerialize {
         json_ = "{" + name + ":[" + json_ + "]}";
     }
 
-        template<typename T>
-    void FSerializeS(string & json_, T & object_, string name = ""){
+    template<typename T>
+    void FSerializeM(string & json_, T & object_, string name = ""){
         typename T::iterator it;
         it = object_.begin();
 
@@ -434,12 +460,15 @@ class FdogSerialize {
                 if(objectType == OBJECT_ARRAY){
                     regex_value = arrayRegex;
                 }
-                if(objectType == OBJECT_ARRAY){
-                    regex_value = arrayRegex;
-                }
             }
-            regex pattern(regex_key + ":" +regex_value);
-            if(regex_search(json_, result, pattern)){
+            //根据大小写判断
+            regex * pattern = nullptr;
+            if (metainfoObject->memberIsIgnoreLU == false){
+                pattern = new regex(regex_key + ":" +regex_value);
+            }else{
+                pattern = new regex(regex_key + ":" +regex_value,regex::icase);//icase用于忽略大小写
+            }
+            if(regex_search(json_, result, *pattern)){
                 string value = result.str(2).c_str();
                 if(metainfoObject->memberTypeInt == OBJECT_BASE){
                     cout << "类型：" << metainfoObject->memberType << endl;
@@ -450,17 +479,43 @@ class FdogSerialize {
         }
     }
 
+    //基础类型和结构体
     template<typename T>
     void FDesSerialize(T & object_, string & json_){
         DesSerialize(object_, json_);
     }
-
+    //用于数组，vector，list，set
     template<typename T>
     void FDesSerializeA(T & object_, string & json_){
+        vector<string> json_array = FdogSerializeBase::Instance()->CuttingArray(json_);
+        int i = 0;
         for(auto & object_one : object_){
-            
+            DesSerialize(object_, json_array[i]);
+            i++;
         }
     }
+    //用于map
+    template<typename T>
+    void FDesSerializeM(T & object_, string & json_){
+        vector<string> json_array = FdogSerializeBase::Instance()->CuttingArray(json_);
+        typename T::iterator it;
+        it = object_.begin();
+        int i = 0;
+        while(it != object_.end()){
+            
+            i++;
+        }
+    }
+
+        typename T::iterator it;
+        it = object_.begin();
+
+        while(it != object_.end())
+        {
+            json_ = json_ + "\"" + it->first + "\"" + ":";
+            Serialize(json_, it->second);
+            it ++;         
+        }
 
 };
 
