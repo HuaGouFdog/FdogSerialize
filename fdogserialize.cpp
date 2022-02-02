@@ -337,27 +337,26 @@ void FdogSerialize::removeNumbers(string & return_){
 }
 
 vector<string> FdogSerialize::CuttingArray(string data){
-    //[{{},{}},{},{}]
-    int sum = 0;
-    int first = 0;
-    int end = 0;
-    vector<string> StrArray;
-    for(int i=0; i<= data.length(); i++){
-        //一个一个遍历
-        if(data[i] == '{'){
-            sum++;
-            first = i;
-        }
-        if(data[i]) == '}'){
-            sum--;
-            if(sum == 0){
-                //归零
-                end = i;
-                //将这个放入vector
-                string da = data.substr(first,end);
-                StrArray.push_back(da);
-            }
-        }
-    }
-    return StrArray;
+	int sum = 0;
+	int first = 0;
+	int end = 0;
+	vector<string> StrArray;
+	for (int i = 0; i <= data.length(); i++) {
+		if (data[i] == '{'){
+			sum++;
+			if (sum == 1) {
+				first = i;
+			}
+		}
+		if (data[i] == '}'){
+			sum--;
+			if (sum == 0) {
+				end = i;
+				string da = data.substr(first, end - first + 1);
+				cout << da << endl;
+				StrArray.push_back(da);
+			}
+		}
+	}
+	return StrArray;
 }
