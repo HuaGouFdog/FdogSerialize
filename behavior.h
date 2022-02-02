@@ -16,11 +16,8 @@
 
 #define Serialize_type_judgment_all\
     Serialize_type_judgment(student)\
-    Serialize_type_judgment(school)
-    
 
 #define DesSerialize_type_judgment_all\
     DesSerialize_type_judgment(student)\
-    DesSerialize_type_judgment(school)
 
 #endif
