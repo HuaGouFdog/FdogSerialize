@@ -3,7 +3,7 @@
 
 #include "behavior.h"
 //在此添加用到的类型头文件
-#include "utils.h"
+#include "test.h"
 #include <map>
 #include <vector>
 #include <regex>
@@ -15,7 +15,6 @@
 #ifdef __linux__
 #include <cxxabi.h>
 #elif _WIN32
-#include <string>
 #endif
 using namespace std;
 
