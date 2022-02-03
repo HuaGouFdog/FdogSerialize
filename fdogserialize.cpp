@@ -261,17 +261,13 @@ ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt
     }
 }
 
-void * getInstance(){
-    return FdogSerialize::Instance();
-}
-
 int FdogSerialize::getObjectTypeByObjectInfo(string objectName){
     return getObjectInfo(objectName).objectTypeInt;
 }
 
 bool FdogSerialize::isBaseType(string typeName){
-    vector<string>::iterator result = find(baseType1.begin(), baseType1.end(), typeName);
-    if(result != baseType1.end()){
+    vector<string>::iterator result = find(baseType.begin(), baseType.end(), typeName);
+    if(result != baseType.end()){
         return true;
     } 
     return false;
@@ -341,7 +337,8 @@ vector<string> FdogSerialize::CuttingArray(string data){
 	int first = 0;
 	int end = 0;
 	vector<string> StrArray;
-	for (int i = 0; i <= data.length(); i++) {
+    int len = data.length();
+	for (int i = 0; i <= len; i++) {
 		if (data[i] == '{'){
 			sum++;
 			if (sum == 1) {
@@ -353,7 +350,7 @@ vector<string> FdogSerialize::CuttingArray(string data){
 			if (sum == 0) {
 				end = i;
 				string da = data.substr(first, end - first + 1);
-				cout << da << endl;
+				//cout << da << endl;
 				StrArray.push_back(da);
 			}
 		}
