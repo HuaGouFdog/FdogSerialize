@@ -5,7 +5,7 @@
 ​		FdogSerialize是一个用于C++序列化的开源库，采用非入侵方式，无需在原有结构体上进行修改，目前支持基础类型，基础类型数组，结构体，以及vector，list，map等数据类型的序列化，支持JSON和XML两种数据格式，支持别名，支持忽略字段，最少三行代码即可完成转换。
 
 ​		使用git命令将代码拉取到本地：git clone https://github.com/HuaGouFdog/FdogSerialize.git
-
+       代码中有使用到C++11特性，并且使用到了正则表达式，若是linux编译，需保证gcc版本在4.9(4.8不支持正则表达式)
 ​		该库包括behavior.h，fdogserialize.h，fdogserialize.cpp，三个文件。
 
 ​		您需要将声明结构体的头文件添加在behavior.h，并且behavior.h有事先写好的两个宏定义，如果您有使用到结构体类型作为结构体成员的序列化，无论是单个结构体还是vector<结构体>，都需要在两个宏定义中添加对应的定义（基础类型不需要在behavior.h添加）。
