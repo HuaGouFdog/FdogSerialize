@@ -357,6 +357,8 @@ class FdogSerialize {
     //解析数组
     vector<string> CuttingArray(string data);
 
+    vector<string> split(string str, string pattern);
+
     //序列化
     template<typename T>
     void Serialize(string & json_, T & object_, string name = ""){
@@ -418,9 +420,17 @@ class FdogSerialize {
     void FSerializeA(string & json_, T & object_, string name = ""){
         for(auto & object_one : object_){
             //加不加花括号根据类型来决定
-            //json_ = json_ + "{";
+            cout << "dsdsa=d====" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0) << endl;
+            int objectType = isBaseType(abi::__cxa_demangle(typeid(object_one).name(),0,0,0));
+            if (!objectType){
+                cout << "结构体类型" << endl;
+                json_ = json_ + "{";
+            }
             Serialize(json_, object_one);
-            //json_ = json_ + "},";
+            if (!objectType){
+                json_ = json_ + "},";
+            }
+            cout << "类型值" << objectType << endl;
         }
         if(json_.length() > 0){
             removeLastComma(json_);
@@ -435,64 +445,63 @@ class FdogSerialize {
 
         while(it != object_.end())
         {
-            json_ = json_ + "\"" + to_string(it->first) + "\"" + ":";
+            json_ = json_ + "\"" + to_string(it->first) + "\"" + ":{";
             Serialize(json_, it->second);
+            json_ = json_ + "},";
             it ++;         
         }
         removeLastComma(json_);
-        json_ = "{" + name + ":[" + json_ + "]}";
+        json_ = "{" + json_ + "}";
     }
 
     //反序列化
     template<typename T>
     void DesSerialize(T & object_, string & json_, string name = ""){
+        //cout << "DesSerialize" << json_ << endl;
+        //cout << "传进来的值：" << abi::__cxa_demangle(typeid(T).name(),0,0,0) << endl;
         ObjectInfo & objectinfo = FdogSerialize::Instance()->getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
         int objectType = getObjectTypeInt(objectinfo.objectType, abi::__cxa_demangle(typeid(T).name(),0,0,0));
         if(objectinfo.objectType == "NULL" && objectType != OBJECT_BASE && objectType != OBJECT_STRUCT){
             //说明不是struct类型和base类型尝试，尝试解析类型
-            cout << "找不到object类型，开始查找基础" << endl;
+            //cout << "找不到object类型，开始查找基础" << endl;
             objectinfo = getObjectInfoByType(abi::__cxa_demangle(typeid(T).name(),0,0,0), objectType);
             objectType = getObjectTypeInt(objectinfo.objectType, abi::__cxa_demangle(typeid(T).name(),0,0,0));
-            cout << "objecttype=" << objectType << endl;
+            //cout << "objecttype=" << objectType << endl;
         }
 
         if (OBJECT_BASE == objectType) {
             MetaInfo * metainfo1 = getMetaInfo(abi::__cxa_demangle(typeid(object_).name(),0,0,0));
-            cout << "成员类型" << metainfo1->memberType << "json=" << json_ << endl;
-                            //通过正则表达式获取对应的json
-                cout << "总类型：" << objectType << endl;
-                smatch result;
-                string regex_key = "(\"" + name +"\")";
-                cout << "regex_key=" << regex_key << endl;
-                string regex_value = baseRegex[metainfo1->memberType];
-                cout << "regex_value=" << regex_value << endl;
-                regex pattern(regex_key + ":" +regex_value);
-                //根据大小写判断
-                // regex * pattern = nullptr;
-                // if (metainfo1->memberIsIgnoreLU == false){
-                //     cout << "不执行忽略大小写" << endl;
-                //     pattern = new regex(regex_key + ":" +regex_value);
-                // }else{
-                //     pattern = new regex(regex_key + ":" +regex_value,regex::icase);//icase用于忽略大小写
-                // }
-                cout << "开始查找" << endl;
-                if(regex_search(json_, result, pattern)){
-                    string value = result.str(2).c_str();
-                    cout << "值：" << value << endl;
-                    if(objectType == OBJECT_BASE){
-                        cout << "类型：" << objectType << endl;
-                        FdogSerializeBase::Instance()->JsonToBase(object_, metainfo1, value);
-                    }
-                    //DesSerialize_type_judgment_all;
-                } else {
-                    cout << "错误" << endl;
+            //cout << "成员类型" << metainfo1->memberType << "json=" << json_ << endl;
+            //通过正则表达式获取对应的json
+            //cout << "总类型：" << objectType << endl;
+            smatch result;
+            string regex_key;
+            //cout << "regex_key=" << regex_key << endl;
+            //数组类型不包含name，应该进行区分 如果name是"""
+            string regex_value = baseRegex[metainfo1->memberType];
+            //cout << "regex_value=" << regex_value << endl;
+            regex * pattern;
+            if (name == "") {
+                pattern = new regex(regex_value);
+            } else {
+                pattern = new regex(regex_key + ":" +regex_value);
+            }
+            (regex_value);
+            //cout << "开始查找" << endl;
+            if(regex_search(json_, result, *pattern)){
+                string value = result.str(2).c_str();
+                if (value == ""){
+                    value = result.str(1).c_str();
                 }
+                //cout << "值：" << value << endl;
+                FdogSerializeBase::Instance()->JsonToBase(object_, metainfo1, value);
+            }
         }
 
         if (OBJECT_STRUCT == objectType) {
             for(auto metainfoObject : objectinfo.metaInfoObjectList){
                 //通过正则表达式获取对应的json
-                cout << "总类型：" << objectType << "--当前成员：" << metainfoObject->memberName << " 类型为：" << metainfoObject->memberType << endl;
+                //cout << "总类型：" << objectType << "--当前成员：" << metainfoObject->memberName << " 类型为：" << metainfoObject->memberType << endl;
                 smatch result;
                 string regex_key = "(\"" + metainfoObject->memberName +"\")";
                 string regex_value = baseRegex[metainfoObject->memberType];
@@ -505,17 +514,18 @@ class FdogSerialize {
                     }
                 }
                 //根据大小写判断
-                regex pattern(regex_key + ":" +regex_value);
-                // regex * pattern = nullptr;
-                // if (metainfoObject->memberIsIgnoreLU == false){
-                //     pattern = new regex(regex_key + ":" +regex_value);
-                // }else{
-                //     pattern = new regex(regex_key + ":" +regex_value,regex::icase);//icase用于忽略大小写
-                // }
-                if(regex_search(json_, result, pattern)){
+                //regex pattern(regex_key + ":" +regex_value);
+                regex * pattern = nullptr;
+                if (metainfoObject->memberIsIgnoreLU == false){
+                    pattern = new regex(regex_key + ":" +regex_value);
+                }else{
+                    pattern = new regex(regex_key + ":" +regex_value,regex::icase);//icase用于忽略大小写
+                }
+                if(regex_search(json_, result, *pattern)){
                     string value = result.str(2).c_str();
+                    //cout << "进入正则：" << value << endl;
                     if(metainfoObject->memberTypeInt == OBJECT_BASE){
-                        cout << "类型：" << metainfoObject->memberType << endl;
+                        //cout << "类型：" << metainfoObject->memberType << endl;
                         FdogSerializeBase::Instance()->JsonToBase(object_, metainfoObject, value);
                     }
                     DesSerialize_type_judgment_all;
@@ -532,31 +542,53 @@ class FdogSerialize {
     //用于数组，vector，list，set
     template<typename T>
     void FDesSerializeA(T & object_, string & json_, string name = ""){
-        cout << "====" << endl;
+        //cout << "====" << endl;
         //判断是不是基础类型数组
+        int objectType;
+        for(auto & object_one : object_){
+            objectType = isBaseType(abi::__cxa_demangle(typeid(object_one).name(),0,0,0));
+            break;
+        }
         vector<string> json_array;
-        if (1){
-
+        if (objectType){
+            cout << "基础类型" << endl;
+                smatch result;
+                regex pattern(arrayRegex);
+                if(regex_search(json_, result, pattern)){
+                    string value = result.str(2).c_str();
+                    json_array = split(value, ",");
+                }
         }else{
+            removeFirstComma(json_);
+            removeLastComma(json_);
             json_array = FdogSerialize::Instance()->CuttingArray(json_);
         }
         int i = 0;
         for(auto & object_one : object_){
-            //cout << "111===" << json_array[i] <<endl;
-            DesSerialize(object_, json_);
+            DesSerialize(object_one, json_array[i]);
             i++;
         }
     }
     //用于map
     template<typename T>
     void FDesSerializeM(T & object_, string & json_){
+        removeFirstComma(json_);
+        removeLastComma(json_);
         vector<string> json_array = FdogSerialize::Instance()->CuttingArray(json_);
         typename T::iterator it;
         it = object_.begin();
         int i = 0;
-        while(it != object_.end()){
-            DesSerialize(it->second, json_);
+        int len = json_array.size();
+        //这里有个问题，就是可能key的顺序不匹配
+        while(it != object_.end() && i < len){
+            //cout << "进入循环" << json_array[i] << endl;
+            //cout << "类型：" << typeid(it->second).name() << ","<< to_string(it->first) << endl;
+            //it->second.name = "xxxx";
+            //it->second.age = 222;
+            //cout << "it:" << it->second.name << "," << it->second.age << endl;
+            DesSerialize(it->second, json_array[i]);
             i++;
+            it++;
         }
     }
 };
