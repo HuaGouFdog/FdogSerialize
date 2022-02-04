@@ -350,7 +350,6 @@ vector<string> FdogSerialize::CuttingArray(string data){
 			if (sum == 0) {
 				end = i;
 				string da = data.substr(first, end - first + 1);
-				//cout << da << endl;
 				StrArray.push_back(da);
 			}
 		}
