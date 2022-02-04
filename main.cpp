@@ -40,7 +40,7 @@ int main()
     string stu_json;
     FdogSerialize::Instance()->FSerialize(stu_json, stu);
     cout << stu_json << endl;
-    stu_json = "{\"name\":\"yujing\", \"age\":22}";
+    stu_json = "{\"name\":\"yujing\", \"age\":21}";
     FdogSerialize::Instance()->FDesSerialize(stu, stu_json);
     cout << stu.name << "," << stu.age << endl;
     //**********************************************************************
@@ -51,7 +51,7 @@ int main()
     sch.id = 1;
     sch.stu.name = "zhangxv";
     sch.stu.age = 22;
-    //REGISTEREDMEMBER(student, name, age); //注册成员 上面已经注册
+    //REGISTEREDMEMBER(student, name, age)注册成员 上面已经注册
     REGISTEREDMEMBER(school, id, stu); //注册成员
     //在behavior.h中的两个宏定义中添加student，因为student结构体是作为成员出现的
     string sch_json;
@@ -90,8 +90,7 @@ int main()
     cout << stuv_json << endl;
     av_json = "{\"stuv\":[{\"name\":\"zhangsan\", \"age\":32},{\"name\":\"anjing\", \"age\":12},{\"name\":\"lifei\", \"age\":20}]}";
     FdogSerialize::Instance()->FDesSerializeA(stuv, stuv_json);
-    cout << stuv[0].name << "," << stuv[1].name << "," << stuv[2].name << endl;
-    cout << stuv[0].age << "," << stuv[1].age << "," << stuv[2].age << endl;
+    cout << stuv[0].name << "," << stuv[0].age << "," << stuv[1].name << "," << stuv[1].age << "," << stuv[2].name << "," << stuv[2].age << endl;
     //**********************************************************************
 
     //**********************************************************************
@@ -101,11 +100,12 @@ int main()
     stum[1] = {"yujing", 21};
     stum[2] = {"lisi", 21};
     string stum_json;
-    FdogSerialize::Instance()->FSerializeM(stum_json, stum, "stum");
-    cout << stuv_json << endl;
-    av_json = "{\"0\":{\"name\":\"zhangsan\", \"age\":32},\"1\":{\"name\":\"anjing\", \"age\":12},\"2\":{\"name\":\"lifei\", \"age\":20}}";
+    FdogSerialize::Instance()->FSerializeM(stum_json, stum);
+    cout << stum_json << endl;
+    stum_json = "{\"0\":{\"name\":\"huhansan\",\"age\":21},\"1\":{\"name\":\"lifei\",\"age\":11},\"2\":{\"name\":\"huruiming\",\"age\":20}}";
     FdogSerialize::Instance()->FDesSerializeM(stum, stum_json);
-    for(int i = 1; i<= stum.size(); i++){
+    int len = stum.size();
+    for(int i = 0; i < len; i++){
         cout << stum[i].name << "," << stum[i].age << endl;
     }
     //**********************************************************************    
