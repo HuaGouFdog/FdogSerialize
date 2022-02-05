@@ -304,7 +304,7 @@ class FdogSerialize {
     void setIgnoreLU(string Type, string memberName);
 
 	//设置进行模糊转换 结构体转json不存在这个问题主要是针对json转结构体的问题，如果存在分歧，可以尝试进行模糊转换
-	void setFuzzy(string Type, string memberName);
+	void setFuzzy(string Type);
 
 
     //一次性设置多个别名
@@ -357,6 +357,7 @@ class FdogSerialize {
     //解析数组
     vector<string> CuttingArray(string data);
 
+    //切割
     vector<string> split(string str, string pattern);
 
     //序列化
@@ -471,8 +472,12 @@ class FdogSerialize {
                 pattern = new regex(regex_value);
             } else {
                 pattern = new regex(regex_key + ":" +regex_value);
+                // if (metainfoObject->memberIsIgnoreLU == false){
+                //     pattern = new regex(regex_key + ":" +regex_value);
+                // }else{
+                //     pattern = new regex(regex_key + ":" +regex_value,regex::icase);//icase用于忽略大小写
+                // }
             }
-            (regex_value);
             if(regex_search(json_, result, *pattern)){
                 string value = result.str(2).c_str();
                 if (value == ""){
