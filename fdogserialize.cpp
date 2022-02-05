@@ -162,7 +162,7 @@ void FdogSerialize::setIgnoreLU(string Type, string memberName){
     }
 }
 
-void FdogSerialize::setFuzzy(string Type, string memberName) {
+void FdogSerialize::setFuzzy(string Type) {
 
 }
 

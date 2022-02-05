@@ -4,15 +4,17 @@
 
 ​		FdogSerialize是一个用于C++序列化的开源库，采用非入侵方式，无需在原有结构体上进行修改，目前支持基础类型，基础类型数组，结构体，以及vector，list，map等数据类型的序列化，支持JSON和XML两种数据格式，支持别名，支持忽略字段，最少三行代码即可完成转换。
 
-​		使用git命令将代码拉取到本地：git clone https://github.com/HuaGouFdog/FdogSerialize.git
-       代码中有使用到C++11特性，并且使用到了正则表达式，若是linux编译，需保证gcc版本在4.9(4.8不支持正则表达式)
-​		该库包括behavior.h，fdogserialize.h，fdogserialize.cpp，三个文件。
+使用git命令将代码拉取到本地：git clone https://github.com/HuaGouFdog/FdogSerialize.git
 
-​		您需要将声明结构体的头文件添加在behavior.h，并且behavior.h有事先写好的两个宏定义，如果您有使用到结构体类型作为结构体成员的序列化，无论是单个结构体还是vector<结构体>，都需要在两个宏定义中添加对应的定义（基础类型不需要在behavior.h添加）。
+代码中有使用到C++11特性，并且使用到了正则表达式，若是linux编译，需保证gcc版本在4.9(4.8不支持正则表达式)		
 
-​		fdogserialize.h，fdogserialize.cpp是核心代码，在需要序列化的源文件中添加fdogserialize.h即可调用相关的序列化函数，为了更详细的说明该库的使用，准备了测试示例放在test.h头文件，以及main.cpp中的相关测试。
+该库包括behavior.h，fdogserialize.h，fdogserialize.cpp，三个文件。
 
-​		欢迎体验，如果对您有帮助，不妨给我一个 :star:，同时本人能力有限，若您有更好的解决方案，欢迎给我留言。:blush::blush::blush:
+您需要将声明结构体的头文件添加在behavior.h，并且behavior.h有事先写好的两个宏定义，如果您有使用到结构体类型作为结构体成员的序列化，无论是单个结构体还是vector<结构体>，都需要在两个宏定义中添加对应的定义（基础类型不需要在behavior.h添加）。
+
+fdogserialize.h，fdogserialize.cpp是核心代码，在需要序列化的源文件中添加fdogserialize.h即可调用相关的序列化函数，为了更详细的说明该库的使用，准备了测试示例放在test.h头文件，以及main.cpp中的相关测试。
+
+欢迎体验，如果对您有帮助，不妨给我一个 :star:，同时本人能力有限，若您有更好的解决方案，欢迎给我留言。:blush::blush::blush:
 
 ---
 
@@ -420,6 +422,7 @@ int main()
 | setAliasName(string Type, string memberName, string AliasName) | 使用别名   |
 | setIgnoreField(string Type, string memberName)               | 忽略字段   |
 | setIgnoreLU(string Type, string memberName)                  | 忽略大小写 |
+| setFuzzy(string Type)                                        | 模糊转换   |
 
 
 
@@ -437,13 +440,14 @@ struct student{
 int main()
 {
     REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    setAliasName("student", "name", "Aliasname");  //第一个参数为类型，第二参数为原名，第三个参数为别名
+    FdogSerialize::Instance()->setAliasName("student", "name", "Aliasname"); 
+    //第一个参数为类型，第二参数为原名，第三个参数为别名
     //除此之外，也可以使用setAliasNameAll设置多个参数的别名
     struct stu;
     stu.name = "花狗Fdog";
     stu.age = 22;
     string json_;
-    FdogSerialize::Instance()->FSerialize(json_, value, "stu");   //json值为"{{"Aliasname":"花狗Fdog","age":22}}"
+    FdogSerialize::Instance()->FSerialize(json_, value);   //json值为"{{"Aliasname":"花狗Fdog","age":22}}"
 }
 ```
 
@@ -465,13 +469,14 @@ struct student{
 int main()
 {
     REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    setIgnoreField("student", "name");  //第一个参数为类型，第二参数为需要忽略的字段
+    FdogSerialize::Instance()->setIgnoreField("student", "name");  
+    //第一个参数为类型，第二参数为需要忽略的字段
     //除此之外，也可以使用setIgnoreFieldAll设置多个忽略的字段
     struct stu;
     stu.name = "花狗Fdog";
     stu.age = 22;
     string json_;
-    FdogSerialize::Instance()->FSerialize(json_, value, "stu");   //json值为"{{"age":22}}"
+    FdogSerialize::Instance()->FSerialize(json_, value);   //json值为"{{"age":22}}"
 }
 ```
 
@@ -483,11 +488,32 @@ int main()
 
 当将json转为对象时，如json中的键值与对象中的成员名存在大小写不同，可以设定忽略大小写。
 
+```cpp
+#include "fdogserialize.h" //添加序列化所需头文件
+
+//自定义基础类型结构体
+struct student{
+    char * name;
+    int age;
+};
+
+int main()
+{
+    REGISTEREDMEMBER(student, name, age); 
+    struct stu;
+    FdogSerialize::Instance()->setIgnoreLU("student", "name"); 
+    string stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
+    FdogSerialize::Instance()->FDesSerialize(json_, value);
+}
+```
+
 
 
 #### 4. 支持模糊转换
 
 若json和对象中的键值不相同，开启后将根据模糊等级进行匹配
+
+暂无
 
 
 
