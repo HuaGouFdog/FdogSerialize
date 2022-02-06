@@ -12,11 +12,11 @@ int main()
     int base_a = 10;
     string base_ajson;
     //基础类型序列化为json
-    FdogSerialize::Instance()->FSerialize(base_ajson, base_a, "base_a");
+    Fdog::FSerialize(base_ajson, base_a, "base_a");
     cout << base_ajson << endl;
     base_ajson = "{\"base_a\":20}";
     //将json类型转为基础类型
-    FdogSerialize::Instance()->FDesSerialize(base_a, base_ajson, "base_a");
+    Fdog::FDesSerialize(base_a, base_ajson, "base_a");
     cout << base_a << endl;
     //**********************************************************************
 
@@ -24,10 +24,10 @@ int main()
     cout << "基础类型数组序列化==============================================" << endl;
     float base_array[5] = {1.2, 3.4, 5.6, 4.3, 5.6};
     string base_arrayjson;
-    FdogSerialize::Instance()->FSerializeA(base_arrayjson, base_array, "base_array");
+    Fdog::FSerializeA(base_arrayjson, base_array, "base_array");
     cout << base_arrayjson << endl;
     base_arrayjson = "{\"base_array\":[2.2, 3.6, 7.6, 2.3, 6.8]}";
-    FdogSerialize::Instance()->FDesSerializeA(base_array, base_arrayjson);
+    Fdog::FDesSerializeA(base_array, base_arrayjson);
     cout << base_array[0] << "," << base_array[1] << "," << base_array[2] << "," << base_array[3] << "," << base_array[4] << endl;
     //**********************************************************************
 
@@ -38,7 +38,7 @@ int main()
     stu.age = 22;
     REGISTEREDMEMBER(student, name, age); //注册成员
     string stu_json;
-    FdogSerialize::Instance()->FSerialize(stu_json, stu);
+    Fdog::FSerialize(stu_json, stu);
     cout << stu_json << endl;
     stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
     FdogSerialize::Instance()->setIgnoreLU("student", "name");
@@ -57,10 +57,10 @@ int main()
     REGISTEREDMEMBER(school, id, stu); //注册成员
     //在behavior.h中的两个宏定义中添加student，因为student结构体是作为成员出现的
     string sch_json;
-    FdogSerialize::Instance()->FSerialize(sch_json, sch);
+    Fdog::FSerialize(sch_json, sch);
     cout << sch_json << endl;
     sch_json = "{\"id\":3, \"stu\":{\"name\":\"yujing\", \"age\":22}}";
-    FdogSerialize::Instance()->FDesSerialize(sch, sch_json);
+    Fdog::FDesSerialize(sch, sch_json);
     cout << sch.id << "," << sch.stu.name << "," << sch.stu.age << endl;
     //**********************************************************************
 
@@ -71,10 +71,10 @@ int main()
     av.push_back(10);
     av.push_back(5);
     string av_json;
-    FdogSerialize::Instance()->FSerializeA(av_json, av, "av");
+    Fdog::FSerializeA(av_json, av, "av");
     cout << av_json << endl;
     av_json = "{\"av\":[30, 20, 10]}";
-    FdogSerialize::Instance()->FDesSerializeA(av, av_json);
+    Fdog::FDesSerializeA(av, av_json);
     cout << av[0] << "," << av[1] << "," << av[2] << endl;
     //**********************************************************************
 
@@ -88,10 +88,10 @@ int main()
     stuv.push_back(stu_2);
     stuv.push_back(stu_3);
     string stuv_json;
-    FdogSerialize::Instance()->FSerializeA(stuv_json, stuv, "stuv");
+    Fdog::FSerializeA(stuv_json, stuv, "stuv");
     cout << stuv_json << endl;
     av_json = "{\"stuv\":[{\"name\":\"zhangsan\", \"age\":32},{\"name\":\"anjing\", \"age\":12},{\"name\":\"lifei\", \"age\":20}]}";
-    FdogSerialize::Instance()->FDesSerializeA(stuv, stuv_json);
+    Fdog::FDesSerializeA(stuv, stuv_json);
     cout << stuv[0].name << "," << stuv[0].age << "," << stuv[1].name << "," << stuv[1].age << "," << stuv[2].name << "," << stuv[2].age << endl;
     //**********************************************************************
 
@@ -102,10 +102,10 @@ int main()
     stum[1] = {"yujing", 21};
     stum[2] = {"lisi", 21};
     string stum_json;
-    FdogSerialize::Instance()->FSerializeM(stum_json, stum);
+    Fdog::FSerializeM(stum_json, stum);
     cout << stum_json << endl;
     stum_json = "{\"0\":{\"name\":\"huhansan\",\"age\":21},\"1\":{\"name\":\"lifei\",\"age\":11},\"2\":{\"name\":\"huruiming\",\"age\":20}}";
-    FdogSerialize::Instance()->FDesSerializeM(stum, stum_json);
+    Fdog::FDesSerializeM(stum, stum_json);
     int len = stum.size();
     for(int i = 0; i < len; i++){
         cout << stum[i].name << "," << stum[i].age << endl;
