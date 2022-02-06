@@ -18,6 +18,7 @@
 
 using namespace std;
 
+
 static vector<string> baseType = {
         "bool", "bool*"
         "char", "unsigned char", "char*", "unsigned char*",
@@ -569,6 +570,52 @@ class FdogSerialize {
         }
     }
 };
+namespace Fdog{
+template<typename T>
+void FSerialize(string & json_, T & object_, string name = ""){
+  FdogSerialize::Instance()->FSerialize(json_, object_, name);
+}
+
+template<typename T>
+void FSerializeA(string & json_, T & object_, string name = ""){
+  FdogSerialize::Instance()->FSerializeA(json_, object_, name);
+}
+
+template<typename T>
+void FSerializeM(string & json_, T & object_, string name = ""){
+  FdogSerialize::Instance()->FSerializeM(json_, object_, name);
+}
+
+template<typename T>
+void FDesSerialize(T & object_, string & json_, string name = ""){
+  FdogSerialize::Instance()->FDesSerialize(object_, json_, name);
+}
+
+template<typename T>
+void FDesSerializeA(T & object_, string & json_, string name = ""){
+  FdogSerialize::Instance()->FDesSerializeA(object_, json_, name);
+}
+
+template<typename T>
+void FDesSerializeM(T & object_, string & json_, string name = ""){
+  FdogSerialize::Instance()->FDesSerializeM(object_, json_);
+}
+// //设置别名
+// void setAliasName1(string Type, string memberName, string AliasName){
+//   FdogSerialize::Instance()->setAliasName(Type, memberName, AliasName);
+// }
+
+// //设置是否忽略该字段序列化
+// void setIgnoreField1(string Type, string memberName){
+//   FdogSerialize::Instance()->setIgnoreField(Type, memberName);
+// }
+
+// //设置是否忽略大小写
+// void setIgnoreLU(string Type, string memberName){
+//   FdogSerialize::Instance()->setIgnoreLU(Type, memberName);
+// }
+
+}
 
 #define NAME(x) #x
 
