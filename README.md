@@ -16,18 +16,36 @@ fdogserialize.h，fdogserialize.cpp是核心代码，在需要序列化的源文
 
 欢迎体验，如果对您有帮助，不妨给我一个 :star:，同时本人能力有限，若您有更好的解决方案，欢迎给我留言。:blush::blush::blush:
 
+
+
 ---
+
+
 
 ### 目录
 
-- [FdogSerialize](#FdogSerialize)
-    - [目录](#%E7%9B%AE%E5%BD%95)
-    - [背景](#%E8%83%8C%E6%99%AF)
-    - [类型支持](#%E7%B1%BB%E5%9E%8B%E6%94%AF%E6%8C%81)
-    - [使用说明](#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E)
-    - [作者](#%E4%BD%9C%E8%80%85)
-    - [许可](#%E8%AE%B8%E5%8F%AF)
-    - [其他](#%E5%85%B6%E4%BB%96)
+- [:fire:FdogSerialize:fire:](#fireFdogSerializefire)
+  - [目录](#%E7%9B%AE%E5%BD%95)
+  - [起源](#%E8%B5%B7%E6%BA%90)
+  - [类型支持](#%E7%B1%BB%E5%9E%8B%E6%94%AF%E6%8C%81)
+  - [示例说明](#%E7%A4%BA%E4%BE%8B%E8%AF%B4%E6%98%8E)
+    - [1. 基础类型序列化](#1-%E5%9F%BA%E7%A1%80%E7%B1%BB%E5%9E%8B%E5%BA%8F%E5%88%97%E5%8C%96)
+    - [2. 基础类型数组序列化](#2-%E5%9F%BA%E7%A1%80%E7%B1%BB%E5%9E%8B%E6%95%B0%E7%BB%84%E5%BA%8F%E5%88%97%E5%8C%96)
+    - [3. 基础类型组成的结构体序列化](#3-%E5%9F%BA%E7%A1%80%E7%B1%BB%E5%9E%8B%E7%BB%84%E6%88%90%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93%E5%BA%8F%E5%88%97%E5%8C%96)
+    - [4. 包含结构体类型的结构体序列化](#4-%E5%8C%85%E5%90%AB%E7%BB%93%E6%9E%84%E4%BD%93%E7%B1%BB%E5%9E%8B%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93%E5%BA%8F%E5%88%97%E5%8C%96)
+    - [5. vector类型的序列化](#5-vector%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96)
+    - [6. list类型的序列化](#6-list%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96)
+    - [7. map类型的序列化](#7-map%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96)
+    - [8. 必要说明](#8-%E5%BF%85%E8%A6%81%E8%AF%B4%E6%98%8E)
+  - [杂项支持](#%E6%9D%82%E9%A1%B9%E6%94%AF%E6%8C%81)
+    - [1. 支持别名](#1-%E6%94%AF%E6%8C%81%E5%88%AB%E5%90%8D)
+    - [2. 支持字段忽略](#2-%E6%94%AF%E6%8C%81%E5%AD%97%E6%AE%B5%E5%BF%BD%E7%95%A5)
+    - [3. 支持忽略大小写](#3-%E6%94%AF%E6%8C%81%E5%BF%BD%E7%95%A5%E5%A4%A7%E5%B0%8F%E5%86%99)
+    - [4. 支持模糊转换](#4-%E6%94%AF%E6%8C%81%E6%A8%A1%E7%B3%8A%E8%BD%AC%E6%8D%A2)
+  - [一些可能的疑问](#%E4%B8%80%E4%BA%9B%E5%8F%AF%E8%83%BD%E7%9A%84%E7%96%91%E9%97%AE)
+  - [作者](#%E4%BD%9C%E8%80%85)
+  - [许可](#%E8%AE%B8%E5%8F%AF)
+  - [其他](#%E5%85%B6%E4%BB%96)
 
 ---
 
@@ -59,35 +77,46 @@ fdogserialize.h，fdogserialize.cpp是核心代码，在需要序列化的源文
 
 既然心高气傲都不满意，那就自己动手写一个吧，一开始想的简单了，说实话后面还是有些难度的，虽然说C++中应该尽可能的少用宏，但就目前来说C++没有反射机制，编译后不保存结构体的元信息来说，不得不使用大量的宏。
 
-:point_right:暂时将这个库分为下面几个阶段：
+:point_right:第一阶段分为下面几个部分：
 
 1. 支持由基础类型和Json互转:white_check_mark:
-
 2. 支持由基础类型组成的数组和json互转:white_check_mark:
-
 3. 支持由基础类型组合成结构体类型和Json互转:white_check_mark:
-
 4. 支持由结构体包含结构体的类型和Json互转:white_check_mark:
-
 5. 支持vector类型和json互转:white_check_mark:
-
 6. 支持list类型和json互转:white_check_mark:
-
 7. 支持map类型和json互转:white_check_mark:
-
 8. 支持set类型和json互转:white_check_mark:
 
-9. 支持STL和自定义类型多层嵌套
 
-10. 支持XML数据格式
 
-    
+:point_right:第二阶段分为下面几个部分：
+
+1. 支持STL和自定义类型多层嵌套
+2. 支持XML数据格式的转换
+
+
+
+:point_right:第三阶段分为下面几个部分：
+
+1. 支持对json字符串进行格式正确判断
+2. 支持获取某个字段是否存在
+3. 支持获取某个字段的值，而无须先进行序列化
+
+
+
+:point_right:第四阶段分为下面几个部分：
+
+1. 支持必选字段和可选字段，当必选字段无值时，进行报错
+
+
 
 :point_right:杂项支持：
 
 1. 支持别名:white_check_mark:
 1. 支持字段忽略:white_check_mark:
 1. 支持忽略大小写:white_check_mark:
+1. 支持字段为空，则不进行序列化
 1. 支持模糊转换
 
 
