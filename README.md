@@ -2,25 +2,21 @@
 
 # :fire:FStruct:fire:
 
-​		FStruct是一个用于C++序列化的开源库，采用非入侵方式，无需在原有结构体上进行修改，目前支持基础类型，基础类型数组，结构体，以及vector，list，map等数据类型的序列化，支持JSON和XML两种数据格式，支持别名，支持忽略字段，最少三行代码即可完成转换。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FStruct是一个用于C++序列化的开源库，采用非入侵方式，无需在原有结构体上进行修改，目前支持基础类型，结构体，以及vector，list，deque，set，map等复杂数据类型的序列化，支持JSON和XML两种数据格式，支持别名，支持忽略字段，等其他特性，最少三行代码即可完成转换。
 
-使用git命令将代码拉取到本地：git clone https://github.com/HuaGouFdog/FdogSerialize.git
 
-代码中有使用到C++11特性，并且使用到了正则表达式，若是linux编译，需保证gcc版本在4.9(4.8不支持正则表达式)		
 
-该库包括behavior.h，fdogserialize.h，fdogserialize.cpp，三个文件。
+> 使用git命令将代码拉取到本地：git clone https://github.com/HuaGouFdog/FdogSerialize.git
+>
+> linux编译：g++ -std=c++11 ../FStruct.cpp main.cpp -o main -w
+>
+> 代码中有使用到C++11特性，使用到了正则表达式，若是linux编译，需保证gcc版本在4.9(4.8不支持正则表达式)。
 
-您需要将声明结构体的头文件添加在behavior.h，并且behavior.h有事先写好的两个宏定义，如果您有使用到结构体类型作为结构体成员的序列化，无论是单个结构体还是vector<结构体>，都需要在两个宏定义中添加对应的定义（基础类型不需要在behavior.h添加）。
-
-fdogserialize.h，fdogserialize.cpp是核心代码，在需要序列化的源文件中添加fdogserialize.h即可调用相关的序列化函数，为了更详细的说明该库的使用，准备了测试示例放在test.h头文件，以及main.cpp中的相关测试。
-
-欢迎体验，如果对您有帮助，不妨给我一个 :star:，同时本人能力有限，若您有更好的解决方案，欢迎给我留言。:blush::blush::blush:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;欢迎体验，如果对您有帮助，不妨给我一个 :star:，同时本人能力有限，若您有更好的解决方案，欢迎给我留言。:blush::blush::blush:
 
 
 
 ---
-
-
 
 ### 目录
 
@@ -28,21 +24,9 @@ fdogserialize.h，fdogserialize.cpp是核心代码，在需要序列化的源文
     - [目录](#%E7%9B%AE%E5%BD%95)
     - [起源](#%E8%B5%B7%E6%BA%90)
     - [类型支持](#%E7%B1%BB%E5%9E%8B%E6%94%AF%E6%8C%81)
-    - [示例说明](#%E7%A4%BA%E4%BE%8B%E8%AF%B4%E6%98%8E)
-      - [1. 基础类型序列化](#1-%E5%9F%BA%E7%A1%80%E7%B1%BB%E5%9E%8B%E5%BA%8F%E5%88%97%E5%8C%96)
-      - [2. 基础类型数组序列化](#2-%E5%9F%BA%E7%A1%80%E7%B1%BB%E5%9E%8B%E6%95%B0%E7%BB%84%E5%BA%8F%E5%88%97%E5%8C%96)
-      - [3. 基础类型组成的结构体序列化](#3-%E5%9F%BA%E7%A1%80%E7%B1%BB%E5%9E%8B%E7%BB%84%E6%88%90%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93%E5%BA%8F%E5%88%97%E5%8C%96)
-      - [4. 包含结构体类型的结构体序列化](#4-%E5%8C%85%E5%90%AB%E7%BB%93%E6%9E%84%E4%BD%93%E7%B1%BB%E5%9E%8B%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93%E5%BA%8F%E5%88%97%E5%8C%96)
-      - [5. vector类型的序列化](#5-vector%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96)
-      - [6. list类型的序列化](#6-list%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96)
-      - [7. map类型的序列化](#7-map%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96)
-      - [8. 必要说明](#8-%E5%BF%85%E8%A6%81%E8%AF%B4%E6%98%8E)
-    - [杂项支持](#%E6%9D%82%E9%A1%B9%E6%94%AF%E6%8C%81)
-      - [1. 支持别名](#1-%E6%94%AF%E6%8C%81%E5%88%AB%E5%90%8D)
-      - [2. 支持字段忽略](#2-%E6%94%AF%E6%8C%81%E5%AD%97%E6%AE%B5%E5%BF%BD%E7%95%A5)
-      - [3. 支持忽略大小写](#3-%E6%94%AF%E6%8C%81%E5%BF%BD%E7%95%A5%E5%A4%A7%E5%B0%8F%E5%86%99)
-      - [4. 支持模糊转换](#4-%E6%94%AF%E6%8C%81%E6%A8%A1%E7%B3%8A%E8%BD%AC%E6%8D%A2)
-    - [一些可能的疑问](#%E4%B8%80%E4%BA%9B%E5%8F%AF%E8%83%BD%E7%9A%84%E7%96%91%E9%97%AE)
+    - [接口支持](#%E6%8E%A5%E5%8F%A3%E6%94%AF%E6%8C%81)
+    - [测试文档(即使用说明)](#%E6%B5%8B%E8%AF%95%E6%96%87%E6%A1%A3%E5%8D%B3%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E)
+    - [可能的疑问](#%E5%8F%AF%E8%83%BD%E7%9A%84%E7%96%91%E9%97%AE)
     - [作者](#%E4%BD%9C%E8%80%85)
     - [许可](#%E8%AE%B8%E5%8F%AF)
     - [其他](#%E5%85%B6%E4%BB%96)
@@ -51,11 +35,9 @@ fdogserialize.h，fdogserialize.cpp是核心代码，在需要序列化的源文
 
 ### 起源
 
-​		经常使用java或者go的人应该知道这些语言在进行序列化和反序列化是很容易的，但是对于C++而言，这是困难的，根本原因是C++不支持反射，基于c++的语言哲学，C++宁死也要坚守的zero overhead，不为用不到的特性付出任何代价，不管这个代价有多小，也不管是怎样的语言特性，都不会妥协。
+​		使用过java或者go的人知道这些语言在进行序列化和反序列化是很容易的，对于C++而言，这是困难的，根本原因是C++不支持反射，虽然C++不支持反射，但是我们依旧可以通过自己的方式来保存对象元信息来实现序列化与反序列化，记得我在大二时用C++写的一个client-server小项目，自己规定了传输的数据格式（当时觉得自己解析Json很麻烦），第一个字段应该是什么，第二个字段应该是什么，正是因为没有方便的函数进行转换，我每次都需要使用非常繁琐的代码去拼出一个可以传递的字符串，是的，这样确实可以完成我想要的功能，但是我自己定的数据格式只适合自己用，这种方式长期必然行不通，而大多数人使用JSON和XML这两种数据格式来保存数据，如果我的项目想要使用这种大众化的数据格式，我又将重构我的代码。
 
-​		虽然C++不支持反射，但是我们依旧可以通过自己的方式实现序列化与反序列化，记得我在大二时用C++写的一个client-server小项目，自己规定了传输的数据格式（当时觉得自己解析Json很麻烦），第一个字段应该是什么，第二个字段应该是什么，正是因为没有方便的函数进行转换，我每次都需要使用非常繁琐的代码去拼出一个可以传递的字符串，是的，这样确实可以完成我想要的功能，但是我自己定的数据格式只适合自己用，这种方式长期必然行不通，而大多数人使用JSON和XML这两种数据格式来保存对象，如果我的项目想要使用这种大众化的数据格式，我又将重构我的代码。
-
-​		我试着在github寻找一些用于C++的序列化与反序列的库，看看有没有什么办法可以帮助我快速把对象转变成JSON，我找到了一些类似的库，但是存在一些问题
+​		我试着在github寻找一些用于C++的序列化与反序列的库，看看有没有什么办法可以帮助我快速把对象转变成JSON，我找到了一些类似的库，但是获得或多或少存在一些问题。
 
 :point_right:不太和我心意的设计：
 
@@ -75,7 +57,7 @@ fdogserialize.h，fdogserialize.cpp是核心代码，在需要序列化的源文
 
 
 
-既然心高气傲都不满意，那就自己动手写一个吧，一开始想的简单了，说实话后面还是有些难度的，虽然说C++中应该尽可能的少用宏，但就目前来说C++没有反射机制，编译后不保存结构体的元信息来说，不得不使用大量的宏。
+长痛不如短痛， 自己动手写一个吧。（一开始想的简单了，说实话后面还是有些难度的）
 
 :point_right:第一阶段分为下面几个部分：
 
@@ -92,8 +74,8 @@ fdogserialize.h，fdogserialize.cpp是核心代码，在需要序列化的源文
 
 :point_right:第二阶段分为下面几个部分：
 
-1. 支持STL和自定义类型多层嵌套
-2. 支持XML数据格式的转换
+1. 支持STL和自定义类型多层嵌套:white_check_mark:
+2. 对第一阶段所使用的接口进行优化，将多个接口整合为一个，方面调用:white_check_mark:
 
 
 
@@ -107,7 +89,8 @@ fdogserialize.h，fdogserialize.cpp是核心代码，在需要序列化的源文
 
 :point_right:第四阶段分为下面几个部分：
 
-1. 支持必选字段和可选字段，当必选字段无值时，进行报错
+1. 支持必选字段和可选字段，当必选字段无值时，进行报错(定义为指针类型即为可选字段)
+1. 支持XML数据格式的转换
 
 
 
@@ -121,7 +104,7 @@ fdogserialize.h，fdogserialize.cpp是核心代码，在需要序列化的源文
 
 
 
-暂时就想到怎么多，欢迎补充！
+暂时就想到怎么多，打钩的是已经实现的，如果您有更好或者更有趣的建议，麻烦告诉我！
 
 
 
@@ -129,18 +112,19 @@ fdogserialize.h，fdogserialize.cpp是核心代码，在需要序列化的源文
 
 ### 类型支持
 
-| 序号  |    基础类型    |            说明            | 序号 |      基础类型      |       说明       |
-| :---: | :------------: | :------------------------: | :--: | :----------------: | :--------------: |
-|   1   |      bool      |          布尔类型          |  9   |    unsigned int    |    无符号整型    |
-|   2   |      char      |        无符号字符型        |  10  |        long        |      长整型      |
-|   3   | unsigned char  |        无符号字符型        |  11  |   unsigned long    |   无符号长整型   |
-| **4** |   **char ***   | **字符指针（字符串类型）** |  12  |     long long      |     超长整型     |
-|   5   |     short      |           短整型           |  13  | unsigned long long |  无符号超长整型  |
-|   6   | unsigned short |        无符号短整型        |  14  |       float        |  单精度浮点类型  |
-|   7   |      int       |            整型            |  15  |       double       |  双进度浮点类型  |
-|   8   |  unsigned int  |         无符号整型         |  16  |    long double     | 长双进度浮点类型 |
+| 序号  |    基础类型    |            说明            | 序号  |      基础类型      |       说明       |
+| :---: | :------------: | :------------------------: | :---: | :----------------: | :--------------: |
+|   1   |      bool      |          布尔类型          |   9   |    unsigned int    |    无符号整型    |
+|   2   |      char      |        无符号字符型        |  10   |        long        |      长整型      |
+|   3   | unsigned char  |        无符号字符型        |  11   |   unsigned long    |   无符号长整型   |
+| **4** |   **char ***   | **字符指针（字符串类型）** |  12   |     long long      |     超长整型     |
+|   5   |     short      |           短整型           |  13   | unsigned long long |  无符号超长整型  |
+|   6   | unsigned short |        无符号短整型        |  14   |       float        |  单精度浮点类型  |
+|   7   |      int       |            整型            |  15   |       double       |  双进度浮点类型  |
+|   8   |  unsigned int  |         无符号整型         |  16   |    long double     | 长双进度浮点类型 |
+|  17   |     string     |         字符串类型         |       |                    |                  |
 
-基于C++的基础类型，FdogSerialize支持如上的十六种类型，只要你的结构体中**最基本类型**在这十六种范围之内，便可完成转换。
+基于C++的基础类型，FStruct支持如上的十种类型，只要你的结构体中**最基本类型**在这十六种范围之内，便可完成转换。
 
 :point_right:最基本类型说明：
 
@@ -160,283 +144,22 @@ struct school{
 
 因此school这个结构体完全可以被正常解析，事实上是任意类型都可以解析。
 
-
-
 ---
 
 
 
-### 示例说明
+### 接口支持
 
-序列化和反序列化各提供三个函数
+FStruct提供的接口支持：
 
-| 序列化调用函数                                             | 说明                     |
-| ---------------------------------------------------------- | ------------------------ |
-| FSerialize(string & json_, T & object_, string name = "")  | 基础类型及结构体类型调用 |
-| FSerializeA(string & json_, T & object_, string name = "") | 数组，vector，list调用   |
-| FSerializeS(string & json_, T & object_, string name = "") | set，map类型调用         |
-
-| 反序列化调用函数                                            | 说明                       |
-| ----------------------------------------------------------- | -------------------------- |
-| FSerialize( T & object_, string & json_, string name = "")  | 基础类型及结构体类型调用   |
-| FSerializeA( T & object_, string & json_, string name = "") | 数组，vector，list类型调用 |
-| FSerializeS( T & object_, string & json_, string name = "") | set，map类型调用           |
-
-#### 1. 基础类型序列化
-
-```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
-
-int main()
-{
-	int value = 10;
-    string json_;
-    //将value转为json格式数据，建议使用第二种类型
-    FdogSerialize::Instance()->FSerialize(json_, value); 			//json值为 "{10}"
-    FdogSerialize::Instance()->FSerialize(json_, value, "value");   //json值为"{"value":10}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerialize(value, json_);
-    return 0;
-}
-```
-
-
-
----
-
-#### 2. 基础类型数组序列化
-
-```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
-
-int main()
-{
-    int valueArray[5] = {1,2,3,4,5};
-    string json_;
-    //将valueArray转为json格式数据，建议使用第二种类型
-    FdogSerialize::Instance()->FSerialize(json_, value); 			//json值为 "{[1,2,3,4,5]}"
-    FdogSerialize::Instance()->FSerialize(json_, value, "value");   //json值为"{"valueArray":[1,2,3,4,5]}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerialize(value, json_);
-}
-```
-
-
-
----
-
-#### 3. 基础类型组成的结构体序列化
-
-```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    struct stu;
-    stu.name = "花狗Fdog";
-    stu.age = 22;
-    string json_;
-    //将value转为json格式数据
-    FdogSerialize::Instance()->FSerialize(json_, value, "stu");   //json值为"{"stu":{"name":"花狗Fdog","age":22}}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerialize(value, json_);
-}
-```
-
-
-
----
-
-#### 4. 包含结构体类型的结构体序列化
-
-```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-struct school{
-  char * schoolName;
-  student stu;
-};
-
-//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
-#define Serialize_type_judgment_all\
-    Serialize_type_judgment(student)
-	//依次添加
-    
-//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
-#define DesSerialize_type_judgment_all\
-    DesSerialize_type_judgment(student)
-	//依次添加
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型
-    REGISTEREDMEMBER(school, school, stu); //需要注册自定义类型
-   
-    school sch;
-    sch.schoolName = "fzyz";
-    sch.stu.name = "花狗Fdog";
-    sch.stu.age = 22;
-    string json_;
-    //将value转为json格式数据
-    FdogSerialize::Instance()->FSerialize(json_, value, "sch");   
-    //json值为"{"sch":{"schoolName":"fzyz","stu":{"name":"花狗Fdog","age":21}}}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerialize(value, json_);
-}
-```
-
-
-
----
-
-#### 5. vector类型的序列化
-
-```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    vector<student> stu;
-    struct stu_1;
-    stu_1.name = "花狗Fdog";
-    stu_1.age = 22;
-    
-    struct stu_2;
-    stu_2.name = "黑狗Fdog";
-    stu_2.age = 23;
-    
-    stu.push_back(stu_1);
-    stu.push_back(stu_2);
-    
-    string json_;
-    //将value转为json格式数据
-    FdogSerialize::Instance()->FSerializeA(json_, stu, "stu");   
-    //json值为"{"stu":[{"name":"花狗Fdog","age":22},{"name":"黑狗Fdog","age":23}]}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerializeA(value, json_);
-}
-```
-
-
-
----
-
-#### 6. list类型的序列化
-
-```Cpp
-#include "fdogserialize.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    list<student> stu;
-    struct stu_1;
-    stu_1.name = "花狗Fdog";
-    stu_1.age = 22;
-    
-    struct stu_2;
-    stu_2.name = "黑狗Fdog";
-    stu_2.age = 23;
-    
-    stu.push_back(stu_1);
-    stu.push_back(stu_2);
-    
-    string json_;
-    //将value转为json格式数据
-    FdogSerialize::Instance()->FSerializeA(json_, stu, "stu");   
-    //json值为"{"stu":[{"name":"花狗Fdog","age":22},{"name":"黑狗Fdog","age":23}]}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerializeA(value, json_);
-}
-```
-
-
-
----
-
-#### 7. map类型的序列化
-
-```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    vector<student> stu;
-    struct stu_1;
-    stu_1.name = "花狗Fdog";
-    stu_1.age = 22;
-    
-    struct stu_2;
-    stu_2.name = "黑狗Fdog";
-    stu_2.age = 23;
-    
-    stu.push_back(stu_1);
-    stu.push_back(stu_2);
-    
-    string json_;
-    //将value转为json格式数据
-    FdogSerialize::Instance()->FSerializeA(json_, stu, "stu");   
-    //json值为"{"stu":[{"name":"花狗Fdog","age":22},{"name":"黑狗Fdog","age":23}]}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerializeA(value, json_);
-}
-```
-
-#### 8. 必要说明
-
-```cpp
-//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
-#define Serialize_type_judgment_all\
-    Serialize_type_judgment(student)
-	//依次添加
-    
-//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
-#define DesSerialize_type_judgment_all\
-    DesSerialize_type_judgment(student)
-	//依次添加
-
-//两个宏的定义准则：使用该自定义类型做为其他自定义类型的成员
-```
+| 接口支持                                                       | 说明         |
+| -------------------------------------------------------------- | ------------ |
+| FJson(string & json_, T & object_, string name = "")           | object转json |
+| FObject( T & object_, string & json_, string name = "")        | json转object |
+| setAliasName(string Type, string memberName, string AliasName) | 使用别名     |
+| setIgnoreField(string Type, string memberName)                 | 忽略字段     |
+| setIgnoreLU(string Type, string memberName)                    | 忽略大小写   |
+| setFuzzy(string Type)                                          | 模糊转换     |
 
 
 
@@ -444,105 +167,7 @@ int main()
 
 
 
-### 杂项支持
-
-| 杂项函数支持                                                 | 说明       |
-| :----------------------------------------------------------- | ---------- |
-| setAliasName(string Type, string memberName, string AliasName) | 使用别名   |
-| setIgnoreField(string Type, string memberName)               | 忽略字段   |
-| setIgnoreLU(string Type, string memberName)                  | 忽略大小写 |
-| setFuzzy(string Type)                                        | 模糊转换   |
-
-
-
-#### 1. 支持别名
-
-```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    FdogSerialize::Instance()->setAliasName("student", "name", "Aliasname"); 
-    //第一个参数为类型，第二参数为原名，第三个参数为别名
-    //除此之外，也可以使用setAliasNameAll设置多个参数的别名
-    struct stu;
-    stu.name = "花狗Fdog";
-    stu.age = 22;
-    string json_;
-    FdogSerialize::Instance()->FSerialize(json_, value);   //json值为"{{"Aliasname":"花狗Fdog","age":22}}"
-}
-```
-
-
-
-----
-
-#### 2. 支持字段忽略
-
-```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    FdogSerialize::Instance()->setIgnoreField("student", "name");  
-    //第一个参数为类型，第二参数为需要忽略的字段
-    //除此之外，也可以使用setIgnoreFieldAll设置多个忽略的字段
-    struct stu;
-    stu.name = "花狗Fdog";
-    stu.age = 22;
-    string json_;
-    FdogSerialize::Instance()->FSerialize(json_, value);   //json值为"{{"age":22}}"
-}
-```
-
-
-
----
-
-#### 3. 支持忽略大小写
-
-当将json转为对象时，如json中的键值与对象中的成员名存在大小写不同，可以设定忽略大小写。
-
-```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); 
-    struct stu;
-    FdogSerialize::Instance()->setIgnoreLU("student", "name"); 
-    string stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
-    FdogSerialize::Instance()->FDesSerialize(json_, value);
-}
-```
-
-
-
-#### 4. 支持模糊转换
-
-若json和对象中的键值不相同，开启后将根据模糊等级进行匹配
-
-暂无
+### 测试文档(即使用说明)
 
 
 
@@ -550,15 +175,15 @@ int main()
 
 
 
-### 一些可能的疑问
+### 可能的疑问
 
 ---
 
-你可能会有如下疑问：
+
 
 1. 为什么char * 类型算作基础类型
 
-​		因为json中除了数值型数据，剩下的便是字符串类型，考虑到字符串使用的频率，再加上C++对于C兼容的原因，决定把他作为最基础类型。
+​	因为json中除了数值型数据，剩下的便是字符串类型，考虑到字符串使用的频率，再加上C++对于C兼容的原因，决定把char *作为最基础类型，除了char * 可以存储字符串，也可使用string存储字符串。
 
 2. char 类型怎么传递 
 
@@ -571,18 +196,51 @@ int main()
    std::string json = "{\"ch\":98}";
    
    //相对的，如果一个包含char的json想转为struct
-   std::string json = "{\"ch\":98}"; //建议使用这种方式
+   std::string json = "{\"ch\":98}";
    
    //又或者你不知道字符'A'的ASCII码是多少，那么可以使用如下方式，一般情况下不会遇到自己写json
    std::string json = "{\"ch\":\"char('A')\"}";//库会根据ch的类型，若ch为char类型自动将\"char('A')\"转为98
-   
    ```
+
+   
 
 3. 目前支持20个成员的结构体，也可自行添加。
 
-4. vector<bool>的问题
+   ```cpp
+   //添加方法：在FStruct.h底部，找到
+   #define REGISTEREDMEMBER_s_20(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+   REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
+   
+   //当前支持20，若您有更大的需求，可以根据已有格式自行添加，当然如果您觉得20个太多，也可以自行删除。
+   ```
+   
+   
+   
+4. 关于指针类型的支持
 
-5. 关于指针类型的支持，后续会添加，思路是先获取指针类型的值再进行解析。
+​		对于指针类型的支持，内部在处理指针时，将判断指针是否为nullpr，如果为nullpr则不参与序列化，如果不为nullpr则参与序列化，指针类型在这里有可选字段的属性，您可赋值，也可不赋值，当遇到非必传字段时，建议您使用指针类型。
+
+
+
+5. vector<bool>的问题
+
+​	vector<bool>的问题不是一个STL容器，出于**空间优化的原因**，C++ 标准（最早可追溯到 C++98）明确地将 vector<bool> 称为特殊的标准容器，其中每个 bool 仅使用一位空间而不是像普通 bool 那样使用一个字节（ 实现一种“动态位集”）。
+
+​	标准库提供了两个替代品：deque<bool>，bitset
+
+
+
+6. 文件说明
+
+​	该库包括behavior.h，FStruct.h，FStruct.cpp，三个文件。
+
+​	FStruct.h，FStruct.cpp提供的所有可用接口，已在<接口支持>中列出，您可按需调用。
+
+​	behavior.h头文件用于宏替换某些必要的代码，如果一个参与序列化与反序列化的结构体中存在某个成员也是结构体，那么您应该在behavior.h对应的宏里面添	加相应的定义。
+
+​	example.md提供了足够详细的测试示例(如果您觉得还有缺陷，可与我联系)。
+
+​	对应的example.cpp提供了example.md所提供示例的代码。
 
 
 
@@ -609,11 +267,11 @@ int main()
 
 ### 其他
 
-如果对您有帮助的话，请帮我点个star！
+如果FStruct对您有帮助的话，请给FStruct点个star！
 
-如果觉得它好用的话，可以推广给你的朋友们！
+如果觉得FStruct好用的话，可以推广给你的朋友们！
 
-
+如果您有更好的建议，欢迎您告诉我！
 
 ---
 

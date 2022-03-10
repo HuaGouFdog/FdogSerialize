@@ -1,5 +1,5 @@
 #include <iostream>
-#include "FStruct.h"
+#include "../FStruct.h"
 #include <typeinfo>
 #include <iostream>
 #include <list>

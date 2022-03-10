@@ -14,6 +14,8 @@
         DesSerialize(*((TYPE *)((void *)&object_ + metainfoObject->memberOffset)), value);\
     }
 
+
+
 #define Serialize_type_judgment_all\
     Serialize_type_judgment(student)\
 

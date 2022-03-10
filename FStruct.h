@@ -1,13 +1,15 @@
 #ifndef FDOGSERIALIZE_H
 #define FDOGSERIALIZE_H
 
-#include "behavior.h"
+#include "definition.h"
 //在此添加用到的类型头文件
-#include "test.h"
+#include "example/testType.h"
 #include <map>
 #include <vector>
 #include <list>
 #include <map>
+#include <set>
+#include <deque>
 #include <regex>
 #include <algorithm>
 #include <mutex>
@@ -45,7 +47,7 @@ static map<string, string> baseRegex = {
 
 static map<int, string> complexRegex = {
     {5, "std::vector<(.*?),"},
-    {6, "std::map<(.*?),(.*?),"},
+    {6, "std::map<(.*?), (.*?),"},
     {7, "std::__cxx11::list<(.*?),"},
     {8, "匹配set"},
 };
@@ -70,6 +72,8 @@ enum ObjectType{
     OBJECT_VECTOR,
     OBJECT_MAP,
     OBJECT_LIST,
+    OBJECT_SET,
+    OBJECT_DEQUE,
 };
 
 
@@ -101,9 +105,9 @@ typedef struct ObjectInfo{
 }ObjectInfo;
 
 
-typedef struct fdogMap{
-    int first;
-    int second;
+typedef struct FdogMap{
+    string first;
+    string second;
 };
 
 /***********************************
@@ -293,6 +297,18 @@ template<> struct TagDispatchTrait<vector<int>> {
     using Tag = ArrayTag;
 };
 
+template<> struct TagDispatchTrait<list<int>> {
+    using Tag = ArrayTag;
+};
+
+template<> struct TagDispatchTrait<set<int>> {
+    using Tag = ArrayTag;
+};
+
+template<> struct TagDispatchTrait<deque<int>> {
+    using Tag = ArrayTag;
+};
+
 template<> struct TagDispatchTrait<map<int,int>> {
     using Tag = MapTag;
 };
@@ -370,19 +386,19 @@ class FdogSerialize {
     bool isVectorType(string objectName, string typeName);
     
     //获取vector中的类型
-    int getTypeOfVector(string objectName, string typeName);
+    string getTypeOfVector(string objectName, string typeName);
 
     //判断是否为map类型
     bool isMapType(string objectName, string typeName);
 
     //获取map中的key，value类型
-    fdogMap getTypeOfMap(string objectName, string typeName);
+    FdogMap getTypeOfMap(string objectName, string typeName);
 
     //判断是否是list类型
     bool isListType(string objectName, string typeName);
 
     //获取list中的类型
-    int getTypeOfList(string objectName, string typeName);
+    string getTypeOfList(string objectName, string typeName);
 
     //判断是否是结构体类型
     bool isStructType(string objectName, string typeName);
@@ -424,19 +440,37 @@ class FdogSerialize {
             {
                 for(auto metainfoObject : objectinfo.metaInfoObjectList){
                     string json_s;
-                    cout <<"成员类型：" << metainfoObject->memberType << "--" << metainfoObject->memberTypeInt << endl;
+                    cout <<"成员类型：" << metainfoObject->memberType << "--" << metainfoObject->memberTypeInt << "--"<< metainfoObject->first << endl;
                     if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
                         FdogSerializeBase::Instance()->BaseToJson(json_s, metainfoObject, object_);
                         json_ = json_ + json_s;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_VECTOR && metainfoObject->memberIsIgnore != true){
-                        FSerialize(json_s, *(vector<int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                        if(metainfoObject->first == "int"){
+                            FSerialize(json_s, *(vector<int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                        }
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
                     }
-                    if(metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberIsIgnore != true){
-                        FSerialize(json_s, *(map<int, int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
+                    if(metainfoObject->memberTypeInt == OBJECT_LIST && metainfoObject->memberIsIgnore != true){
+                        if(metainfoObject->first == "int"){
+                            FSerialize(json_s, *(list<int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                        }
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
-                    }                    
+                    }
+                    if(metainfoObject->memberTypeInt == OBJECT_DEQUE && metainfoObject->memberIsIgnore != true){ 
+                        FSerialize(json_s, *(deque<int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                        json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
+                    }
+                    if(metainfoObject->memberTypeInt == OBJECT_SET && metainfoObject->memberIsIgnore != true){ 
+                        FSerialize(json_s, *(set<int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                        json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";                       
+                    }
+                    if(metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberIsIgnore != true){
+                        if(metainfoObject->first == "int" && metainfoObject->second == "int"){
+                            FSerialize(json_s, *(map<int, int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
+                        }
+                        json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";
+                    }
                     Serialize_type_judgment_all;
                     if(i == sum){
                         if(json_.length() > 0){
@@ -481,17 +515,21 @@ class FdogSerialize {
         //json_ = "{\"" + name + "\":[" + json_ + "]}";
         //如果转换对象直接就是数组，可以再额外提供一个，或者说其他
     }
-    //map无法和上面进行合并，如果需要使用map，可以考虑使用pair pair是结构体 可以与上面代码合并
-    //在内部由map转为pair
+
     template<typename T>
     void FSerialize(string & json_, T & object_, MapTag, string name = ""){
+        int i = 0;
+        int len = object_.size();
         for(auto & object_one : object_){
-            json_ = json_ + "\"" + to_string(object_one.first) + "\"" + ":{";
+            //看情况，如果是结构体，需要花括号，基本类型不需要
+            json_ = json_ + "\"" + to_string(object_one.first) + "\"" + ":";
             Serialize(json_, object_one.second);
-            json_ = json_ + "},";
+            removeLastComma(json_);
+            json_ = json_ + ",";
+            i++;
         }
         removeLastComma(json_);
-        json_ = "{" + json_ + "}";
+        //json_ = "{" + json_ + "}";
     }
 
     //反序列化
@@ -814,6 +852,8 @@ REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
         metainfo_one->memberTypeSize = sizeof(TYPE);\
         metainfo_one->memberArraySize = resReturn.ArraySize;\
         metainfo_one->memberTypeInt = resReturn.valueTypeInt;\
+        metainfo_one->first = resReturn.first;\
+        metainfo_one->second = resReturn.second;\
         metainfo_one->memberIsIgnore = false;\
         metainfo_one->memberIsIgnoreLU = false;\
         metaInfoObjectList.push_back(metainfo_one);\

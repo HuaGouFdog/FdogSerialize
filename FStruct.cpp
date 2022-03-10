@@ -182,7 +182,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         regex pattern(complexRegex[5]);
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            cout << "=========>>" << value << endl;
+            cout << "=========>>1 " << value << endl;
             resReturn.first = value;
         }
         resReturn.valueTypeInt = OBJECT_VECTOR;
@@ -192,7 +192,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         regex pattern(complexRegex[7]);
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            cout << "=========>>" << value << endl;
+            cout << "=========>>1 " << value << endl;
             resReturn.first = value;
         }
         resReturn.valueTypeInt = OBJECT_LIST;
@@ -203,8 +203,11 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         regex pattern(complexRegex[6]);
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            cout << "=========>>" << value << endl;
+            string value2 = result.str(2).c_str();
+            cout << "=========>>1 " << value << endl;
+            cout << "=========>>2 " << value2 << endl;
             resReturn.first = value;
+            resReturn.second = value2;
         }
         resReturn.valueTypeInt = OBJECT_MAP;
     }
@@ -392,14 +395,32 @@ vector<string> FdogSerialize::split(string str, string pattern){
     return result;
 }
 
-int FdogSerialize::getTypeOfVector(string objectName, string typeName){
-
+string FdogSerialize::getTypeOfVector(string objectName, string typeName){
+    smatch result;
+    regex pattern(complexRegex[5]);
+    if(regex_search(typeName, result, pattern)){
+        return result.str(1).c_str();
+    }
+    return "";
 }
 
-fdogMap FdogSerialize::getTypeOfMap(string objectName, string typeName){
-
+FdogMap FdogSerialize::getTypeOfMap(string objectName, string typeName){
+    smatch result;
+    regex pattern(complexRegex[5]);
+    FdogMap fdogMap;
+    if(regex_search(typeName, result, pattern)){
+        fdogMap.first = result.str(1).c_str();
+        fdogMap.second;
+        return fdogMap;
+    }
+    return fdogMap;
 }
 
-int FdogSerialize::getTypeOfList(string objectName, string typeName){
-
+string FdogSerialize::getTypeOfList(string objectName, string typeName){
+    smatch result;
+    regex pattern(complexRegex[5]);
+    if(regex_search(typeName, result, pattern)){
+        return result.str(1).c_str();
+    }
+    return "";
 }
