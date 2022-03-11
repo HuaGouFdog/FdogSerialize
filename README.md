@@ -112,19 +112,18 @@
 
 ### 类型支持
 
-| 序号  |    基础类型    |            说明            | 序号  |      基础类型      |       说明       |
-| :---: | :------------: | :------------------------: | :---: | :----------------: | :--------------: |
-|   1   |      bool      |          布尔类型          |   9   |    unsigned int    |    无符号整型    |
-|   2   |      char      |        无符号字符型        |  10   |        long        |      长整型      |
-|   3   | unsigned char  |        无符号字符型        |  11   |   unsigned long    |   无符号长整型   |
-| **4** |   **char ***   | **字符指针（字符串类型）** |  12   |     long long      |     超长整型     |
-|   5   |     short      |           短整型           |  13   | unsigned long long |  无符号超长整型  |
-|   6   | unsigned short |        无符号短整型        |  14   |       float        |  单精度浮点类型  |
-|   7   |      int       |            整型            |  15   |       double       |  双进度浮点类型  |
-|   8   |  unsigned int  |         无符号整型         |  16   |    long double     | 长双进度浮点类型 |
-|  17   |     string     |         字符串类型         |       |                    |                  |
+| 序号  |    基础类型    |            说明            | 序号 |      基础类型      |       说明       |
+| :---: | :------------: | :------------------------: | :--: | :----------------: | :--------------: |
+|   1   |      bool      |          布尔类型          |  9   |    unsigned int    |    无符号整型    |
+|   2   |      char      |        无符号字符型        |  10  |        long        |      长整型      |
+|   3   | unsigned char  |        无符号字符型        |  11  |   unsigned long    |   无符号长整型   |
+| **4** |   **char ***   | **字符指针（字符串类型）** |  12  |     long long      |     超长整型     |
+|   5   |     short      |           短整型           |  13  | unsigned long long |  无符号超长整型  |
+|   6   | unsigned short |        无符号短整型        |  14  |       float        |  单精度浮点类型  |
+|   7   |      int       |            整型            |  15  |       double       |  双进度浮点类型  |
+|   8   |     string     |         字符串类型         |  16  |    long double     | 长双进度浮点类型 |
 
-基于C++的基础类型，FStruct支持如上的十种类型，只要你的结构体中**最基本类型**在这十六种范围之内，便可完成转换。
+基于C++的基础类型，FStruct支持如上的十六种类型，只要你的结构体中**最基本类型**在这十六种范围之内，便可完成转换。
 
 :point_right:最基本类型说明：
 
@@ -169,7 +168,7 @@ FStruct提供的接口支持：
 
 ### 测试文档(即使用说明)
 
-
+[example.md](https://github.com/HuaGouFdog/FdogSerialize/blob/master/example/example.md)
 
 ---
 
@@ -232,11 +231,11 @@ FStruct提供的接口支持：
 
 6. 文件说明
 
-​	该库包括behavior.h，FStruct.h，FStruct.cpp，三个文件。
+​	该库包括defintion.h，FStruct.h，FStruct.cpp，三个文件。
 
 ​	FStruct.h，FStruct.cpp提供的所有可用接口，已在<接口支持>中列出，您可按需调用。
 
-​	behavior.h头文件用于宏替换某些必要的代码，如果一个参与序列化与反序列化的结构体中存在某个成员也是结构体，那么您应该在behavior.h对应的宏里面添	加相应的定义。
+​	defintion.h头文件用于宏替换某些必要的代码，如果一个参与序列化与反序列化的结构体中存在某个成员也是结构体，那么您应该在defintion.h对应的宏里面添	加相应的定义。
 
 ​	example.md提供了足够详细的测试示例(如果您觉得还有缺陷，可与我联系)。
 
