@@ -6,6 +6,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <list>
+#include <set>
+#include <deque>
 using namespace std;
 
 struct student{
@@ -22,6 +25,10 @@ struct zhang {
     int age;
     vector<int> a;
     map<int,int> b;
+    list<int> c;
+    deque<int> d;
+    set<int> f;
 };
+
 
 #endif

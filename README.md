@@ -1,5 +1,7 @@
 **中文**|English
 
+
+
 # :fire:FStruct:fire:
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FStruct是一个用于C++序列化的开源库，采用非入侵方式，无需在原有结构体上进行修改，目前支持基础类型，结构体，以及vector，list，deque，set，map等复杂数据类型的序列化，支持JSON和XML两种数据格式，支持别名，支持忽略字段，等其他特性，最少三行代码即可完成转换。
@@ -33,7 +35,7 @@
 
 ---
 
-### 起源
+### :christmas_tree:起源
 
 ​		使用过java或者go的人知道这些语言在进行序列化和反序列化是很容易的，对于C++而言，这是困难的，根本原因是C++不支持反射，虽然C++不支持反射，但是我们依旧可以通过自己的方式来保存对象元信息来实现序列化与反序列化，记得我在大二时用C++写的一个client-server小项目，自己规定了传输的数据格式（当时觉得自己解析Json很麻烦），第一个字段应该是什么，第二个字段应该是什么，正是因为没有方便的函数进行转换，我每次都需要使用非常繁琐的代码去拼出一个可以传递的字符串，是的，这样确实可以完成我想要的功能，但是我自己定的数据格式只适合自己用，这种方式长期必然行不通，而大多数人使用JSON和XML这两种数据格式来保存数据，如果我的项目想要使用这种大众化的数据格式，我又将重构我的代码。
 
@@ -61,46 +63,46 @@
 
 :point_right:第一阶段分为下面几个部分：
 
-1. 支持由基础类型和Json互转:white_check_mark:
-2. 支持由基础类型组成的数组和json互转:white_check_mark:
-3. 支持由基础类型组合成结构体类型和Json互转:white_check_mark:
-4. 支持由结构体包含结构体的类型和Json互转:white_check_mark:
-5. 支持vector类型和json互转:white_check_mark:
-6. 支持list类型和json互转:white_check_mark:
-7. 支持map类型和json互转:white_check_mark:
-8. 支持set类型和json互转:white_check_mark:
+1. 支持由基础类型和Json互转:heavy_check_mark:
+2. 支持由基础类型组成的数组和json互转:heavy_check_mark:
+3. 支持由基础类型组合成结构体类型和Json互转:heavy_check_mark:
+4. 支持由结构体包含结构体的类型和Json互转:heavy_check_mark:
+5. 支持vector类型和json互转:heavy_check_mark:
+6. 支持list类型和json互转:heavy_check_mark:
+7. 支持map类型和json互转:heavy_check_mark:
+8. 支持set类型和json互转:heavy_check_mark:
 
 
 
 :point_right:第二阶段分为下面几个部分：
 
-1. 支持STL和自定义类型多层嵌套:white_check_mark:
-2. 对第一阶段所使用的接口进行优化，将多个接口整合为一个，方面调用:white_check_mark:
+1. 支持STL和自定义类型多层嵌套:heavy_check_mark::
+2. 对第一阶段所使用的接口进行优化，将多个接口整合为一个，方面调用:heavy_check_mark:
 
 
 
 :point_right:第三阶段分为下面几个部分：
 
-1. 支持对json字符串进行格式正确判断
-2. 支持获取某个字段是否存在
-3. 支持获取某个字段的值，而无须先进行序列化
+1. 支持对json字符串进行格式正确判断:clock3:
+2. 支持获取某个字段是否存在:clock3:
+3. 支持获取某个字段的值，而无须先进行序列化:clock3:
 
 
 
 :point_right:第四阶段分为下面几个部分：
 
-1. 支持必选字段和可选字段，当必选字段无值时，进行报错(定义为指针类型即为可选字段)
-1. 支持XML数据格式的转换
+1. 支持必选字段和可选字段，当必选字段无值时，进行报错(定义为指针类型即为可选字段):clock3:
+1. 支持XML数据格式的转换:clock3:
 
 
 
 :point_right:杂项支持：
 
-1. 支持别名:white_check_mark:
-1. 支持字段忽略:white_check_mark:
-1. 支持忽略大小写:white_check_mark:
-1. 支持字段为空，则不进行序列化
-1. 支持模糊转换
+1. 支持别名:heavy_check_mark:
+1. 支持字段忽略:heavy_check_mark:
+1. 支持忽略大小写:heavy_check_mark:
+1. 支持字段为空，则不进行序列化:clock3:
+1. 支持模糊转换:clock3:
 
 
 
@@ -110,7 +112,7 @@
 
 ---
 
-### 类型支持
+### :christmas_tree:类型支持
 
 | 序号  |    基础类型    |            说明            | 序号 |      基础类型      |       说明       |
 | :---: | :------------: | :------------------------: | :--: | :----------------: | :--------------: |
@@ -147,7 +149,7 @@ struct school{
 
 
 
-### 接口支持
+### :christmas_tree:接口支持
 
 FStruct提供的接口支持：
 
@@ -166,7 +168,7 @@ FStruct提供的接口支持：
 
 
 
-### 测试文档(即使用说明)
+### :christmas_tree:测试文档(即使用说明)
 
 [example.md](https://github.com/HuaGouFdog/FdogSerialize/blob/master/example/example.md)
 
@@ -174,17 +176,17 @@ FStruct提供的接口支持：
 
 
 
-### 可能的疑问
+### :christmas_tree:可能的疑问
 
 ---
 
 
 
-1. 为什么char * 类型算作基础类型
+1. :point_right:为什么char * 类型算作基础类型
 
 ​	因为json中除了数值型数据，剩下的便是字符串类型，考虑到字符串使用的频率，再加上C++对于C兼容的原因，决定把char *作为最基础类型，除了char * 可以存储字符串，也可使用string存储字符串。
 
-2. char 类型怎么传递 
+2. :point_right:char 类型怎么传递 
 
    由于JSON并不支持单引号，所以将使用数值传递并还原，例如：
 
@@ -203,7 +205,7 @@ FStruct提供的接口支持：
 
    
 
-3. 目前支持20个成员的结构体，也可自行添加。
+3. :point_right:目前支持20个成员的结构体，也可自行添加。
 
    ```cpp
    //添加方法：在FStruct.h底部，找到
@@ -215,13 +217,13 @@ FStruct提供的接口支持：
    
    
    
-4. 关于指针类型的支持
+4. :point_right:关于指针类型的支持
 
 ​		对于指针类型的支持，内部在处理指针时，将判断指针是否为nullpr，如果为nullpr则不参与序列化，如果不为nullpr则参与序列化，指针类型在这里有可选字段的属性，您可赋值，也可不赋值，当遇到非必传字段时，建议您使用指针类型。
 
 
 
-5. vector<bool>的问题
+5. :point_right:vector<bool>的问题
 
 ​	vector<bool>的问题不是一个STL容器，出于**空间优化的原因**，C++ 标准（最早可追溯到 C++98）明确地将 vector<bool> 称为特殊的标准容器，其中每个 bool 仅使用一位空间而不是像普通 bool 那样使用一个字节（ 实现一种“动态位集”）。
 
@@ -229,7 +231,7 @@ FStruct提供的接口支持：
 
 
 
-6. 文件说明
+6. :point_right:文件说明
 
 ​	该库包括defintion.h，FStruct.h，FStruct.cpp，三个文件。
 
@@ -245,7 +247,7 @@ FStruct提供的接口支持：
 
 ---
 
-### 作者
+### :christmas_tree:作者
 
 :boy: Author：花狗Fdog(张旭)
 
@@ -255,7 +257,7 @@ FStruct提供的接口支持：
 
 ---
 
-### 许可
+### :christmas_tree:许可
 
 该项目签署了Apache-2.0 License，详情请参见LICENSE
 
@@ -264,7 +266,7 @@ FStruct提供的接口支持：
 
 ---
 
-### 其他
+### :christmas_tree:其他
 
 如果FStruct对您有帮助的话，请给FStruct点个star！
 

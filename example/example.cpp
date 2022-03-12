@@ -39,11 +39,37 @@ int main()
     z.a.push_back(1);
     z.b[1]=10;
     z.b[2]=20;
-    REGISTEREDMEMBER(zhang, age, a, b); //注册成员
+    z.c.push_back(0);
+    z.c.push_back(1);
+    z.d.push_back(0);
+    z.d.push_back(1);
+    z.f.insert(0);
+    z.f.insert(1);
+    REGISTEREDMEMBER(zhang, age, a, b, c, d, f); //注册成员
     string zjson;
     Fdog::FJson(zjson, z);
     cout << zjson << endl;
 
+    zhang x;
+    string xjson = "{\"age\":99,\"a\":[22,33],\"b\":{\"4\":44,\"5\":55},\"c\":[66,77],\"d\":[88,99],\"f\":[100,110]}";
+    cout << xjson << endl;
+    Fdog::FObject(z, xjson);
+    cout << "z.age ：" << z.age << endl;
+    cout << "z.age ：" << z.a[0] << endl;
+    cout << "z.age ：" << z.a[1] << endl;
+    cout << "z.age ：" << z.b[0] << endl;
+    cout << "z.age ：" << z.b[1] << endl;
+    // cout << "z.age ：" << x.c[0] << endl;
+    // cout << "z.age ：" << x.c[1] << endl; 
+    cout << "z.age ：" << z.d[0] << endl;
+    cout << "z.age ：" << z.d[1] << endl;
+
+    zhang dd;
+    dd.a.push_back;
+    dd.b.insert;
+    dd.c.push_back;
+    dd.d.push_back;
+    dd.f.insert;
     // //**********************************************************************
     // cout << "基础类型序列化==================================================" << endl;
     // int base_a = 10;
@@ -153,5 +179,4 @@ int main()
     return 0;
 }
 
-//g++ -std=c++11 utils.cpp fdogserializebase.cpp fdogserialize.cpp macrodefinition.h main.cpp -o main -w
-//g++ -std=c++11 FJson.cpp main.cpp -o main -w
+//g++ -std=c++11 FStruct.cpp example.cpp -o main -w

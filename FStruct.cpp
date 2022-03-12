@@ -314,6 +314,21 @@ bool FdogSerialize::isBaseType(string typeName){
     return false;
 }
 
+bool FdogSerialize::isBaseTypeByMap(string typeName){
+    smatch result;
+    regex pattern(complexRegex[10]);
+    if(regex_search(typeName, result, pattern)){
+        string value = result.str(2).c_str();
+        vector<string>::iterator result = find(baseType.begin(), baseType.end(), value);
+        if(result != baseType.end()){
+            return true;
+        }
+        // return result.str(1).c_str();
+        //         result.str(2).c_str();
+    }
+    return false;
+}
+
 //判断是否为vector类型
 bool FdogSerialize::isVectorType(string objectName, string typeName){
     auto x = typeName.find("std::vector<");
