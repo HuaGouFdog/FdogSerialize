@@ -27,7 +27,7 @@ struct zhang {
     map<int,int> b;
     list<int> c;
     deque<int> d;
-    set<int> f;
+    set<int> e;
 };
 
 

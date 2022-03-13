@@ -17,6 +17,7 @@
 #include <string>
 #include <cxxabi.h>
 #include <cstring>
+#include <ctime>
 
 using namespace std;
 
@@ -345,34 +346,234 @@ string F_to_string(T object){
     return F_to_string_s(object, typename TagString<T>::Tag{});
 }
 
+struct Base1Tag{};
+struct VectorTag{};
+struct DequeTag{};
+struct ListTag{};
+struct Map1Tag{};
+struct SetTag{};
+
+template<typename T> struct TagSTLType {
+    using Tag = Base1Tag;
+};
+
+template<> struct TagSTLType<vector<int>> {
+    using Tag = VectorTag;
+};
+
+template<> struct TagSTLType<list<int>> {
+    using Tag = ListTag;
+};
+
+template<> struct TagSTLType<set<int>> {
+    using Tag = SetTag;
+};
+
+template<> struct TagSTLType<deque<int>> {
+    using Tag = DequeTag;
+};
+
+template<> struct TagSTLType<map<int,int>> {
+    using Tag = Map1Tag;
+};
+
 template<typename T>
-void F_init_s(T & object, VectorTag){
-    object.push_back();
+void F_init_s(T & object, Base1Tag, string first, string second = ""){
 }
 
 template<typename T>
-void F_init_s(T & object, DequeTag){
-    object.push_back();
+void F_init_s(T & object, VectorTag, string first, string second = ""){
+    if (first == "int"){
+        object.push_back(0);
+    }
+    // if (first == "char"){
+    //     object.push_back('0');
+    // }else if (first == "unsigned char"){
+    //     object.push_back(0);
+    // }else if (first == "char *"){
+    //     object.push_back("");
+    // }else if (first == "string"){
+    //     object.push_back("");
+    // }else if (first == "short"){
+    //     object.push_back(0);
+    // }else if (first == "unsigned short"){
+    //     object.push_back(0);
+    // }else if (first == "int"){
+    //     object.push_back(0);
+    // }else if (first == "unsigned int"){
+    //     object.push_back(0);
+    // }else if (first == "long"){
+    //     object.push_back(0);
+    // }else if (first == "unsigned long"){
+    //     object.push_back(0);
+    // }else if (first == "long long"){
+    //     object.push_back(0);
+    // }else if (first == "unsigned long long"){
+    //     object.push_back(0);
+    // }else if (first == "float"){
+    //     object.push_back(0.1f);
+    // }else if (first == "double"){
+    //     object.push_back(0.1);
+    // }else if (first == "long double"){
+    //     object.push_back(0.1);
+    // }else{
+
+    // }
 }
 
 template<typename T>
-void F_init_s(T & object, ListTag){
-    object.push_back();
+void F_init_s(T & object, DequeTag, string first, string second = ""){
+    if (first == "int"){
+        object.push_back(0);
+    }
+    // if (first == "char"){
+    //     object.push_back('0');
+    // }else if (first == "unsigned char"){
+    //     object.push_back(0);
+    // }else if (first == "char *"){
+    //     object.push_back("");
+    // }else if (first == "string"){
+    //     object.push_back("");
+    // }else if (first == "short"){
+    //     object.push_back(0);
+    // }else if (first == "unsigned short"){
+    //     object.push_back(0);
+    // }else if (first == "int"){
+    //     object.push_back(0);
+    // }else if (first == "unsigned int"){
+    //     object.push_back(0);
+    // }else if (first == "long"){
+    //     object.push_back(0);
+    // }else if (first == "unsigned long"){
+    //     object.push_back(0);
+    // }else if (first == "long long"){
+    //     object.push_back(0);
+    // }else if (first == "unsigned long long"){
+    //     object.push_back(0);
+    // }else if (first == "float"){
+    //     object.push_back(0.1f);
+    // }else if (first == "double"){
+    //     object.push_back(0.1);
+    // }else if (first == "long double"){
+    //     object.push_back(0.1);
+    // }else {
+
+    // }
 }
 
 template<typename T>
-void F_init_s(T & object, MapTag){
-    object.insert();
+void F_init_s(T & object, ListTag, string first, string second = ""){
+    if (first == "int"){
+        object.push_back(0);
+    }
+    // if (first == "char"){
+    //     object.push_back('0');
+    // }else if (first == "unsigned char"){
+    //     object.push_back(0);
+    // }else if (first == "char *"){
+    //     object.push_back("0");
+    // }else if (first == "string"){
+    //     object.push_back("0");
+    // }else if (first == "short"){
+    //     object.push_back(0);
+    // }else if (first == "unsigned short"){
+    //     object.push_back(0);
+    // }else if (first == "int"){
+    //     object.push_back(0);
+    // }else if (first == "unsigned int"){
+    //     object.push_back(0);
+    // }else if (first == "long"){
+    //     object.push_back(0);
+    // }else if (first == "unsigned long"){
+    //     object.push_back(0);
+    // }else if (first == "long long"){
+    //     object.push_back(0);
+    // }else if (first == "unsigned long long"){
+    //     object.push_back(0);
+    // }else if (first == "float"){
+    //     object.push_back(0.1f);
+    // }else if (first == "double"){
+    //     object.push_back(0.1);
+    // }else if (first == "long double"){
+    //     object.push_back(0.1);
+    // }else {
+
+    // }
 }
 
 template<typename T>
-void F_init_s(T & object, SetTag){
-    object.insert();
+void F_init_s(T & object, SetTag, string first, string second = ""){
+        //set是不可以重复的，可以拿随机数
+    int a = rand()%100;
+    if (first == "int"){
+        object.insert(a);
+    }
+    // if (first == "char"){
+    //     stringstream sstr;
+    //     sstr << a;
+    //     object.insert(sstr.str()[0]);
+    // }else if (first == "unsigned char"){
+    //     object.insert(a);
+    // }else if (first == "char *"){
+    //     stringstream sstr;
+    //     sstr << a;
+    //     object.insert(sstr.str());
+    // }else if (first == "string"){
+    //     stringstream sstr;
+    //     sstr << a;
+    //     object.insert(sstr.str());
+    // }else if (first == "short"){
+    //     object.insert(a);
+    // }else if (first == "unsigned short"){
+    //     object.insert(a);
+    // }else if (first == "int"){
+    //     object.insert(a);
+    // }else if (first == "unsigned int"){
+    //     object.insert(a);
+    // }else if (first == "long"){
+    //     object.insert(a);
+    // }else if (first == "unsigned long"){
+    //     object.insert(a);
+    // }else if (first == "long long"){
+    //     object.insert(a);
+    // }else if (first == "unsigned long long"){
+    //     object.insert(a);
+    // }else if (first == "float"){
+    //     object.insert(static_cast<float>(a));
+    // }else if (first == "double"){
+    //     object.insert(static_cast<double>(a));
+    // }else if (first == "long double"){
+    //     object.insert(static_cast<long double>(a));
+    // }else {
+
+    // }
 }
 
 template<typename T>
-void F_init_(T & object){
-    F_init_s(object, typename TagInit<T>::Tag{});
+void F_init_s(T & object, Map1Tag, string first, string second = ""){
+    if(first == "int" && second == "int"){
+        object.insert(make_pair(1, 2));
+    }
+}
+
+template<typename T>
+void F_init_(T & object, int stlType, string first, string second = ""){
+    //cout << "STL类型" << stlType << endl;
+    if(stlType == OBJECT_VECTOR){
+            F_init_s(object, typename TagSTLType<T>::Tag{}, first);
+    }
+    if(stlType == OBJECT_LIST){
+            F_init_s(object, typename TagSTLType<T>::Tag{}, first); 
+    }
+    if(stlType == OBJECT_DEQUE){
+            F_init_s(object, typename TagSTLType<T>::Tag{}, first);   
+    }
+    if(stlType == OBJECT_SET){
+            F_init_s(object, typename TagSTLType<T>::Tag{}, first);      
+    }
+    if(stlType == OBJECT_MAP){
+            F_init_s(object, typename TagSTLType<T>::Tag{}, first, second);    
+    }
 }
 
 class FdogSerialize {
@@ -497,7 +698,7 @@ class FdogSerialize {
             //这里这个objectinfo应该还是空 所以拿objecttype的数值判断
         }
         int sum = objectinfo.metaInfoObjectList.size();
-        cout << "sum：" << sum << endl;
+        //cout << "sum：" << sum << endl;
         int i = 1;
         //获取到的objectType才是真正的类型，根据这个类型进行操作
         switch(objectType){
@@ -511,7 +712,7 @@ class FdogSerialize {
             {
                 for(auto metainfoObject : objectinfo.metaInfoObjectList){
                     string json_s;
-                    cout <<"成员类型：" << metainfoObject->memberType << "--" << metainfoObject->memberTypeInt << "--"<< metainfoObject->first << endl;
+                    //cout <<"成员类型：" << metainfoObject->memberType << "--" << metainfoObject->memberTypeInt << "--"<< metainfoObject->first << endl;
                     if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
                         FdogSerializeBase::Instance()->BaseToJson(json_s, metainfoObject, object_);
                         json_ = json_ + json_s;
@@ -586,8 +787,7 @@ class FdogSerialize {
                         if(metainfoObject->first == "unsigned short"){
                             FSerialize(json_s, *(list<unsigned short> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "int"){
-                            cout << "dasdsa======进入list" << endl;                        
+                        if(metainfoObject->first == "int"){                    
                             FSerialize(json_s, *(list<int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned int"){
@@ -766,7 +966,7 @@ class FdogSerialize {
 
     template<typename T>
     void FSerialize(string & json_, T & object_, ArrayTag, string name = ""){
-        cout << "进入array==========" << endl;
+        //cout << "进入array==========" << endl;
         for(auto & object_one : object_){
             int objectType = isBaseType(abi::__cxa_demangle(typeid(object_one).name(),0,0,0));
             if (!objectType){
@@ -841,38 +1041,38 @@ class FdogSerialize {
                 smatch result;
                 string regex_key = "(\"" + metainfoObject->memberName +"\")";
                 string regex_value = baseRegex[metainfoObject->memberType];
-                cout << "       反序列化获取的regex_value：" << regex_value << "  memberType = " << metainfoObject->memberType << endl;
+                //cout << "       反序列化获取的regex_value：" << regex_value << "  memberType = " << metainfoObject->memberType << endl;
                 if(regex_value == ""){
                     if(metainfoObject->memberTypeInt == OBJECT_STRUCT){
-                        cout << "------------" << "struct类型" << endl;
+                        //cout << "------------" << "struct类型" << endl;
                         regex_value = objectRegex;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_ARRAY){
-                        cout << "------------" << "appay类型" << endl;
+                        //cout << "------------" << "appay类型" << endl;
                         regex_value = arrayRegex;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_VECTOR){
-                        cout << "------------" << "vector类型" << endl;
+                        //cout << "------------" << "vector类型" << endl;
                         regex_value = arrayRegex;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_LIST){
-                        cout << "------------" << "list类型" << endl;
+                        //cout << "------------" << "list类型" << endl;
                         regex_value = arrayRegex;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_SET){
-                        cout << "------------" << "set类型" << endl;
+                        //cout << "------------" << "set类型" << endl;
                         regex_value = arrayRegex;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_DEQUE){
-                        cout << "------------" << "deque类型" << endl;
+                        //cout << "------------" << "deque类型" << endl;
                         regex_value = arrayRegex;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_MAP){
-                        cout << "------------" << "map类型" << endl;
+                        //cout << "------------" << "map类型" << endl;
                         regex_value = mapRegex;
                     }                                       
                 } else {
-                    cout << "------------" << "base类型" << endl;
+                    //cout << "------------" << "base类型" << endl;
                 }
                 //根据大小写判断
                 regex * pattern = nullptr;
@@ -883,9 +1083,9 @@ class FdogSerialize {
                 }
                 if(regex_search(json_, result, *pattern)){
                     string value = result.str(2).c_str();
-                    cout <<"正则表达式 获取的值：" << value << "   type = " << metainfoObject->memberTypeInt << endl;
+                    //cout <<"正则表达式 获取的值：" << value << "   type = " << metainfoObject->memberTypeInt << endl;
                     if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
-                        cout << "反序列化进入base：" << value << endl << endl;
+                        //cout << "反序列化进入base：" << value << endl << endl;
                         FdogSerializeBase::Instance()->JsonToBase(object_, metainfoObject, value);
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_VECTOR && metainfoObject->memberIsIgnore != true){
@@ -958,7 +1158,7 @@ class FdogSerialize {
                             FDesSerialize(*(list<unsigned short> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "int"){
-                            cout << "dasdsa======进入list" << endl;                        
+                            //cout << "dasdsa======进入list" << endl;                        
                             FDesSerialize(*(list<int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned int"){
@@ -1112,20 +1312,20 @@ class FdogSerialize {
     //基础类型和结构体
     template<typename T>
     void FDesSerialize(T & object_, string & json_, BaseTag, string name = ""){
-        cout << "反序列化进入base：" << json_ << endl << endl;
+        //cout << "反序列化进入base：" << json_ << endl << endl;
         DesSerialize(object_, json_, name);
     }
 
     //用于数组，vector，list，set
     template<typename T>
     void FDesSerialize(T & object_, string & json_, ArrayTag, string name = ""){
-        cout << "反序列化进入~array：" << json_  << endl;
-        cout << "类型" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
+        //cout << "反序列化进入~array：" << json_  << endl;
+        //cout << "类型" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
         int objectType;
         for(auto & object_one : object_){
             //判断内部类型是否为基础类型
             objectType = isBaseType(abi::__cxa_demangle(typeid(object_one).name(),0,0,0));
-            cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
+            //cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
             break;
         }
         vector<string> json_array;
@@ -1142,10 +1342,19 @@ class FdogSerialize {
             json_array = FdogSerialize::Instance()->CuttingArray(json_);
         }
         int i = 0;
-        //这里需要注意，进来的STL容器长度为0，需要重新指定长度
+        //这里需要注意，进来的STL容器长度为0，需要重新指定长度 需要想办法
+        //需要知道容易内部类型，然后作为参数传进去,如果长度小于需要转换的，就需要添加长度
+        
+        memberAttribute Member = getMemberAttribute(abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        srand((int)time(NULL)); //用于set
         for(int i = 0; i < json_array.size(); i++){
-            F_init_(object_); //给object添加内存
+            if(json_array.size() > object_.size()){
+                F_init_(object_, Member.valueTypeInt, Member.first);
+            }
         }
+        int len = json_array.size();
+        int len2 = object_.size();
+        //cout << "changdu:" << len  << "----" << len2 << endl;
         for(auto & object_one : object_){
             DesSerialize(object_one, json_array[i]);
             i++;
@@ -1154,13 +1363,13 @@ class FdogSerialize {
     //用于map
     template<typename T>
     void FDesSerialize(T & object_, string & json_, MapTag){
-        cout << "反序列化进入~map：" << json_ << endl;
-        cout << "类型" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
+        //cout << "反序列化进入~map：" << json_ << endl;
+        //cout << "类型" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
         int objectType;
         for(auto & object_one : object_){
             //判断内部类型是否为基础类型
             objectType = isBaseTypeByMap(abi::__cxa_demangle(typeid(object_one).name(),0,0,0));
-            cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
+            //cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
             break;
         }
         vector<string> json_array;
@@ -1178,9 +1387,12 @@ class FdogSerialize {
         }
         int i = 0;
         int len = json_array.size();
-        cout << "changdu:" << len << endl;
+        //cout << "changdu:" << len << endl;
+        memberAttribute Member = getMemberAttribute(abi::__cxa_demangle(typeid(T).name(),0,0,0));
         for(int i = 0; i < json_array.size(); i++){
-            F_init_(object_); //给object添加内存
+            if(json_array.size() > object_.size()){
+                F_init_(object_, Member.valueTypeInt, Member.first, Member.second);
+            }
         }
         //这里有个问题，就是可能key的顺序不匹配
         //这里存在问题，进来的STL容器长度为0，需要重新指定长度
@@ -1271,11 +1483,13 @@ void FObject(T & object_, string & json_, string name = ""){
 
 #define NAME(x) #x
 
+#define EXTAND_ARGS(args) args //__VA_ARGS__ 在vs中会被认为是一个实参，所以需要定义该宏过渡
+
 #define ARG_N(...) \
-    ARG_N_(0, ##__VA_ARGS__, ARG_N_RESQ()) 
+    EXTAND_ARGS(ARG_N_(0, ##__VA_ARGS__, ARG_N_RESQ()))
 
 #define ARG_N_(...) \
-    ARG_N_M(__VA_ARGS__)
+    EXTAND_ARGS(ARG_N_M(__VA_ARGS__))
 
 #define ARG_N_M(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9,_10, _11, _12, _13, _14, _15, _16, _17, _18, _19,_20, N,...) N
 

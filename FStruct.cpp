@@ -182,7 +182,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         regex pattern(complexRegex[5]);
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            cout << "=========>>1  isVectorType " << value << endl;
+            //cout << "=========>>1  isVectorType " << value << endl;
             resReturn.first = value;
         }
         resReturn.valueTypeInt = OBJECT_VECTOR;
@@ -193,8 +193,8 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
             string value2 = result.str(2).c_str();
-            cout << "=========>>1  isMapType " << value << endl;
-            cout << "=========>>2  isMapType " << value2 << endl;
+            //cout << "=========>>1  isMapType " << value << endl;
+            //cout << "=========>>2  isMapType " << value2 << endl;
             resReturn.first = value;
             resReturn.second = value2;
         }
@@ -205,7 +205,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         regex pattern(complexRegex[7]);
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            cout << "=========>>1  isListType " << value << endl;
+            //cout << "=========>>1  isListType " << value << endl;
             resReturn.first = value;
         }
         resReturn.valueTypeInt = OBJECT_LIST;
@@ -216,7 +216,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         regex pattern(complexRegex[8]);
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            cout << "=========>>1  isSetType " << value << endl;
+            //cout << "=========>>1  isSetType " << value << endl;
             resReturn.first = value;
         }
         resReturn.valueTypeInt = OBJECT_SET;
@@ -227,7 +227,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         regex pattern(complexRegex[9]);
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            cout << "=========>>1  isDequeType " << value << endl;
+            //cout << "=========>>1  isDequeType " << value << endl;
             resReturn.first = value;
         }
         resReturn.valueTypeInt = OBJECT_DEQUE;
