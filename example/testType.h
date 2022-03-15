@@ -23,7 +23,7 @@ struct school{
 
 struct zhang {
     int age;
-    vector<string> a;
+    vector<char *> a;
     map<int,int> b;
     list<int> c;
     deque<int> d;

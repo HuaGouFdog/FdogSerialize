@@ -31,7 +31,7 @@ static vector<string> baseType = {
         "long long", "unsigned long long", "long long*", "unsigned long long*",
         "float", "double", "long double", "float*", "double*", "long double*",
         "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >", 
-        ""
+        "char*"
 };
 
 //有符号类型应该拥有正负号，正号忽视 ^(-|+)? 匹配负号
@@ -49,7 +49,7 @@ static map<string, string> baseRegex = {
 };
 
 static map<int, string> complexRegex = {
-    {5, "std::vector<(.*?),"},
+    {5, "std::vector<(.*?),"},     //这里存在问题，如果是string，只会截取不完整类型
     {6, "std::map<(.*?), (.*?),"},
     {7, "std::__cxx11::list<(.*?),"},
     {8, "std::set<(.*?),"},
@@ -816,7 +816,8 @@ class FdogSerialize {
                             FSerialize(json_s, *(vector<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FSerialize(json_s, *(vector<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int *>>::Tag{});
+                            cout << "zhaodaoleix1" << endl;
+                            FSerialize(json_s, *(vector<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
                             cout << "zhaodaoleix1" << endl;
@@ -1047,6 +1048,7 @@ class FdogSerialize {
 
     template<typename T>
     void FSerialize(string & json_, T & object_, BaseTag, string name = ""){
+        cout << "进入base==========" << endl;
         Serialize(json_, object_, name);
         //这里需要判断类型 如果是基础类型直接使用name 不是基础类型，可以使用
         if (isBaseType(abi::__cxa_demangle(typeid(T).name(),0,0,0))) {

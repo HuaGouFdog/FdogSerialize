@@ -99,10 +99,10 @@ FdogSerialize::FdogSerialize(){
     metainfo->memberTypeSize = sizeof(string);
     this->baseInfoList.push_back(metainfo);
 
-    // metainfo = new MetaInfo();
-    // metainfo->memberType = "long double";
-    // metainfo->memberTypeSize = sizeof(long double);
-    // this->baseInfoList.push_back(metainfo);
+    metainfo = new MetaInfo();
+    metainfo->memberType = "char*";
+    metainfo->memberTypeSize = sizeof(char*);
+    this->baseInfoList.push_back(metainfo);
 
 }
 
@@ -190,12 +190,18 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         resReturn.valueTypeInt = OBJECT_BASE;
     }
     else if(FdogSerialize::isVectorType("", typeName)){
+        cout << "=========>>1  typeName ============= = " << typeName << endl;
         resReturn.valueType = typeName;
         regex pattern(complexRegex[5]);
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            //cout << "=========>>1  isVectorType " << value << endl;
-            resReturn.first = value;
+            cout << "=========>>1  isVectorType ============= = " << value << endl;
+            //处理好
+            if (value == "std::__cxx11::basic_string<char"){
+                resReturn.first = "string";
+            } else{
+                resReturn.first = value;
+            }
         }
         resReturn.valueTypeInt = OBJECT_VECTOR;
     }
