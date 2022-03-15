@@ -6,39 +6,17 @@
 using namespace std;
 
 //g++ -std=c++11 ../FStruct.cpp example.cpp -o main -w
+void registeredMember(){
+    REGISTEREDMEMBER(zhang, age, a, b, c, d, e); //注册成员
+}
 
 int main()
 {
-    //Fdog::FJson();
-    //Fdog::FObject();
-    //Fdog::Valid(); //json是否有效
-    //Fdog::Exists(); //字段是否存在
-    //Fdog::GetValue(); //获取某个值段的值
-    //当指针类型的值为nuller时，则认为当前字段是可选字段，并且没有传值，默认不序列化
-
-    // vector<int> a;
-    // a.push_back(10);
-    // a.push_back(20);
-    // string json_1;
-    // Fdog::FJson(json_1, a, "a");
-    // cout << json_1 << endl;
-
-    // int b = 30;
-    // string json_2;
-    // Fdog::FJson(json_2, b, "b");
-    // cout << json_2 << endl;
-
-    // map<int,int> c;
-    // c[1]=11;
-    // c[2]=22;
-    // string json_3;
-    // Fdog::FJson(json_3, c, "c");
-    // cout << json_3 << endl;
-
+    registeredMember();
     zhang z;
     z.age = 10;
-    z.a.push_back(0);
-    z.a.push_back(1);
+    z.a.push_back("312");
+    z.a.push_back("432");
     z.b[1]=10;
     z.b[2]=20;
     z.c.push_back(0);
@@ -47,13 +25,12 @@ int main()
     z.d.push_back(1);
     z.e.insert(0);
     z.e.insert(1);
-    REGISTEREDMEMBER(zhang, age, a, b, c, d, e); //注册成员
     string zjson;
     Fdog::FJson(zjson, z);
     cout << zjson << endl;
 
     zhang x;
-    string xjson = "{\"age\":99,\"a\":[22,33],\"b\":{\"4\":44,\"5\":55},\"c\":[66,77],\"d\":[88,99],\"e\":[100,110]}";
+    string xjson = "{\"age\":99,\"a\":[\"张旭\",\"是的萨\"],\"b\":{\"4\":44,\"5\":55},\"c\":[66,77],\"d\":[88,99],\"e\":[100,110]}";
     cout << xjson << endl;
     Fdog::FObject(x, xjson);
     cout << "z.age ：" << x.age << endl;

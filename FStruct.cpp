@@ -94,6 +94,16 @@ FdogSerialize::FdogSerialize(){
     metainfo->memberTypeSize = sizeof(long double);
     this->baseInfoList.push_back(metainfo);
 
+    metainfo = new MetaInfo();
+    metainfo->memberType = "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >";
+    metainfo->memberTypeSize = sizeof(string);
+    this->baseInfoList.push_back(metainfo);
+
+    // metainfo = new MetaInfo();
+    // metainfo->memberType = "long double";
+    // metainfo->memberTypeSize = sizeof(long double);
+    // this->baseInfoList.push_back(metainfo);
+
 }
 
 FdogSerialize::~FdogSerialize(){
@@ -125,11 +135,13 @@ ObjectInfo & FdogSerialize::getObjectInfo(string objectName){
 }
 
 MetaInfo * FdogSerialize::getMetaInfo(string TypeName){
+    cout << "getMetaInfo - TypeName = "  << TypeName << endl;
     for(auto metainfo : FdogSerialize::Instance()->baseInfoList){
         if(metainfo->memberType == TypeName){
             return metainfo;
         }
     }
+    return nullptr;
 }
 
 void FdogSerialize::setAliasName(string type, string memberName, string aliasName){
@@ -261,6 +273,7 @@ int FdogSerialize::getObjectTypeInt(string objectName, string typeName){
         return OBJECT_LIST;
     }
     if(FdogSerialize::Instance()->isStructType(objectName, typeName)){
+        //这里也存在问题 判断
         return OBJECT_STRUCT;    
     }
     if(FdogSerialize::Instance()->isArrayType(objectName, typeName)){
@@ -307,12 +320,14 @@ int FdogSerialize::getObjectTypeByObjectInfo(string objectName){
 }
 
 bool FdogSerialize::isBaseType(string typeName){
+    cout << "isBaseType = " << typeName << endl;
     vector<string>::iterator result = find(baseType.begin(), baseType.end(), typeName);
     if(result != baseType.end()){
         return true;
     } 
     return false;
 }
+//这里存在问题，当类型是基本类型是不会错，但是当stl包含char* string，就会出问题
 
 bool FdogSerialize::isBaseTypeByMap(string typeName){
     smatch result;

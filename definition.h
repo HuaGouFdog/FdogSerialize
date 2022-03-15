@@ -14,7 +14,9 @@
         DesSerialize(*((TYPE *)((void *)&object_ + metainfoObject->memberOffset)), value);\
     }
 
+//上面不要动
 
+//自定义类型在此添加
 
 #define Serialize_type_judgment_all\
     Serialize_type_judgment(student)\
