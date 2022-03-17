@@ -1,3 +1,11 @@
+/*
+该项目签署了Apache-2.0 License，详情请参见LICENSE
+根据 Apache 许可，版本 2.0（“许可”）获得许可
+除非遵守许可，否则您不得使用此文件。
+
+Copyright 2021-2022 花狗Fdog(张旭)
+*/
+
 #ifndef FDOGSERIALIZE_H
 #define FDOGSERIALIZE_H
 
@@ -30,7 +38,7 @@ static vector<string> baseType = {
         "long", "unsigned long int", "long*", "unsigned long*",
         "long long", "unsigned long long", "long long*", "unsigned long long*",
         "float", "double", "long double", "float*", "double*", "long double*",
-        "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >", 
+        "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >",
         "char*"
 };
 
@@ -41,6 +49,7 @@ static map<string, string> baseRegex = {
         {"double", "(\\d+.\\d+)"},
         {"long double", "(\\d+.\\d+)"},
         {"char*", "\"(.*?)\""},
+        {"std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >", "\"(.*?)\""},
         {"char", "(\\d+)"}, {"unsigned char", "(\\d+)"}, 
         {"int", "(\\d+)"}, {"unsigned int", "(\\d+)"},
         {"short", "(\\d+)"}, {"unsigned short", "(\\d+)"}, 
@@ -146,7 +155,7 @@ class FdogSerializeBase {
 
     template<class T>
     string getValueByAddress(string valueType, T & object, int offsetValue){
-        cout <<"取值阶段：" << valueType << endl;
+        //cout <<"取值阶段：" << valueType << endl;
         if(valueType == "char*"){
             auto value = *((const char **)((void *)&object + offsetValue));
             string str_value = value;
@@ -222,12 +231,12 @@ class FdogSerializeBase {
 
     template<class T>
     void setValueByAddress(string valueType, T &object, int offsetValue, string value){
-        cout <<"赋值阶段：" << valueType << endl;
+        //cout <<"赋值阶段：" << valueType << endl;
         if(valueType == "char*"){
             *((char **)((void *)&object + offsetValue)) = new char[strlen(value.c_str())];
             strcpy(*((char **)((void *)&object + offsetValue)), value.c_str());
         }
-        if(valueType == "string"){
+        if(valueType == "string" || valueType == "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >"){
             *((string *)((void *)&object + offsetValue)) = value;//new string[strlen(value.c_str())];
             //strcpy(*((string *)((void *)&object + offsetValue)), value);
         }
@@ -294,16 +303,16 @@ class FdogSerializeBase {
     // //基础类型转json
     template<class T>
     void BaseToJsonA(string & json_, MetaInfo * metainfoobject, T & object_){
-        cout << "+++++++++++++++1 = " << metainfoobject->memberType << "---" << metainfoobject->memberOffset << endl;
+        //cout << "+++++++++++++++1 = " << metainfoobject->memberType << "---" << metainfoobject->memberOffset << endl;
         string value = getValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset);
-        cout << "+++++++++++++++2 = " << value << endl;
+        //cout << "+++++++++++++++2 = " << value << endl;
         json_ = json_ + value + ",";
     }    
 
     // //json转基础类型
     template<class T>
     void JsonToBase(T & object_, MetaInfo * metainfoobject, string json_){
-        cout << "setValueByAddress=" << json_ << endl;
+        //cout << "setValueByAddress=" << json_ << endl;
         setValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset, json_);
     }
 };
@@ -478,7 +487,7 @@ template<typename T>
 void F_init_s(T & object, VectorStrTag, string first, string second = ""){
     if (first == "char*"){
         object.push_back("");
-    }else if (first == "string"){
+    }else if (first == "string" || first == "std::__cxx11::basic_string<char"){
         object.push_back("");
     }else{
 
@@ -522,7 +531,7 @@ template<typename T>
 void F_init_s(T & object, DequeStrTag, string first, string second = ""){
     if (first == "char*"){
         object.push_back("");
-    }else if (first == "string"){
+    }else if (first == "string" || first == "std::__cxx11::basic_string<char"){
         object.push_back("");
     }else{
 
@@ -569,7 +578,7 @@ template<typename T>
 void F_init_s(T & object, ListStrTag, string first, string second = ""){
     if (first == "char*"){
         object.push_back("");
-    }else if (first == "string"){
+    }else if (first == "string" || first == "std::__cxx11::basic_string<char"){
         object.push_back("");
     }else{
 
@@ -616,20 +625,30 @@ void F_init_s(T & object, SetTag, string first, string second = ""){
     }
 }
 
+//如果是char * 类型，每次delete之后 地址都是相同的，所以不能在内部使用完归零，要在外面整体赋完值delete
+static vector<char *> temp;
+
 template<typename T>
 void F_init_s(T & object, SetStrTag, string first, string second = ""){
     int a = rand()%100;
+    //cout << "a = " << a << endl;
     if (first == "char*"){
         stringstream sstr;
         sstr << a;
-        object.insert(sstr.str());
-    }else if (first == "string"){
+        char * cc = new char[4];
+        //cout << "cc = " << (void *)cc << "---"<< *cc << "---" << &cc << " sstr 地址：" << &sstr << endl;
+        strcpy(cc, (char *)sstr.str().data());
+        //cout << "cc = " << (void *)cc << "---"<< *cc << "---" << &cc << " sstr 地址：" << &sstr << endl;
+        object.insert(cc);
+        temp.push_back(cc);
+    }else if (first == "string" || first == "std::__cxx11::basic_string<char"){
         stringstream sstr;
         sstr << a;
-        object.insert(sstr.str());
+        object.insert((char *)sstr.str().c_str());
     }else{
 
     }
+    //cout << "长度：" << object.size() << endl;
 }
 
 template<typename T>
@@ -784,17 +803,17 @@ class FdogSerialize {
         //cout << "sum：" << sum << endl;
         int i = 1;
         //获取到的objectType才是真正的类型，根据这个类型进行操作
-        cout << "objectType type = " << objectType  << "json_ : " << json_ << endl;
+        //cout << "objectType type = " << objectType  << "json_ : " << json_ << endl;
         switch(objectType){
             case OBJECT_BASE:
             {
                 MetaInfo * metainfo1 = nullptr;
                 metainfo1 = getMetaInfo(abi::__cxa_demangle(typeid(object_).name(),0,0,0));
                 if (metainfo1 != nullptr){
-                    cout << "==================" << endl;
+                    //cout << "==================" << endl;
                     FdogSerializeBase::Instance()->BaseToJsonA(json_, metainfo1, object_);
                 } else {
-                    cout << "获取MetaInfo失败" << endl;
+                    //cout << "获取MetaInfo失败" << endl;
                 }
             }
             break;
@@ -808,7 +827,7 @@ class FdogSerialize {
                         json_ = json_ + json_s;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_VECTOR && metainfoObject->memberIsIgnore != true){
-                        cout << "====获取的值：" << metainfoObject->first << endl;
+                        //cout << "====获取的值：" << metainfoObject->first << endl;
                         if(metainfoObject->first == "char"){
                             FSerialize(json_s, *(vector<char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
@@ -816,11 +835,11 @@ class FdogSerialize {
                             FSerialize(json_s, *(vector<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            cout << "zhaodaoleix1" << endl;
+                            //cout << "zhaodaoleix1" << endl;
                             FSerialize(json_s, *(vector<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
-                            cout << "zhaodaoleix1" << endl;
+                            //cout << "zhaodaoleix1" << endl;
                             FSerialize(json_s, *(vector<string> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -859,7 +878,7 @@ class FdogSerialize {
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_LIST && metainfoObject->memberIsIgnore != true){
-                        cout << "====获取的值：" << metainfoObject->first << endl;
+                        //cout << "====获取的值：" << metainfoObject->first << endl;
                         if(metainfoObject->first == "bool"){
                             FSerialize(json_s, *(list<bool> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<bool>>::Tag{});
                         } 
@@ -870,9 +889,9 @@ class FdogSerialize {
                             FSerialize(json_s, *(list<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FSerialize(json_s, *(list<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int *>>::Tag{});
+                            FSerialize(json_s, *(list<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string"){
+                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
                             FSerialize(json_s, *(list<string> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -921,9 +940,9 @@ class FdogSerialize {
                             FSerialize(json_s, *(deque<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FSerialize(json_s, *(deque<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int *>>::Tag{});
+                            FSerialize(json_s, *(deque<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string"){
+                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
                             FSerialize(json_s, *(deque<string> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -972,9 +991,9 @@ class FdogSerialize {
                             FSerialize(json_s, *(set<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FSerialize(json_s, *(set<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int *>>::Tag{});
+                            FSerialize(json_s, *(set<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string"){
+                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
                             FSerialize(json_s, *(set<string> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -1048,7 +1067,7 @@ class FdogSerialize {
 
     template<typename T>
     void FSerialize(string & json_, T & object_, BaseTag, string name = ""){
-        cout << "进入base==========" << endl;
+        //cout << "进入base==========" << endl;
         Serialize(json_, object_, name);
         //这里需要判断类型 如果是基础类型直接使用name 不是基础类型，可以使用
         if (isBaseType(abi::__cxa_demangle(typeid(T).name(),0,0,0))) {
@@ -1061,14 +1080,14 @@ class FdogSerialize {
 
     template<typename T>
     void FSerialize(string & json_, T & object_, ArrayTag, string name = ""){
-        cout << "进入array==========" << endl;
+        //cout << "进入array==========" << endl;
         for(auto & object_one : object_){
             //ji
             int objectType = isBaseType(abi::__cxa_demangle(typeid(object_one).name(),0,0,0));
             if (!objectType){
                 json_ = json_ + "{";
             }
-            cout << "1=====" << endl;
+            //cout << "1=====" << endl;
             Serialize(json_, object_one);
             if (!objectType){
                 json_ = json_ + "},";
@@ -1123,11 +1142,13 @@ class FdogSerialize {
                 //     pattern = new regex(regex_key + ":" +regex_value,regex::icase);//icase用于忽略大小写
                 // }
             }
+            //cout << "       反序列化获取的regex_value：" << regex_value << "  memberType = " << metainfo1->memberType << endl;
             if(regex_search(json_, result, *pattern)){
                 string value = result.str(2).c_str();
                 if (value == ""){
                     value = result.str(1).c_str();
                 }
+                //cout << "@@@@@@@@@@@@@反序列化value = " << value << endl;
                 FdogSerializeBase::Instance()->JsonToBase(object_, metainfo1, value);
             }
         }
@@ -1180,7 +1201,7 @@ class FdogSerialize {
                 }
                 if(regex_search(json_, result, *pattern)){
                     string value = result.str(2).c_str();
-                    cout <<"正则表达式 获取的值：" << value << "   type = " << metainfoObject->memberTypeInt << endl;
+                    //cout << endl << "正则表达式 获取的值：" << value << "   type = " << metainfoObject->memberTypeInt << endl;
                     if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
                         //cout << "反序列化进入base：" << value << endl << endl;
                         FdogSerializeBase::Instance()->JsonToBase(object_, metainfoObject, value);
@@ -1195,7 +1216,7 @@ class FdogSerialize {
                         if(metainfoObject->first == "char*"){
                             FDesSerialize(*(vector<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string"){
+                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
                             cout << "进入string" << endl;
                             FDesSerialize(*(vector<string> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
@@ -1244,9 +1265,9 @@ class FdogSerialize {
                             FDesSerialize(*(list<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FDesSerialize(*(list<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int *>>::Tag{});
+                            FDesSerialize(*(list<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string"){
+                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
                             FDesSerialize(*(list<string> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -1295,9 +1316,9 @@ class FdogSerialize {
                             FDesSerialize(*(deque<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FDesSerialize(*(deque<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int *>>::Tag{});
+                            FDesSerialize(*(deque<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string"){
+                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
                             FDesSerialize(*(deque<string> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -1345,9 +1366,9 @@ class FdogSerialize {
                             FDesSerialize(*(set<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FDesSerialize(*(set<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int *>>::Tag{});
+                            FDesSerialize(*(set<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string"){
+                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
                             FDesSerialize(*(set<string> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -1446,6 +1467,7 @@ class FdogSerialize {
         memberAttribute Member = getMemberAttribute(abi::__cxa_demangle(typeid(T).name(),0,0,0));
         srand((int)time(NULL)); //用于set
         for(int i = 0; i < json_array.size(); i++){
+            //cout << "xunhuan :" << i << endl;
             if(json_array.size() > object_.size()){
                 F_init_(object_, Member.valueTypeInt, Member.first);
             }
@@ -1454,10 +1476,19 @@ class FdogSerialize {
         int len2 = object_.size();
         //cout << "changdu:" << len  << "----" << len2 << endl;
         for(auto & object_one : object_){
+            //cout << "json_array[i] = " << json_array[i] << endl;
             DesSerialize(object_one, json_array[i]);
             i++;
         }
-    }
+        //这里释放init里面申请的内存
+        if(Member.valueTypeInt == OBJECT_SET){
+            vector<char *>::iterator it = temp.begin();
+            while(it!= temp.end()){
+                delete *it;
+                ++it;
+            }
+        }
+        temp.clear();    }
     //用于map
     template<typename T>
     void FDesSerialize(T & object_, string & json_, MapTag){

@@ -3,12 +3,22 @@
 #include <typeinfo>
 #include <iostream>
 #include <list>
+#include <functional>
 using namespace std;
 
 //g++ -std=c++11 ../FStruct.cpp example.cpp -o main -w
 void registeredMember(){
     REGISTEREDMEMBER(zhang, age, a, b, c, d, e); //注册成员
 }
+
+
+struct strLess
+{
+   bool operator() (const char *s1, const char *s2) const
+   {
+    return strcmp(s1, s2) < 0;
+   }
+};
 
 int main()
 {
@@ -19,18 +29,18 @@ int main()
     z.a.push_back("432");
     z.b[1]=10;
     z.b[2]=20;
-    z.c.push_back(0);
-    z.c.push_back(1);
-    z.d.push_back(0);
-    z.d.push_back(1);
-    z.e.insert(0);
-    z.e.insert(1);
+    z.c.push_back("不好不好");
+    z.c.push_back("你好不好");
+    z.d.push_back("张旭");
+    z.d.push_back("张旭");
+    z.e.insert("张旭2");
+    z.e.insert("张旭1");
     string zjson;
     Fdog::FJson(zjson, z);
     cout << zjson << endl;
 
     zhang x;
-    string xjson = "{\"age\":99,\"a\":[\"张旭\",\"是的萨\"],\"b\":{\"4\":44,\"5\":55},\"c\":[66,77],\"d\":[88,99],\"e\":[100,110]}";
+    string xjson = "{\"age\":99,\"a\":[\"张旭\",\"是的萨\"],\"b\":{\"4\":44,\"5\":55},\"c\":[\"你好不好\",\"你好不好\"],\"d\":[\"你好不好1\",\"你好不好2\"],\"e\":[\"你好不好2\",\"你好不好1\"]}";
     cout << xjson << endl;
     Fdog::FObject(x, xjson);
     cout << "z.age ：" << x.age << endl;

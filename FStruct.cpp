@@ -1,3 +1,11 @@
+/*
+该项目签署了Apache-2.0 License，详情请参见LICENSE
+根据 Apache 许可，版本 2.0（“许可”）获得许可
+除非遵守许可，否则您不得使用此文件。
+
+Copyright 2021-2022 花狗Fdog(张旭)
+*/
+
 #include "FStruct.h"
 
 FdogSerializeBase * FdogSerializeBase::fdogserializebase = nullptr;
@@ -135,7 +143,7 @@ ObjectInfo & FdogSerialize::getObjectInfo(string objectName){
 }
 
 MetaInfo * FdogSerialize::getMetaInfo(string TypeName){
-    cout << "getMetaInfo - TypeName = "  << TypeName << endl;
+    //cout << "getMetaInfo - TypeName = "  << TypeName << endl;
     for(auto metainfo : FdogSerialize::Instance()->baseInfoList){
         if(metainfo->memberType == TypeName){
             return metainfo;
@@ -190,12 +198,12 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         resReturn.valueTypeInt = OBJECT_BASE;
     }
     else if(FdogSerialize::isVectorType("", typeName)){
-        cout << "=========>>1  typeName ============= = " << typeName << endl;
+        //cout << "=========>>1  typeName ============= = " << typeName << endl;
         resReturn.valueType = typeName;
         regex pattern(complexRegex[5]);
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            cout << "=========>>1  isVectorType ============= = " << value << endl;
+            //cout << "=========>>1  isVectorType 暂时有问题 ============= = " << value << endl;
             //处理好
             if (value == "std::__cxx11::basic_string<char"){
                 resReturn.first = "string";
@@ -296,7 +304,7 @@ ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt
         //截取值
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            cout << "-----" << value << endl;
+            //cout << "-----" << value << endl;
             return getObjectInfo(value);
             //除了复杂类型，还应该有基础类型
         }
@@ -310,7 +318,7 @@ ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt
     case OBJECT_MAP:
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            cout << "-----" << value << endl;
+            //cout << "-----" << value << endl;
             return getObjectInfo(value);
         }
         break;
@@ -326,7 +334,7 @@ int FdogSerialize::getObjectTypeByObjectInfo(string objectName){
 }
 
 bool FdogSerialize::isBaseType(string typeName){
-    cout << "isBaseType = " << typeName << endl;
+    //cout << "isBaseType = " << typeName << endl;
     vector<string>::iterator result = find(baseType.begin(), baseType.end(), typeName);
     if(result != baseType.end()){
         return true;

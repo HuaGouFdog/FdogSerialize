@@ -25,9 +25,9 @@ struct zhang {
     int age;
     vector<char *> a;
     map<int,int> b;
-    list<int> c;
-    deque<int> d;
-    set<int> e;
+    list<char *> c;
+    deque<char *> d;
+    set<char *> e;
 };
 
 

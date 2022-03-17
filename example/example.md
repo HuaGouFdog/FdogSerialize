@@ -14,18 +14,18 @@
 #### 1. 基础类型序列化
 
 ```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
+#include "../FStruct.h" //添加序列化所需头文件
 
 int main()
 {
 	int value = 10;
     string json_;
     //将value转为json格式数据，建议使用第二种类型
-    FdogSerialize::Instance()->FSerialize(json_, value); 			//json值为 "{10}"
-    FdogSerialize::Instance()->FSerialize(json_, value, "value");   //json值为"{"value":10}"
+    Fdog::FJson(json_, value); 			//json值为 "{10}"
+    Fdog::FJson(json_, value, "value");   //json值为"{"value":10}"
 
     //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerialize(value, json_);
+    Fdog::FObject(value, json_);Fdog::FJson
     return 0;
 }
 ```
@@ -37,18 +37,18 @@ int main()
 #### 2. 基础类型数组序列化
 
 ```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
+#include "../FStruct.h" //添加序列化所需头文件
 
 int main()
 {
     int valueArray[5] = {1,2,3,4,5};
     string json_;
     //将valueArray转为json格式数据，建议使用第二种类型
-    FdogSerialize::Instance()->FSerialize(json_, value); 			//json值为 "{[1,2,3,4,5]}"
-    FdogSerialize::Instance()->FSerialize(json_, value, "value");   //json值为"{"valueArray":[1,2,3,4,5]}"
+    Fdog::FJson(json_, value); 			//json值为 "{[1,2,3,4,5]}"
+    Fdog::FJson(json_, value, "value");   //json值为"{"valueArray":[1,2,3,4,5]}"
 
     //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerialize(value, json_);
+    Fdog::FObject(value, json_);
 }
 ```
 
@@ -59,7 +59,7 @@ int main()
 #### 3. 基础类型组成的结构体序列化
 
 ```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
+#include "../FStruct.h" //添加序列化所需头文件
 
 //自定义基础类型结构体
 struct student{
@@ -75,10 +75,10 @@ int main()
     stu.age = 22;
     string json_;
     //将value转为json格式数据
-    FdogSerialize::Instance()->FSerialize(json_, value, "stu");   //json值为"{"stu":{"name":"花狗Fdog","age":22}}"
+    Fdog::FJson(json_, value, "stu");   //json值为"{"stu":{"name":"花狗Fdog","age":22}}"
 
     //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerialize(value, json_);
+    Fdog::FObject(value, json_);
 }
 ```
 
@@ -89,7 +89,7 @@ int main()
 #### 4. 包含结构体类型的结构体序列化
 
 ```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
+#include "../FStruct.h" //添加序列化所需头文件
 
 //自定义基础类型结构体
 struct student{
@@ -123,11 +123,11 @@ int main()
     sch.stu.age = 22;
     string json_;
     //将value转为json格式数据
-    FdogSerialize::Instance()->FSerialize(json_, value, "sch");   
+    Fdog::FJson(json_, value, "sch");   
     //json值为"{"sch":{"schoolName":"fzyz","stu":{"name":"花狗Fdog","age":21}}}"
 
     //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerialize(value, json_);
+    Fdog::FObject(value, json_);
 }
 ```
 
@@ -138,7 +138,7 @@ int main()
 #### 5. vector类型的序列化
 
 ```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
+#include "../FStruct.h" //添加序列化所需头文件
 
 //自定义基础类型结构体
 struct student{
@@ -163,11 +163,11 @@ int main()
     
     string json_;
     //将value转为json格式数据
-    FdogSerialize::Instance()->FSerializeA(json_, stu, "stu");   
+    Fdog::FJson(json_, stu, "stu");   
     //json值为"{"stu":[{"name":"花狗Fdog","age":22},{"name":"黑狗Fdog","age":23}]}"
 
     //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerializeA(value, json_);
+    Fdog::FObject(value, json_);
 }
 ```
 
@@ -178,7 +178,7 @@ int main()
 #### 6. list类型的序列化
 
 ```Cpp
-#include "fdogserialize.h" //添加序列化所需头文件
+#include "../FStruct.h" //添加序列化所需头文件
 
 //自定义基础类型结构体
 struct student{
@@ -203,11 +203,11 @@ int main()
     
     string json_;
     //将value转为json格式数据
-    FdogSerialize::Instance()->FSerializeA(json_, stu, "stu");   
+    Fdog::FJson(json_, stu, "stu");   
     //json值为"{"stu":[{"name":"花狗Fdog","age":22},{"name":"黑狗Fdog","age":23}]}"
 
     //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerializeA(value, json_);
+    Fdog::FObject(value, json_);
 }
 ```
 
@@ -218,7 +218,7 @@ int main()
 #### 7. map类型的序列化
 
 ```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
+#include "../FStruct.h" //添加序列化所需头文件
 
 //自定义基础类型结构体
 struct student{
@@ -243,11 +243,11 @@ int main()
     
     string json_;
     //将value转为json格式数据
-    FdogSerialize::Instance()->FSerializeA(json_, stu, "stu");   
+    Fdog::FJson(json_, stu, "stu");   
     //json值为"{"stu":[{"name":"花狗Fdog","age":22},{"name":"黑狗Fdog","age":23}]}"
 
     //将json格式数据转为value 需保证json_为正确格式字符串
-    FdogSerialize::Instance()->FDesSerializeA(value, json_);
+    Fdog::FObject(value, json_);
 }
 ```
 
@@ -276,7 +276,7 @@ int main()
 #### 1. 支持别名
 
 ```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
+#include "../FStruct.h" //添加序列化所需头文件
 
 //自定义基础类型结构体
 struct student{
@@ -294,7 +294,7 @@ int main()
     stu.name = "花狗Fdog";
     stu.age = 22;
     string json_;
-    FdogSerialize::Instance()->FSerialize(json_, value);   //json值为"{{"Aliasname":"花狗Fdog","age":22}}"
+    Fdog::FJson(json_, value);   //json值为"{{"Aliasname":"花狗Fdog","age":22}}"
 }
 ```
 
@@ -305,7 +305,7 @@ int main()
 #### 2. 支持字段忽略
 
 ```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
+#include "../FStruct.h" //添加序列化所需头文件
 
 //自定义基础类型结构体
 struct student{
@@ -323,7 +323,7 @@ int main()
     stu.name = "花狗Fdog";
     stu.age = 22;
     string json_;
-    FdogSerialize::Instance()->FSerialize(json_, value);   //json值为"{{"age":22}}"
+    Fdog::FJson(json_, value);   //json值为"{{"age":22}}"
 }
 ```
 
@@ -336,7 +336,7 @@ int main()
 当将json转为对象时，如json中的键值与对象中的成员名存在大小写不同，可以设定忽略大小写。
 
 ```cpp
-#include "fdogserialize.h" //添加序列化所需头文件
+#include "../FStruct.h" //添加序列化所需头文件
 
 //自定义基础类型结构体
 struct student{
@@ -350,7 +350,7 @@ int main()
     struct stu;
     FdogSerialize::Instance()->setIgnoreLU("student", "name"); 
     string stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
-    FdogSerialize::Instance()->FDesSerialize(json_, value);
+    Fdog::FObject(json_, value);
 }
 ```
 

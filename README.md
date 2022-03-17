@@ -2,9 +2,11 @@
 
 
 
+![https://img-blog.csdnimg.cn/b9712c0943a14a00a96a7793831ae2bc.png]()
+
 # :fire:FStruct:fire:
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FStruct是一个用于C++序列化的开源库，采用非入侵方式，无需在原有结构体上进行修改，目前支持基础类型，结构体，以及vector，list，deque，set，map等复杂数据类型的序列化，支持JSON和XML两种数据格式，支持别名，支持忽略字段，等其他特性，最少三行代码即可完成转换。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FStruct是一个用于C++序列化的开源库，采用非入侵方式，无需在原有结构体上进行修改，目前支持基础类型，结构体，以及vector，list，deque，set，map等复杂数据类型的序列化，支持JSON和XML两种数据格式，支持别名，支持忽略字段，等其他特性，最少两行代码即可完成转换。
 
 
 
@@ -59,7 +61,7 @@
 
 
 
-长痛不如短痛， 自己动手写一个吧。（一开始想的简单了，说实话后面还是有些难度的）
+长痛不如短痛， 自己动手写一个吧。（一开始想的简单了，说实话后面还是有些难度的，但是没关系，一项一项攻破。）
 
 :point_right:第一阶段分为下面几个部分：
 
@@ -71,13 +73,14 @@
 6. 支持list类型和json互转:heavy_check_mark:
 7. 支持map类型和json互转:heavy_check_mark:
 8. 支持set类型和json互转:heavy_check_mark:
+8. 支持deque类型和json相转:heavy_check_mark:
 
 
 
 :point_right:第二阶段分为下面几个部分：
 
-1. 支持STL和自定义类型多层嵌套:heavy_check_mark::
-2. 对第一阶段所使用的接口进行优化，将多个接口整合为一个，方面调用:heavy_check_mark:
+1. 结构体多层嵌套(如果成员包括STL容器，则STL容器支持基本类型):heavy_check_mark:
+2. 对第一阶段所使用的接口进行优化，将六个接口整合为两个：FJson/FObject，方面调用:heavy_check_mark:
 
 
 
@@ -86,6 +89,7 @@
 1. 支持对json字符串进行格式正确判断:clock3:
 2. 支持获取某个字段是否存在:clock3:
 3. 支持获取某个字段的值，而无须先进行序列化:clock3:
+3. 结构体多层嵌套(如果成员包括STL容器，则STL容器支持基本类型):clock3:
 
 
 
@@ -151,16 +155,38 @@ struct school{
 
 ### :christmas_tree:接口支持
 
-FStruct提供的接口支持：
+FStructm目前期望提供的接口支持：
 
-| 接口支持                                                       | 说明         |
-| -------------------------------------------------------------- | ------------ |
-| FJson(string & json_, T & object_, string name = "")           | object转json |
-| FObject( T & object_, string & json_, string name = "")        | json转object |
-| setAliasName(string Type, string memberName, string AliasName) | 使用别名     |
-| setIgnoreField(string Type, string memberName)                 | 忽略字段     |
-| setIgnoreLU(string Type, string memberName)                    | 忽略大小写   |
-| setFuzzy(string Type)                                          | 模糊转换     |
+已完成：
+
+| 接口支持                                                     | 说明                       |
+| ------------------------------------------------------------ | -------------------------- |
+| FJson(string & json_, T & object_)                           | object转json               |
+| FObject( T & object_, string & json_, string name = "")      | json转object               |
+| setAliasName(string Type, string memberName, string AliasName) | 使用别名（单个变量设置）   |
+| setIgnoreField(string Type, string memberName)               | 忽略字段（单个变量设置）   |
+| setIgnoreLU(string Type, string memberName)                  | 忽略大小写（单个变量设置） |
+
+未完成：
+
+| 接口支持                | 说明                                                         |
+| ----------------------- | ------------------------------------------------------------ |
+| FXml()                  | object转xml                                                  |
+| FObjectX()              | xml转object                                                  |
+| setAliasNameAll()       | 使用别名（支持多个同时设置）                                 |
+| setIgnoreFieldAll()     | 忽略字段（支持多个同时设置）                                 |
+| setIgnoreLUAll()        | 忽略大小写（支持多个同时设置）                               |
+| setFuzzy(string Type)() | 模糊转换（设置后，对于字段名设置不正确，将尝试模糊匹配，考虑加入到默认） |
+| JsonValid()             | json格式是否正确                                             |
+| XmlValid()              | xml格式是否正确                                              |
+| Exist()                 | 查找字段是否存在                                             |
+| *GetIntValue*           | *获取int类型的值*                                            |
+| GetDoubleValue          | 获取double类型的值                                           |
+| GetStringValue          | 获取string类型的值                                           |
+| GetBoolValue            | 获取bool类型的值                                             |
+|                         |                                                              |
+
+如果您还希望提供什么好的接口，请联系我。
 
 
 
