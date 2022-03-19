@@ -28,7 +28,11 @@ struct zhang {
     list<char *> c;
     deque<char *> d;
     set<char *> e;
+    int f[2];
 };
 
+struct text {
+    string a[2];
+};
 
 #endif

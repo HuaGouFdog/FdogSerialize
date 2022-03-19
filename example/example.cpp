@@ -9,54 +9,59 @@ using namespace std;
 //g++ -std=c++11 ../FStruct.cpp example.cpp -o main -w
 void registeredMember(){
     REGISTEREDMEMBER(zhang, age, a, b, c, d, e); //注册成员
+    //REGISTEREDMEMBER(text, a);
 }
-
-
-struct strLess
-{
-   bool operator() (const char *s1, const char *s2) const
-   {
-    return strcmp(s1, s2) < 0;
-   }
-};
 
 int main()
 {
     registeredMember();
-    zhang z;
-    z.age = 10;
-    z.a.push_back("312");
-    z.a.push_back("432");
-    z.b[1]=10;
-    z.b[2]=20;
-    z.c.push_back("不好不好");
-    z.c.push_back("你好不好");
-    z.d.push_back("张旭");
-    z.d.push_back("张旭");
-    z.e.insert("张旭2");
-    z.e.insert("张旭1");
-    string zjson;
-    Fdog::FJson(zjson, z);
-    cout << zjson << endl;
+    //text a;
+    //string a[2] = {"nihao","buhao"};
+    string a[2] ={"10", "20"};
+    string json1;
+    Fdog::FJson(json1, a);
+    cout << json1 << endl;
 
-    zhang x;
-    string xjson = "{\"age\":99,\"a\":[\"张旭\",\"是的萨\"],\"b\":{\"4\":44,\"5\":55},\"c\":[\"你好不好\",\"你好不好\"],\"d\":[\"你好不好1\",\"你好不好2\"],\"e\":[\"你好不好2\",\"你好不好1\"]}";
-    cout << xjson << endl;
-    Fdog::FObject(x, xjson);
-    cout << "z.age ：" << x.age << endl;
-    cout << "z.a ：" << x.a[0] << endl;
-    cout << "z.a ：" << x.a[1] << endl;
-    cout << "z.b ：" << x.b[0] << endl;
-    cout << "z.b ：" << x.b[1] << endl;
-    for( auto s1 : x.c){
-        cout << "z.c ：" << s1 << endl;
-    }
-    cout << "z.d ：" << x.d[0] << endl;
-    cout << "z.d ：" << x.d[1] << endl;
+    string json2 = "{\"a\":[\"ni\",\"bu\"]}";
+    Fdog::FObject(a, json2);
+    cout << json2 << endl;
 
-    for( auto s1 : x.e){
-        cout << "z.e ：" << s1 << endl;
-    }
+    // zhang z;
+    // z.age = 10;
+    // z.a.push_back("312");
+    // z.a.push_back("432");
+    // z.b[1]=10;
+    // z.b[2]=20;
+    // z.c.push_back("不好不好");
+    // z.c.push_back("你好不好");
+    // z.d.push_back("张旭");
+    // z.d.push_back("张旭");
+    // z.e.insert("张旭2");
+    // z.e.insert("张旭1");
+    // z.f[0]=11;
+    // z.f[1]=12;
+    // string zjson;
+    // Fdog::FJson(zjson, z);
+    // cout << zjson << endl;
+
+    // zhang x;
+    // string xjson = "{\"age\":99,\"a\":[\"张旭\",\"是的萨\"],\"b\":{\"4\":44,\"5\":55},\"c\":[\"你好不好\",\"你好不好\"],\"d\":[\"你好不好1\",\"你好不好2\"],\"e\":[\"你好不好2\",\"你好不好1\"],\"f\":[23,24]}";
+    // cout << xjson << endl;
+    // Fdog::FObject(x, xjson);
+    // cout << "z.age ：" << x.age << endl;
+    // cout << "z.a ：" << x.a[0] << endl;
+    // cout << "z.a ：" << x.a[1] << endl;
+    // cout << "z.b ：" << x.b[0] << endl;
+    // cout << "z.b ：" << x.b[1] << endl;
+    // for( auto s1 : x.c){
+    //     cout << "z.c ：" << s1 << endl;
+    // }
+    // cout << "z.d ：" << x.d[0] << endl;
+    // cout << "z.d ：" << x.d[1] << endl;
+
+    // for( auto s1 : x.e){
+    //     cout << "z.e ：" << s1 << endl;
+    // }
     // cout << "z.age ：" << x.f[0] << endl;
     // cout << "z.age ：" << x.f[1] << endl;
     // //**********************************************************************
@@ -77,10 +82,10 @@ int main()
     // cout << "基础类型数组序列化==============================================" << endl;
     // float base_array[5] = {1.2, 3.4, 5.6, 4.3, 5.6};
     // string base_arrayjson;
-    // Fdog::FJsonA(base_arrayjson, base_array, "base_array");
+    // Fdog::FJson(base_arrayjson, base_array, "base_array");
     // cout << base_arrayjson << endl;
     // base_arrayjson = "{\"base_array\":[2.2, 3.6, 7.6, 2.3, 6.8]}";
-    // Fdog::FObjectA(base_array, base_arrayjson);
+    // Fdog::FObject(base_array, base_arrayjson);
     // cout << base_array[0] << "," << base_array[1] << "," << base_array[2] << "," << base_array[3] << "," << base_array[4] << endl;
     // //**********************************************************************
 
@@ -124,10 +129,10 @@ int main()
     // av.push_back(10);
     // av.push_back(5);
     // string av_json;
-    // Fdog::FJsonA(av_json, av, "av");
+    // Fdog::FJson(av_json, av, "av");
     // cout << av_json << endl;
     // av_json = "{\"av\":[30, 20, 10]}";
-    // Fdog::FObjectA(av, av_json);
+    // Fdog::FObject(av, av_json);
     // cout << av[0] << "," << av[1] << "," << av[2] << endl;
     // //**********************************************************************
 

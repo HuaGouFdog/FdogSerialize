@@ -322,8 +322,6 @@ ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt
             return getObjectInfo(value);
         }
         break;
-    case OBJECT_ARRAY:
-        break;
     default:
         break;
     }
@@ -409,9 +407,19 @@ bool FdogSerialize::isStructType(string objectName, string typeName){
     return false;
 }
 
-//是数组返回对于值，不是数组返回0
+//是数组返回对于值，不是数组返回0 
 bool FdogSerialize::isArrayType(string objectName, string typeName){
-    
+    memberAttribute resReturn;
+    smatch result;
+    resReturn.valueType = typeName;
+    regex pattern(complexRegex[4]);
+    if(regex_search(typeName, result, pattern)){
+        string value = result.str(1).c_str();
+        string value2 = result.str(2).c_str();
+        if((value + value2) == "[]"){
+            return true;
+        }
+    }
     return false;
 }
 

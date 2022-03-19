@@ -58,12 +58,13 @@ static map<string, string> baseRegex = {
 };
 
 static map<int, string> complexRegex = {
+    {4, "(\\[)\\d+(\\])"},
     {5, "std::vector<(.*?),"},     //这里存在问题，如果是string，只会截取不完整类型
     {6, "std::map<(.*?), (.*?),"},
     {7, "std::__cxx11::list<(.*?),"},
     {8, "std::set<(.*?),"},
     {9, "std::deque<(.*?),"},
-    {10,"std::pair<(.*?) const, (.*?)>"}
+    {10,"std::pair<(.*?) const, (.*?)>"} //
 };
 
 
@@ -678,6 +679,22 @@ void F_init_(T & object, int stlType, string first, string second = ""){
     }
 }
 
+//用于区分(基础类型结构体/数组)
+struct BaseAndStructTag{};
+struct BaseArrayTag{};
+
+template<typename T> struct TagSTLAAAType {
+    using Tag = BaseAndStructTag;
+};
+
+template<> struct TagSTLAAAType<int[2]> {
+    using Tag = BaseArrayTag;
+};
+
+template<> struct TagSTLAAAType<list<int>> {
+    using Tag = BaseAndStructTag;
+};
+
 class FdogSerialize {
 
     private:
@@ -805,6 +822,7 @@ class FdogSerialize {
         //获取到的objectType才是真正的类型，根据这个类型进行操作
         //cout << "objectType type = " << objectType  << "json_ : " << json_ << endl;
         switch(objectType){
+            //第一次调用进来表示其本身类型 只有两种 结构体或着基础类型
             case OBJECT_BASE:
             {
                 MetaInfo * metainfo1 = nullptr;
@@ -825,6 +843,9 @@ class FdogSerialize {
                     if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
                         FdogSerializeBase::Instance()->BaseToJson(json_s, metainfoObject, object_);
                         json_ = json_ + json_s;
+                    }
+                    if(metainfoObject->memberTypeInt == OBJECT_ARRAY && metainfoObject->memberIsIgnore != true){
+                        cout << "是数组" << endl;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_VECTOR && metainfoObject->memberIsIgnore != true){
                         //cout << "====获取的值：" << metainfoObject->first << endl;
@@ -1050,7 +1071,10 @@ class FdogSerialize {
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";
                     }
 
+
                     //还需要添加容器自定义参数宏
+
+                    //这个宏用于进入OBJECT_STRUCT
                     Serialize_type_judgment_all;
                     if(i == sum){
                         if(json_.length() > 0){
@@ -1066,18 +1090,49 @@ class FdogSerialize {
     }
 
     template<typename T>
-    void FSerialize(string & json_, T & object_, BaseTag, string name = ""){
-        //cout << "进入base==========" << endl;
+    void SerializeS(string & json_, T & object_, BaseAndStructTag, string name = ""){
+        cout << "SerializeS1" << endl;
         Serialize(json_, object_, name);
+    }
+
+    template<typename T>
+    void SerializeS(string & json_, T & object_, BaseArrayTag, string name = ""){
+        for(auto & object_one : object_){
+            Serialize(json_, object_one);
+        }
+    }
+
+    template<typename T>
+    void SerializeS_s(string & json_, T & object_, bool isArray, string name = ""){
+        if(isArray){
+            SerializeS(json_, object_, TagSTLAAAType<int[2]>::Tag{}, name);
+        }else{
+        SerializeS(json_, object_, TagSTLAAAType<list<int>>::Tag{}, name);
+        }
+    }
+
+
+    //用于解析基础类型，数组(只需要判断有没有[]就能确定是不是数组，结构体和基础类型都不具备[]条件)，结构体
+    template<typename T>
+    void FSerialize(string & json_, T & object_, BaseTag, string name = ""){
+        //cout << "类型：" << abi::__cxa_demangle(typeid(T).name(),0,0,0) << endl;
+        //cout << "是否是数组 ： " << isArrayType("", abi::__cxa_demangle(typeid(T).name(),0,0,0)) << endl;
+        bool isArray = isArrayType("", abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        SerializeS_s(json_, object_, isArray, name);
         //这里需要判断类型 如果是基础类型直接使用name 不是基础类型，可以使用
-        if (isBaseType(abi::__cxa_demangle(typeid(T).name(),0,0,0))) {
+        if(isBaseType(abi::__cxa_demangle(typeid(T).name(),0,0,0))) {
             removeLastComma(json_);
             json_ = "{\"" + name + "\":" + json_ + "}";
             return ;
         }
+        if(isArrayType("", abi::__cxa_demangle(typeid(T).name(),0,0,0))){
+            removeLastComma(json_);
+            json_ = "{\"" + name + "\":" + "[" + json_ + "]" + "}";
+            return ;    
+        }
         json_ = "{" + json_ + "}";
     }
-
+    //用于解析STL（map除外）
     template<typename T>
     void FSerialize(string & json_, T & object_, ArrayTag, string name = ""){
         //cout << "进入array==========" << endl;
@@ -1099,7 +1154,7 @@ class FdogSerialize {
         //json_ = "{\"" + name + "\":[" + json_ + "]}";
         //如果转换对象直接就是数组，可以再额外提供一个，或者说其他
     }
-
+    //用于解析map
     template<typename T>
     void FSerialize(string & json_, T & object_, MapTag, string name = ""){
         int i = 0;
@@ -1205,6 +1260,9 @@ class FdogSerialize {
                     if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
                         //cout << "反序列化进入base：" << value << endl << endl;
                         FdogSerializeBase::Instance()->JsonToBase(object_, metainfoObject, value);
+                    }
+                    if(metainfoObject->memberTypeInt == OBJECT_ARRAY && metainfoObject->memberIsIgnore != true){
+
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_VECTOR && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "char"){
@@ -1428,14 +1486,38 @@ class FdogSerialize {
         }
     }
 
-    //基础类型和结构体
     template<typename T>
-    void FDesSerialize(T & object_, string & json_, BaseTag, string name = ""){
-        //cout << "反序列化进入base：" << json_ << endl << endl;
+    void DesSerializeS(string & json_, T & object_, BaseAndStructTag, string name = ""){
         DesSerialize(object_, json_, name);
     }
 
-    //用于数组，vector，list，set
+    template<typename T>
+    void DesSerializeS(string & json_, T & object_, BaseArrayTag, string name = ""){
+        vector<string> json_array;
+        json_array = FdogSerialize::Instance()->CuttingArray(json_);
+        //cout << "----" << json_array.size() << endl;
+        for(auto & object_one : object_){
+            DesSerialize(object_one, json_);
+        }
+    }
+
+    template<typename T>
+    void DesSerializeS_s(T & object_, string & json_, bool isArray, string name = ""){
+        if(isArray){
+            DesSerializeS(json_, object_, TagSTLAAAType<int[2]>::Tag{}, name);
+        }else{
+        DesSerializeS(json_, object_, TagSTLAAAType<list<int>>::Tag{}, name);
+        }
+    }
+
+    //用于解析基础类型，数组(只需要判断有没有[]就能确定是不是数组，结构体和基础类型都不具备[]条件)，结构体
+    template<typename T>
+    void FDesSerialize(T & object_, string & json_, BaseTag, string name = ""){
+        bool isArray = isArrayType("", abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        DesSerializeS_s(object_, json_, isArray, name);
+    }
+
+    //用于解析STL（map除外）
     template<typename T>
     void FDesSerialize(T & object_, string & json_, ArrayTag, string name = ""){
         //cout << "反序列化进入~array：" << json_  << endl;
@@ -1472,8 +1554,8 @@ class FdogSerialize {
                 F_init_(object_, Member.valueTypeInt, Member.first);
             }
         }
-        int len = json_array.size();
-        int len2 = object_.size();
+        // int len = json_array.size();
+        // int len2 = object_.size();
         //cout << "changdu:" << len  << "----" << len2 << endl;
         for(auto & object_one : object_){
             //cout << "json_array[i] = " << json_array[i] << endl;
