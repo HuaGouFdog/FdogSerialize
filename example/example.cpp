@@ -8,23 +8,39 @@ using namespace std;
 
 //g++ -std=c++11 ../FStruct.cpp example.cpp -o main -w
 void registeredMember(){
-    REGISTEREDMEMBER(zhang, age, a, b, c, d, e); //注册成员
-    //REGISTEREDMEMBER(text, a);
+    //REGISTEREDMEMBER(zhang, age, a, b, c, d, e); //注册成员
+    REGISTEREDMEMBER(text, a);
 }
 
 int main()
 {
     registeredMember();
-    //text a;
+    text tx;
     //string a[2] = {"nihao","buhao"};
-    string a[2] ={"10", "20"};
+    //string a[2] ={"10", "20"};
+    tx.a[0]="11.3";
+    tx.a[1]="22.4";
+    // tx.b[0]="e32";
+    // tx.b[1]="das";
     string json1;
-    Fdog::FJson(json1, a);
+    Fdog::FJson(json1, tx);
+    //cout << "addr1 = " << &(tx.a[0]) << "--" << tx.a[0] << endl;
+    //cout << "addr2 = " << &(tx.a[1]) << "--" << tx.a[1] << endl;
     cout << json1 << endl;
 
-    string json2 = "{\"a\":[\"ni\",\"bu\"]}";
-    Fdog::FObject(a, json2);
-    cout << json2 << endl;
+    text tx2;
+    Fdog::FObject(tx2, json1);
+    cout << "addr1 = " << &(tx.a[0]) << "--" << tx.a[0] << endl;
+    cout << "addr2 = " << &(tx.a[1]) << "--" << tx.a[1] << endl;
+    // int c[2]={1,2};
+    // string json2;
+    // Fdog::FJson(json2, c, "c");
+    //cout << json2 << endl;
+
+
+    // string json2 = "{\"a\":[312,321]}";
+    // Fdog::FObject(tx, json2);
+    // cout << json2 << endl;
 
     // zhang z;
     // z.age = 10;

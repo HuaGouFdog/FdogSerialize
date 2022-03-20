@@ -190,14 +190,14 @@ void FdogSerialize::setFuzzy(string Type) {
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
 ************************************/
 memberAttribute FdogSerialize::getMemberAttribute(string typeName){
+    //cout << "getMemberAttribute = " <<typeName << endl;
     memberAttribute resReturn;
     smatch result;
     if(FdogSerialize::isBaseType(typeName)){
         resReturn.valueType = typeName;
         resReturn.ArraySize = 0;
         resReturn.valueTypeInt = OBJECT_BASE;
-    }
-    else if(FdogSerialize::isVectorType("", typeName)){
+    }else if(FdogSerialize::isVectorType("", typeName)){
         //cout << "=========>>1  typeName ============= = " << typeName << endl;
         resReturn.valueType = typeName;
         regex pattern(complexRegex[5]);
@@ -212,8 +212,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
             }
         }
         resReturn.valueTypeInt = OBJECT_VECTOR;
-    }
-    else if(FdogSerialize::isMapType("", typeName)){
+    }else if(FdogSerialize::isMapType("", typeName)){
         resReturn.valueType = typeName;
         regex pattern(complexRegex[6]);
         if(regex_search(typeName, result, pattern)){
@@ -225,8 +224,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
             resReturn.second = value2;
         }
         resReturn.valueTypeInt = OBJECT_MAP;
-    }
-    else if(FdogSerialize::isListType("", typeName)){
+    }else if(FdogSerialize::isListType("", typeName)){
         resReturn.valueType = typeName;
         regex pattern(complexRegex[7]);
         if(regex_search(typeName, result, pattern)){
@@ -236,8 +234,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         }
         resReturn.valueTypeInt = OBJECT_LIST;
         //getTypeOfList
-    }
-    else if(FdogSerialize::isSetType("", typeName)){
+    }else if(FdogSerialize::isSetType("", typeName)){
         resReturn.valueType = typeName;
         regex pattern(complexRegex[8]);
         if(regex_search(typeName, result, pattern)){
@@ -247,8 +244,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         }
         resReturn.valueTypeInt = OBJECT_SET;
         //getTypeOfList
-    }
-    else if(FdogSerialize::isDequeType("", typeName)){
+    }else if(FdogSerialize::isDequeType("", typeName)){
         resReturn.valueType = typeName;
         regex pattern(complexRegex[9]);
         if(regex_search(typeName, result, pattern)){
@@ -258,12 +254,19 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         }
         resReturn.valueTypeInt = OBJECT_DEQUE;
         //getTypeOfList
-    }
-    else if(FdogSerialize::isArrayType("", typeName)){
+    }else if(FdogSerialize::isArrayType("", typeName)){
         resReturn.valueType = typeName;
-        ObjectInfo objectinfo = getObjectInfoByType(typeName, OBJECT_ARRAY);  
-        resReturn.valueType = objectinfo.objectType;
-        resReturn.ArraySize = 0;
+        // ObjectInfo objectinfo = getObjectInfoByType(typeName, OBJECT_ARRAY);  
+        // resReturn.valueType = objectinfo.objectType;
+        regex pattern(complexRegex[4]);
+        if(regex_search(typeName, result, pattern)){
+            string value = result.str(1).c_str();
+            //cout << "数组类型:" << value << " ";
+            string value2 = result.str(3).c_str();
+            //cout << "数组大小:" << value2;
+            resReturn.first = value;
+            resReturn.ArraySize = atoi(value2.data());
+        }
         resReturn.valueTypeInt = OBJECT_ARRAY;
     }else{
         resReturn.valueType = typeName;
@@ -274,6 +277,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
 }
 
 int FdogSerialize::getObjectTypeInt(string objectName, string typeName){
+    //cout << "进入getObjectTypeInt" << endl;
     if(FdogSerialize::Instance()->isBaseType(typeName)){
         return OBJECT_BASE;
     }
@@ -316,6 +320,13 @@ ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt
         }
         break;        
     case OBJECT_MAP:
+        if(regex_search(typeName, result, pattern)){
+            string value = result.str(1).c_str();
+            //cout << "-----" << value << endl;
+            return getObjectInfo(value);
+        }
+        break;
+    case OBJECT_ARRAY:
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
             //cout << "-----" << value << endl;
@@ -414,8 +425,10 @@ bool FdogSerialize::isArrayType(string objectName, string typeName){
     resReturn.valueType = typeName;
     regex pattern(complexRegex[4]);
     if(regex_search(typeName, result, pattern)){
-        string value = result.str(1).c_str();
-        string value2 = result.str(2).c_str();
+        string value = result.str(2).c_str();
+        string value2 = result.str(4).c_str();
+        //cout << "value = " << value << endl;
+        //cout << "value2 = " << value2 << endl;
         if((value + value2) == "[]"){
             return true;
         }

@@ -33,6 +33,7 @@ struct zhang {
 
 struct text {
     string a[2];
+    //string b[2];
 };
 
 #endif
