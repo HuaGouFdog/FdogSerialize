@@ -11,6 +11,84 @@
 - [3. 支持忽略大小写](#3-%E6%94%AF%E6%8C%81%E5%BF%BD%E7%95%A5%E5%A4%A7%E5%B0%8F%E5%86%99)
 - [4. 支持模糊转换](#4-%E6%94%AF%E6%8C%81%E6%A8%A1%E7%B3%8A%E8%BD%AC%E6%8D%A2)
 
+
+
+
+
+## 测试文档(即使用示例)
+
+```cpp
+//测试所用结构体在example/testType.h中定义
+//textType.h
+struct student{
+  	string name;
+    int age;
+};
+
+struct teacher{
+    string name;
+    int age;
+}
+
+//假设学校只有两个人
+struct school{
+    student stu;
+    teacher tea;
+}
+
+//将需要定义结构体的头文件添加在definition.h头文件中
+//definition.h 添加结构体，定义结构体
+#include "example/testType.h"
+
+//用于示例2, 并非需要同时添加，如果你确定只需要单向转换，那么可以只定义一方即可。
+//这个用于结构体转json
+#define Serialize_type_judgment_all\
+    Serialize_type_judgment(student)\
+    Serialize_type_judgment(teacher)\
+//这个用于json转结构体
+#define DesSerialize_type_judgment_all\
+    DesSerialize_type_judgment(student)\
+    DesSerialize_type_judgment(teacher)\
+
+
+//测试文件
+//example.cpp
+#include "../FStruct.h" //添加序列化所需头文件
+
+int main(){
+    
+    //1.结构体只包含基础类型(int,char,char*,string,以及由基础类型构成的数组,或者是STL容器(map暂不支持全类型))，则只需要注册成员即可。
+    REGISTEREDMEMBER(student, name, age);  //注册student成员
+    student stu;
+    stu.name = "yujing";
+    stu.age = 21;
+    string stu_json = "";
+    //结构体转json
+    Fdog::FJson(stu_json, stu);  //结果 输出stu_json为： {"name":"yujing","age":21}; 
+    student stu2;
+    string stu2_json = "{\"name\":\"zhangxv\",\"age\":21}"; //引号要做处理
+    //json转结构体
+    Fdog::FObject(stu2, stu2_json);  //结果  stu2.name = zhangxv   stu2.age = 21
+    
+    
+    //2.结构体中除了基础类型，还包括自定义结构体
+    REGISTEREDMEMBER(teacher, name, age);  //注册teacher成员
+    REGISTEREDMEMBER(school, name, age);  //注册school成员
+    
+    
+    
+    return 0;
+}
+```
+
+
+
+
+
+
+
+
+
 #### 1. 基础类型序列化
 
 ```cpp
