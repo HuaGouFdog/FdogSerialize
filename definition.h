@@ -9,6 +9,10 @@ Copyright 2021-2022 花狗Fdog(张旭)
 #ifndef BEHAVIOR_H
 #define BEHAVIOR_H
 
+/******在此添加结构体所包含的头文件****/
+#include "example/testType.h"
+/*********************************/
+
 #define TYPE_NAME(name) #name
 
 #define Serialize_type_judgment(TYPE)\
@@ -24,12 +28,14 @@ Copyright 2021-2022 花狗Fdog(张旭)
 
 //上面不要动
 
-//自定义类型在此添加
 
+//自定义机构体在此添加
 #define Serialize_type_judgment_all\
     Serialize_type_judgment(student)\
+    Serialize_type_judgment(teacher)\
 
 #define DesSerialize_type_judgment_all\
     DesSerialize_type_judgment(student)\
+    DesSerialize_type_judgment(teacher)\
 
 #endif

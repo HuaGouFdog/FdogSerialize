@@ -7,31 +7,53 @@
 using namespace std;
 
 //g++ -std=c++11 ../FStruct.cpp example.cpp -o main -w
-void registeredMember(){
-    //REGISTEREDMEMBER(zhang, age, a, b, c, d, e); //注册成员
-    REGISTEREDMEMBER(text, a);
-}
 
 int main()
 {
-    registeredMember();
-    text tx;
+    //1.结构体只包含基础类型(int,char,char*,string,以及由基础类型构成的数组)，则只需要注册成员即可。
+    REGISTEREDMEMBER(student, name, age);  //注册成员
+    student stu;
+    stu.name = "yujing";
+    stu.age = 21;
+    string stu_json = ""; 
+    //结构体转json
+    Fdog::FJson(stu_json, stu);  //结果 stu_json = 
+    cout << stu_json << endl;
+    student stu2;
+    string stu2_json = "{\"name\":\"zhangxv\",\"age\":21}";
+    //json转结构体
+    Fdog::FObject(stu2, stu2_json);  //结果  stu2
+    cout << stu2.name << "-" << stu2.age << endl;
+
+    REGISTEREDMEMBER(teacher, name, age);  //注册teacher成员
+    REGISTEREDMEMBER(school, stu, tea);  //注册school成员
+    school sch;
+    sch.stu.name = "liuliu";
+    sch.stu.age = 18;
+    sch.tea.name = "wufang";
+    sch.tea.age = 48;
+    string sch_json = "";
+    //结构体转json
+    Fdog::FJson(sch_json, sch);
+    cout << sch_json << endl;
+
+    //text tx;
     //string a[2] = {"nihao","buhao"};
     //string a[2] ={"10", "20"};
-    tx.a[0]="11.3";
-    tx.a[1]="22.4";
+    // tx.a[0]="11.3";
+    // tx.a[1]="22.4";
     // tx.b[0]="e32";
     // tx.b[1]="das";
-    string json1;
-    Fdog::FJson(json1, tx);
+    // string json1;
+    // Fdog::FJson(json1, tx);
     //cout << "addr1 = " << &(tx.a[0]) << "--" << tx.a[0] << endl;
     //cout << "addr2 = " << &(tx.a[1]) << "--" << tx.a[1] << endl;
-    cout << json1 << endl;
+    // cout << json1 << endl;
 
-    text tx2;
-    Fdog::FObject(tx2, json1);
-    cout << "addr1 = " << &(tx.a[0]) << "--" << tx.a[0] << endl;
-    cout << "addr2 = " << &(tx.a[1]) << "--" << tx.a[1] << endl;
+    // text tx2;
+    // Fdog::FObject(tx2, json1);
+    // cout << "addr1 = " << &(tx.a[0]) << "--" << tx.a[0] << endl;
+    // cout << "addr2 = " << &(tx.a[1]) << "--" << tx.a[1] << endl;
     // int c[2]={1,2};
     // string json2;
     // Fdog::FJson(json2, c, "c");

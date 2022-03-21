@@ -1,21 +1,8 @@
-- [1. 基础类型序列化](#1-%E5%9F%BA%E7%A1%80%E7%B1%BB%E5%9E%8B%E5%BA%8F%E5%88%97%E5%8C%96)
-- [2. 基础类型数组序列化](#2-%E5%9F%BA%E7%A1%80%E7%B1%BB%E5%9E%8B%E6%95%B0%E7%BB%84%E5%BA%8F%E5%88%97%E5%8C%96)
-- [3. 基础类型组成的结构体序列化](#3-%E5%9F%BA%E7%A1%80%E7%B1%BB%E5%9E%8B%E7%BB%84%E6%88%90%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93%E5%BA%8F%E5%88%97%E5%8C%96)
-- [4. 包含结构体类型的结构体序列化](#4-%E5%8C%85%E5%90%AB%E7%BB%93%E6%9E%84%E4%BD%93%E7%B1%BB%E5%9E%8B%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93%E5%BA%8F%E5%88%97%E5%8C%96)
-- [5. vector类型的序列化](#5-vector%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96)
-- [6. list类型的序列化](#6-list%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96)
-- [7. map类型的序列化](#7-map%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96)
-- [8. 必要说明](#8-%E5%BF%85%E8%A6%81%E8%AF%B4%E6%98%8E)
-- [1. 支持别名](#1-%E6%94%AF%E6%8C%81%E5%88%AB%E5%90%8D)
-- [2. 支持字段忽略](#2-%E6%94%AF%E6%8C%81%E5%AD%97%E6%AE%B5%E5%BF%BD%E7%95%A5)
-- [3. 支持忽略大小写](#3-%E6%94%AF%E6%8C%81%E5%BF%BD%E7%95%A5%E5%A4%A7%E5%B0%8F%E5%86%99)
-- [4. 支持模糊转换](#4-%E6%94%AF%E6%8C%81%E6%A8%A1%E7%B3%8A%E8%BD%AC%E6%8D%A2)
+### [中文](https://github.com/HuaGouFdog/FdogSerialize/blob/master/example/example.md) | [**English**](https://github.com/HuaGouFdog/FdogSerialize/blob/master/example/example_EN.md)
 
 
 
-
-
-## 测试文档(即使用示例)
+## :christmas_tree:测试文档(即使用示例)
 
 ```cpp
 //测试所用结构体在example/testType.h中定义
@@ -28,13 +15,13 @@ struct student{
 struct teacher{
     string name;
     int age;
-}
+};
 
 //假设学校只有两个人
 struct school{
     student stu;
     teacher tea;
-}
+};
 
 //将需要定义结构体的头文件添加在definition.h头文件中
 //definition.h 添加结构体，定义结构体
@@ -64,7 +51,7 @@ int main(){
     stu.age = 21;
     string stu_json = "";
     //结构体转json
-    Fdog::FJson(stu_json, stu);  //结果 输出stu_json为： {"name":"yujing","age":21}; 
+    Fdog::FJson(stu_json, stu);  //结果 输出stu_json为： {"name":"yujing","age":21}
     student stu2;
     string stu2_json = "{\"name\":\"zhangxv\",\"age\":21}"; //引号要做处理
     //json转结构体
@@ -73,369 +60,137 @@ int main(){
     
     //2.结构体中除了基础类型，还包括自定义结构体
     REGISTEREDMEMBER(teacher, name, age);  //注册teacher成员
-    REGISTEREDMEMBER(school, name, age);  //注册school成员
-    
-    
-    
-    return 0;
-}
-```
-
-
-
-
-
-
-
-
-
-#### 1. 基础类型序列化
-
-```cpp
-#include "../FStruct.h" //添加序列化所需头文件
-
-int main()
-{
-	int value = 10;
-    string json_;
-    //将value转为json格式数据，建议使用第二种类型
-    Fdog::FJson(json_, value); 			//json值为 "{10}"
-    Fdog::FJson(json_, value, "value");   //json值为"{"value":10}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    Fdog::FObject(value, json_);Fdog::FJson
-    return 0;
-}
-```
-
-
-
----
-
-#### 2. 基础类型数组序列化
-
-```cpp
-#include "../FStruct.h" //添加序列化所需头文件
-
-int main()
-{
-    int valueArray[5] = {1,2,3,4,5};
-    string json_;
-    //将valueArray转为json格式数据，建议使用第二种类型
-    Fdog::FJson(json_, value); 			//json值为 "{[1,2,3,4,5]}"
-    Fdog::FJson(json_, value, "value");   //json值为"{"valueArray":[1,2,3,4,5]}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    Fdog::FObject(value, json_);
-}
-```
-
-
-
----
-
-#### 3. 基础类型组成的结构体序列化
-
-```cpp
-#include "../FStruct.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    struct stu;
-    stu.name = "花狗Fdog";
-    stu.age = 22;
-    string json_;
-    //将value转为json格式数据
-    Fdog::FJson(json_, value, "stu");   //json值为"{"stu":{"name":"花狗Fdog","age":22}}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    Fdog::FObject(value, json_);
-}
-```
-
-
-
----
-
-#### 4. 包含结构体类型的结构体序列化
-
-```cpp
-#include "../FStruct.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-struct school{
-  char * schoolName;
-  student stu;
-};
-
-//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
-#define Serialize_type_judgment_all\
-    Serialize_type_judgment(student)
-	//依次添加
-    
-//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
-#define DesSerialize_type_judgment_all\
-    DesSerialize_type_judgment(student)
-	//依次添加
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型
-    REGISTEREDMEMBER(school, school, stu); //需要注册自定义类型
-   
+    REGISTEREDMEMBER(school, stu, tea);  //注册school成员
     school sch;
-    sch.schoolName = "fzyz";
-    sch.stu.name = "花狗Fdog";
-    sch.stu.age = 22;
-    string json_;
-    //将value转为json格式数据
-    Fdog::FJson(json_, value, "sch");   
-    //json值为"{"sch":{"schoolName":"fzyz","stu":{"name":"花狗Fdog","age":21}}}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    Fdog::FObject(value, json_);
-}
-```
-
-
-
----
-
-#### 5. vector类型的序列化
-
-```cpp
-#include "../FStruct.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    vector<student> stu;
-    struct stu_1;
-    stu_1.name = "花狗Fdog";
-    stu_1.age = 22;
+    sch.stu.name = "liuliu";
+    sch.stu.age = 18;
+    sch.tea.name = "wufang";
+    sch.tea.age = 48;
+    string sch_json = "";
+    //结构体转json
+    Fdog::FJson(sch_json, sch); //结果 输出sch_json为：{"stu":{"name":"liuliu","age":18},"tea":{"name":"wufang","age":48}}
+  	//json转结构体
+    school sch2;
+    string sch2_json = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
+    Fdog::FObject(sch2, sch2_json);
     
-    struct stu_2;
-    stu_2.name = "黑狗Fdog";
-    stu_2.age = 23;
+    //3.结构体成员存在自定义类型的数组
+    //马上支持
     
-    stu.push_back(stu_1);
-    stu.push_back(stu_2);
     
-    string json_;
-    //将value转为json格式数据
-    Fdog::FJson(json_, stu, "stu");   
-    //json值为"{"stu":[{"name":"花狗Fdog","age":22},{"name":"黑狗Fdog","age":23}]}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    Fdog::FObject(value, json_);
-}
-```
-
-
-
----
-
-#### 6. list类型的序列化
-
-```Cpp
-#include "../FStruct.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    list<student> stu;
-    struct stu_1;
-    stu_1.name = "花狗Fdog";
-    stu_1.age = 22;
+    //4.结构体成员存在自定义类型STL容器
+    //马上支持
     
-    struct stu_2;
-    stu_2.name = "黑狗Fdog";
-    stu_2.age = 23;
     
-    stu.push_back(stu_1);
-    stu.push_back(stu_2);
+    //5.支持别名(这个接口调用太复杂，后期会优化)
+    FdogSerialize::Instance()->setAliasName("student", "name", "Aliasname"); //第一个参数为类型，第二参数为原名，第三个参数为别名
+    Fdog::FJson(stu_json, stu);  //结果 输出stu_json为： {"Aliasname":"yujing","age":21}
     
-    string json_;
-    //将value转为json格式数据
-    Fdog::FJson(json_, stu, "stu");   
-    //json值为"{"stu":[{"name":"花狗Fdog","age":22},{"name":"黑狗Fdog","age":23}]}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    Fdog::FObject(value, json_);
-}
-```
-
-
-
----
-
-#### 7. map类型的序列化
-
-```cpp
-#include "../FStruct.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    vector<student> stu;
-    struct stu_1;
-    stu_1.name = "花狗Fdog";
-    stu_1.age = 22;
     
-    struct stu_2;
-    stu_2.name = "黑狗Fdog";
-    stu_2.age = 23;
+    //6.支持字段忽略(这个接口调用太复杂，后期会优化)
+    FdogSerialize::Instance()->setIgnoreField("student", "name");  //第一个参数为类型，第二参数为需要忽略的字段
+    Fdog::FJson(stu_json, stu);  //结果 输出stu_json为： {"age":21}  //name字段的数据将被忽略
     
-    stu.push_back(stu_1);
-    stu.push_back(stu_2);
     
-    string json_;
-    //将value转为json格式数据
-    Fdog::FJson(json_, stu, "stu");   
-    //json值为"{"stu":[{"name":"花狗Fdog","age":22},{"name":"黑狗Fdog","age":23}]}"
-
-    //将json格式数据转为value 需保证json_为正确格式字符串
-    Fdog::FObject(value, json_);
-}
-```
-
-#### 8. 必要说明
-
-```cpp
-//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
-#define Serialize_type_judgment_all\
-    Serialize_type_judgment(student)
-	//依次添加
-    
-//需要在宏Serialize_type_judgment_all定义下添加嵌套结构体
-#define DesSerialize_type_judgment_all\
-    DesSerialize_type_judgment(student)
-	//依次添加
-
-//两个宏的定义准则：使用该自定义类型做为其他自定义类型的成员
-```
-
-
-
----
-
-
-
-#### 1. 支持别名
-
-```cpp
-#include "../FStruct.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    FdogSerialize::Instance()->setAliasName("student", "name", "Aliasname"); 
-    //第一个参数为类型，第二参数为原名，第三个参数为别名
-    //除此之外，也可以使用setAliasNameAll设置多个参数的别名
-    struct stu;
-    stu.name = "花狗Fdog";
-    stu.age = 22;
-    string json_;
-    Fdog::FJson(json_, value);   //json值为"{{"Aliasname":"花狗Fdog","age":22}}"
-}
-```
-
-
-
-----
-
-#### 2. 支持字段忽略
-
-```cpp
-#include "../FStruct.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); //需要注册自定义类型，第一个参数为自定义结构体名，后面参数依次为成员名
-    FdogSerialize::Instance()->setIgnoreField("student", "name");  
-    //第一个参数为类型，第二参数为需要忽略的字段
-    //除此之外，也可以使用setIgnoreFieldAll设置多个忽略的字段
-    struct stu;
-    stu.name = "花狗Fdog";
-    stu.age = 22;
-    string json_;
-    Fdog::FJson(json_, value);   //json值为"{{"age":22}}"
-}
-```
-
-
-
----
-
-#### 3. 支持忽略大小写
-
-当将json转为对象时，如json中的键值与对象中的成员名存在大小写不同，可以设定忽略大小写。
-
-```cpp
-#include "../FStruct.h" //添加序列化所需头文件
-
-//自定义基础类型结构体
-struct student{
-    char * name;
-    int age;
-};
-
-int main()
-{
-    REGISTEREDMEMBER(student, name, age); 
-    struct stu;
-    FdogSerialize::Instance()->setIgnoreLU("student", "name"); 
+    //7.支持忽略字段大小写(这个接口调用太复杂，后期会优化)
+    //当将json转为对象时，如json中的键值与对象中的成员名存在大小写不同，可以设定忽略大小写。
+    FdogSerialize::Instance()->setIgnoreLU("student", "name");
+    FdogSerialize::Instance()->setIgnoreLU("student", "age");
     string stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
-    Fdog::FObject(json_, value);
+    Fdog::FObject(stu, stu_json);  //将Name对应name，AGE对应age
+    
+    //8.针对5，6，7接口增加对应的一次性接口，避免有多个字段需要设置，从而多次调用接口
+    //下个版本支持
+    
+    //9.默认支持模糊匹配
+    //马上支持，当不小心写错字段名时，程序将自动进行模糊匹配，最大可能完成转换。
+    
+    
+    //10.检测Json格式是否正确
+    //马上支持
+    
+    
+    //11.查找json中某个字段是否存在
+    //马上支持
+    
+    //12.支持获取某个字段的值(返回类型支持int, double, string, bool)
+    //马上支持
+    
+    //13.支持其他类型指针(指针类型将拥有可选字段属性，对于指针变量，在转换时，将先判断指针地址是否为空，若为空，将不进行转换，类似于忽略字段)
+    //下个版本
+    
+    //14.支持xml序列化
+    //下下版本～
+    
+    return 0;
 }
 ```
 
 
 
-#### 4. 支持模糊转换
+### :christmas_tree:可能的疑问
 
-若json和对象中的键值不相同，开启后将根据模糊等级进行匹配
+---
 
-暂无
+
+
+1. :point_right:为什么char * 类型算作基础类型
+
+​	因为json中除了数值型数据，剩下的便是字符串类型，考虑到字符串使用的频率，再加上C++对于C兼容的原因，决定把char *作为最基础类型，除了char * 可以存储字符串，也可使用string存储字符串。
+
+2. :point_right:char 类型怎么传递 
+
+   由于JSON并不支持单引号，所以将使用数值传递并还原，例如：
+
+   ```cpp
+   char ch = 'A'; //A的ASCII码十进制为98
+   
+   //如果一个包含char的结构体转Json，检测到ch的类型为char将自动转为字符，//注意C++的中的转义
+   std::string json = "{\"ch\":98}";
+   
+   //相对的，如果一个包含char的json想转为struct
+   std::string json = "{\"ch\":98}";
+   
+   //又或者你不知道字符'A'的ASCII码是多少，那么可以使用如下方式，一般情况下不会遇到自己写json
+   std::string json = "{\"ch\":\"char('A')\"}";//库会根据ch的类型，若ch为char类型自动将\"char('A')\"转为98
+   ```
+
+   
+
+3. :point_right:目前支持20个成员的结构体，也可自行添加。
+
+   ```cpp
+   //添加方法：在FStruct.h底部，找到
+   #define REGISTEREDMEMBER_s_20(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
+   REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
+   
+   //当前支持20，若您有更大的需求，可以根据已有格式自行添加，当然如果您觉得20个太多，也可以自行删除。
+   ```
+
+   
+
+4. :point_right:关于指针类型的支持
+
+​		对于指针类型的支持，内部在处理指针时，将判断指针是否为nullpr，如果为nullpr则不参与序列化，如果不为nullpr则参与序列化，指针类型在这里有可选字段的属性，您可赋值，也可不赋值，当遇到非必传字段时，建议您使用指针类型。
+
+
+
+5. :point_right:vector<bool>的问题
+
+​	vector<bool>的问题不是一个STL容器，出于**空间优化的原因**，C++ 标准（最早可追溯到 C++98）明确地将 vector<bool> 称为特殊的标准容器，其中每个 bool 仅使用一位空间而不是像普通 bool 那样使用一个字节（ 实现一种“动态位集”）。
+
+​	标准库提供了两个替代品：deque<bool>，bitset
+
+
+
+6. :point_right:文件说明
+
+​	该库包括defintion.h，FStruct.h，FStruct.cpp，三个文件。
+
+​	FStruct.h，FStruct.cpp提供的所有可用接口，已在<接口支持>中列出，您可按需调用。
+
+​	defintion.h头文件用于宏替换某些必要的代码，如果一个参与序列化与反序列化的结构体中存在某个成员也是结构体，那么您应该在defintion.h对应的宏里面添	加相应的定义。
+
+​	example.md提供了足够详细的测试示例(如果您觉得还有缺陷，可与我联系)。
+
+​	对应的example.cpp提供了example.md所提供示例的代码。

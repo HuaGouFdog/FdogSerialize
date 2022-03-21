@@ -10,8 +10,6 @@ Copyright 2021-2022 花狗Fdog(张旭)
 #define FDOGSERIALIZE_H
 
 #include "definition.h"
-//在此添加用到的类型头文件
-#include "example/testType.h"
 #include <map>
 #include <vector>
 #include <list>
@@ -26,7 +24,6 @@ Copyright 2021-2022 花狗Fdog(张旭)
 #include <cxxabi.h>
 #include <cstring>
 #include <ctime>
-
 using namespace std;
 
 

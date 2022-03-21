@@ -2,8 +2,6 @@
 
 
 
-<img src="https://img-blog.csdnimg.cn/b9712c0943a14a00a96a7793831ae2bc.png" style="zoom: 30%;" />
-
 # :fire:FStruct:fire:
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FStruct是一个用于C++序列化的开源库，采用非入侵方式，无需在原有结构体上进行修改，目前支持基础类型，结构体，以及vector，list，deque，set，map等复杂数据类型的序列化，支持JSON和XML两种数据格式，支持别名，支持忽略字段，等其他特性，最少两行代码即可完成转换。
@@ -196,78 +194,9 @@ FStructm目前期望提供的接口支持：
 
 ### :christmas_tree:测试文档(即使用说明)
 
-[example.md](https://github.com/HuaGouFdog/FdogSerialize/blob/master/example/example.md)
-
----
 
 
-
-### :christmas_tree:可能的疑问
-
----
-
-
-
-1. :point_right:为什么char * 类型算作基础类型
-
-​	因为json中除了数值型数据，剩下的便是字符串类型，考虑到字符串使用的频率，再加上C++对于C兼容的原因，决定把char *作为最基础类型，除了char * 可以存储字符串，也可使用string存储字符串。
-
-2. :point_right:char 类型怎么传递 
-
-   由于JSON并不支持单引号，所以将使用数值传递并还原，例如：
-
-   ```cpp
-   char ch = 'A'; //ASCII码十进制为98
-   
-   //如果一个包含char的结构体转Json，检测到ch的类型为char将自动转为字符，//注意C++的中的转义
-   std::string json = "{\"ch\":98}";
-   
-   //相对的，如果一个包含char的json想转为struct
-   std::string json = "{\"ch\":98}";
-   
-   //又或者你不知道字符'A'的ASCII码是多少，那么可以使用如下方式，一般情况下不会遇到自己写json
-   std::string json = "{\"ch\":\"char('A')\"}";//库会根据ch的类型，若ch为char类型自动将\"char('A')\"转为98
-   ```
-
-   
-
-3. :point_right:目前支持20个成员的结构体，也可自行添加。
-
-   ```cpp
-   //添加方法：在FStruct.h底部，找到
-   #define REGISTEREDMEMBER_s_20(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
-   REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
-   
-   //当前支持20，若您有更大的需求，可以根据已有格式自行添加，当然如果您觉得20个太多，也可以自行删除。
-   ```
-   
-   
-   
-4. :point_right:关于指针类型的支持
-
-​		对于指针类型的支持，内部在处理指针时，将判断指针是否为nullpr，如果为nullpr则不参与序列化，如果不为nullpr则参与序列化，指针类型在这里有可选字段的属性，您可赋值，也可不赋值，当遇到非必传字段时，建议您使用指针类型。
-
-
-
-5. :point_right:vector<bool>的问题
-
-​	vector<bool>的问题不是一个STL容器，出于**空间优化的原因**，C++ 标准（最早可追溯到 C++98）明确地将 vector<bool> 称为特殊的标准容器，其中每个 bool 仅使用一位空间而不是像普通 bool 那样使用一个字节（ 实现一种“动态位集”）。
-
-​	标准库提供了两个替代品：deque<bool>，bitset
-
-
-
-6. :point_right:文件说明
-
-​	该库包括defintion.h，FStruct.h，FStruct.cpp，三个文件。
-
-​	FStruct.h，FStruct.cpp提供的所有可用接口，已在<接口支持>中列出，您可按需调用。
-
-​	defintion.h头文件用于宏替换某些必要的代码，如果一个参与序列化与反序列化的结构体中存在某个成员也是结构体，那么您应该在defintion.h对应的宏里面添	加相应的定义。
-
-​	example.md提供了足够详细的测试示例(如果您觉得还有缺陷，可与我联系)。
-
-​	对应的example.cpp提供了example.md所提供示例的代码。
+[example.md](https://github.com/HuaGouFdog/FdogSerialize/blob/master/example/example_EN.md)
 
 
 
