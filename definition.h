@@ -21,9 +21,9 @@ Copyright 2021-2022 花狗Fdog(张旭)
         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";\
     }
 
-#define DesSerialize_type_judgment(TYPE)\
+#define Deserialize_type_judgment(TYPE)\
     if(metainfoObject->memberType == TYPE_NAME(TYPE) && metainfoObject->memberIsIgnore != true){\
-        DesSerialize(*((TYPE *)((void *)&object_ + metainfoObject->memberOffset)), value);\
+        Deserialize(*((TYPE *)((void *)&object_ + metainfoObject->memberOffset)), value);\
     }
 
 //上面不要动
@@ -34,8 +34,8 @@ Copyright 2021-2022 花狗Fdog(张旭)
     Serialize_type_judgment(student)\
     Serialize_type_judgment(teacher)\
 
-#define DesSerialize_type_judgment_all\
-    DesSerialize_type_judgment(student)\
-    DesSerialize_type_judgment(teacher)\
+#define Deserialize_type_judgment_all\
+    Deserialize_type_judgment(student)\
+    Deserialize_type_judgment(teacher)\
 
 #endif
