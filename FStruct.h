@@ -6,8 +6,8 @@
 Copyright 2021-2022 花狗Fdog(张旭)
 */
 
-#ifndef FDOGSERIALIZE_H
-#define FDOGSERIALIZE_H
+#ifndef FdogSerializer_H
+#define FdogSerializer_H
 
 #include "definition.h"
 #include <map>
@@ -136,13 +136,13 @@ struct memberAttribute {
 };
 
 //声明序列化base类
-class FdogSerializeBase {
+class FdogSerializerBase {
     private:
     static mutex * mutex_base;
-    static FdogSerializeBase * fdogserializebase;
+    static FdogSerializerBase * FdogSerializerbase;
 
     public:
-    static FdogSerializeBase * Instance();
+    static FdogSerializerBase * Instance();
 
     template<class T>
     string removeLastZero(T & return_){
@@ -693,20 +693,20 @@ template<> struct TagSTLAAAType<list<int>> {
     using Tag = BaseAndStructTag;
 };
 
-class FdogSerialize {
+class FdogSerializer {
 
     private:
     static mutex * mutex_serialize;
-    static FdogSerialize * fdogserialize;
+    static FdogSerializer * FdogSerializer;
     vector<ObjectInfo *> objectInfoList;
     vector<MetaInfo *> baseInfoList;
 
-    FdogSerialize();
-    ~FdogSerialize();
+    FdogSerializer();
+    ~FdogSerializer();
 
     public:
     //获取实例
-    static FdogSerialize * Instance();
+    static FdogSerializer * Instance();
 
     //添加objectinfo
     void addObjectInfo(ObjectInfo * objectinfo);
@@ -805,7 +805,7 @@ class FdogSerialize {
     template<typename T>
     void Serialize(string & json_, T & object_, string name = ""){
         //通过传进来的T判断是什么复合类型，ObjectInfo只保存结构体,如果是NULL可以确定传进来的不是struct类型
-        ObjectInfo objectinfo = FdogSerialize::Instance()->getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        ObjectInfo objectinfo = FdogSerializer::Instance()->getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
         //获取的只能是结构体的信息，无法知道是什么复合类型，尝试解析类型 objectType其实是一个结构体类型名称
         int objectType = getObjectTypeInt(objectinfo.objectType, abi::__cxa_demangle(typeid(T).name(),0,0,0));
         if(objectinfo.objectType == "NULL" && objectType != OBJECT_BASE && objectType != OBJECT_STRUCT){
@@ -827,7 +827,7 @@ class FdogSerialize {
                 metainfo1 = getMetaInfo(abi::__cxa_demangle(typeid(object_).name(),0,0,0));
                 if (metainfo1 != nullptr){
                     //cout << "==================" << endl;
-                    FdogSerializeBase::Instance()->BaseToJsonA(json_, metainfo1, object_);
+                    FdogSerializerBase::Instance()->BaseToJsonA(json_, metainfo1, object_);
                 } else {
                     //cout << "获取MetaInfo失败" << endl;
                 }
@@ -839,103 +839,103 @@ class FdogSerialize {
                     string json_s;
                     //cout <<"成员类型：" << metainfoObject->memberType << "--" << metainfoObject->memberTypeInt << "--"<< metainfoObject->first << endl;
                     if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
-                        FdogSerializeBase::Instance()->BaseToJson(json_s, metainfoObject, object_);
+                        FdogSerializerBase::Instance()->BaseToJson(json_s, metainfoObject, object_);
                         json_ = json_ + json_s;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_ARRAY && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "bool"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(bool)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(bool)));
                                 json_s = json_s + value + ",";
                             }
                         }                        
                         if(metainfoObject->first == "char"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(char)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(char)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "unsigned char"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned char)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned char)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "char*"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(char*)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(char*)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(string)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(string)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "short"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(short)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(short)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "unsigned short"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned short)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned short)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "int"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(int)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(int)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "unsigned int"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned int)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned int)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "long"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "unsigned long"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned long)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned long)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "long long"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long long)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long long)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "unsigned long long"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned long long)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned long long)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "float"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(float)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(float)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "double"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(double)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(double)));
                                 json_s = json_s + value + ",";
                             }
                         }
                         if(metainfoObject->first == "long double"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializeBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long double)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long double)));
                                 json_s = json_s + value + ",";
                             }
                         }
@@ -1272,7 +1272,7 @@ class FdogSerialize {
     //反序列化
     template<typename T>
     void Deserialize(T & object_, string & json_, string name = ""){
-        ObjectInfo & objectinfo = FdogSerialize::Instance()->getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        ObjectInfo & objectinfo = FdogSerializer::Instance()->getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
         int objectType = getObjectTypeInt(objectinfo.objectType, abi::__cxa_demangle(typeid(T).name(),0,0,0));
         if(objectinfo.objectType == "NULL" && objectType != OBJECT_BASE && objectType != OBJECT_STRUCT){
             //说明不是struct类型和base类型尝试，尝试解析类型
@@ -1302,7 +1302,7 @@ class FdogSerialize {
                     value = result.str(1).c_str();
                 }
                 //cout << "@@@@@@@@@@@@@反序列化value = " << value << endl;
-                FdogSerializeBase::Instance()->JsonToBase(object_, metainfo1, value);
+                FdogSerializerBase::Instance()->JsonToBase(object_, metainfo1, value);
             }
         }
 
@@ -1357,7 +1357,7 @@ class FdogSerialize {
                     //cout << endl << "正则表达式 获取的值：" << value << "   type = " << metainfoObject->memberTypeInt << endl;
                     if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
                         //cout << "反序列化进入base：" << value << endl << endl;
-                        FdogSerializeBase::Instance()->JsonToBase(object_, metainfoObject, value);
+                        FdogSerializerBase::Instance()->JsonToBase(object_, metainfoObject, value);
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_ARRAY && metainfoObject->memberIsIgnore != true){
                         vector<string> json_array;
@@ -1372,88 +1372,88 @@ class FdogSerialize {
                         }else{
                             removeFirstComma(json_);
                             removeLastComma(json_);
-                            json_array = FdogSerialize::Instance()->CuttingArray(json_);
+                            json_array = FdogSerializer::Instance()->CuttingArray(json_);
                         }
                         int j = 0;
                         if(metainfoObject->first == "bool"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(bool)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(bool)), json_array[j++]);
                             }
                         }                        
                         if(metainfoObject->first == "char"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(char)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(char)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "unsigned char"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned char)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned char)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "char*"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(char*)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(char*)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(string)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(string)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "short"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(short)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(short)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "unsigned short"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned short)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned short)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "int"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(int)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(int)), json_array[j++]);
 
                             }
                         }
                         if(metainfoObject->first == "unsigned int"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned int)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned int)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "long"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "unsigned long"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned long)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned long)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "long long"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long long)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long long)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "unsigned long long"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned long long)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(unsigned long long)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "float"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(float)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(float)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "double"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(double)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(double)), json_array[j++]);
                             }
                         }
                         if(metainfoObject->first == "long double"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                FdogSerializeBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long double)), json_array[j++]);
+                                FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long double)), json_array[j++]);
                             }
                         }
                     }
@@ -1687,7 +1687,7 @@ class FdogSerialize {
     template<typename T>
     void DeserializeS(string & json_, T & object_, BaseArrayTag, string name = ""){
         vector<string> json_array;
-        json_array = FdogSerialize::Instance()->CuttingArray(json_);
+        json_array = FdogSerializer::Instance()->CuttingArray(json_);
         //cout << "----" << json_array.size() << endl;
         for(auto & object_one : object_){
             Deserialize(object_one, json_);
@@ -1733,7 +1733,7 @@ class FdogSerialize {
         }else{
             removeFirstComma(json_);
             removeLastComma(json_);
-            json_array = FdogSerialize::Instance()->CuttingArray(json_);
+            json_array = FdogSerializer::Instance()->CuttingArray(json_);
         }
         int i = 0;
         //这里需要注意，进来的STL容器长度为0，需要重新指定长度 需要想办法
@@ -1787,7 +1787,7 @@ class FdogSerialize {
         }else{
             removeFirstComma(json_);
             removeLastComma(json_);
-            json_array = FdogSerialize::Instance()->CuttingArray(json_);
+            json_array = FdogSerializer::Instance()->CuttingArray(json_);
         }
         int i = 0;
         int len = json_array.size();
@@ -1810,27 +1810,27 @@ namespace Fdog{
     
 template<typename T>
 void FJson(string & json_, T & object_, string name = "") {
-    FdogSerialize::Instance()->FSerialize(json_, object_, typename TagDispatchTrait<T>::Tag{}, name);
+    FdogSerializer::Instance()->FSerialize(json_, object_, typename TagDispatchTrait<T>::Tag{}, name);
 }
 
 template<typename T>
 void FObject(T & object_, string & json_, string name = ""){
-  FdogSerialize::Instance()->FDeserialize(object_, json_, typename TagDispatchTrait<T>::Tag{}, name);
+  FdogSerializer::Instance()->FDeserialize(object_, json_, typename TagDispatchTrait<T>::Tag{}, name);
 }
 
 // //设置别名
 // void setAliasName1(string Type, string memberName, string AliasName){
-//   FdogSerialize::Instance()->setAliasName(Type, memberName, AliasName);
+//   FdogSerializer::Instance()->setAliasName(Type, memberName, AliasName);
 // }
 
 // //设置是否忽略该字段序列化
 // void setIgnoreField1(string Type, string memberName){
-//   FdogSerialize::Instance()->setIgnoreField(Type, memberName);
+//   FdogSerializer::Instance()->setIgnoreField(Type, memberName);
 // }
 
 // //设置是否忽略大小写
 // void setIgnoreLU(string Type, string memberName){
-//   FdogSerialize::Instance()->setIgnoreLU(Type, memberName);
+//   FdogSerializer::Instance()->setIgnoreLU(Type, memberName);
 // }
 
 /*
@@ -1904,7 +1904,7 @@ void FObject(T & object_, string & json_, string name = ""){
 
 #define ARG_N_RESQ() 20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
 
-#define MEMBERTYPE(TYPE, MEMBER) FdogSerialize::Instance()->getMemberAttribute(abi::__cxa_demangle(typeid(((TYPE *)0)->MEMBER).name(),0,0,0))
+#define MEMBERTYPE(TYPE, MEMBER) FdogSerializer::Instance()->getMemberAttribute(abi::__cxa_demangle(typeid(((TYPE *)0)->MEMBER).name(),0,0,0))
 
 #define PLACEHOLDER(placeholder, ...) placeholder
 
@@ -1912,9 +1912,9 @@ void FObject(T & object_, string & json_, string name = ""){
 do{ \
     ObjectInfo * objectinfo_one = new ObjectInfo();\
     objectinfo_one->objectType = NAME(TYPE);\
-    objectinfo_one->objectTypeInt = FdogSerialize::Instance()->getObjectTypeInt(objectinfo_one->objectType, abi::__cxa_demangle(typeid(TYPE).name(),0,0,0));\
+    objectinfo_one->objectTypeInt = FdogSerializer::Instance()->getObjectTypeInt(objectinfo_one->objectType, abi::__cxa_demangle(typeid(TYPE).name(),0,0,0));\
     objectinfo_one->objectSize = sizeof(TYPE);\
-    FdogSerialize::Instance()->addObjectInfo(objectinfo_one);\
+    FdogSerializer::Instance()->addObjectInfo(objectinfo_one);\
     REGISTEREDMEMBER_s_1(TYPE, PLACEHOLDER(__VA_ARGS__), objectinfo_one->metaInfoObjectList, ARG_N(__VA_ARGS__) - 1, ##__VA_ARGS__, PLACEHOLDER(__VA_ARGS__));\
 }while(0);
 

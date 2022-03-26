@@ -8,23 +8,23 @@ Copyright 2021-2022 花狗Fdog(张旭)
 
 #include "FStruct.h"
 
-FdogSerializeBase * FdogSerializeBase::fdogserializebase = nullptr;
-mutex * FdogSerializeBase::mutex_base = new(mutex);
+FdogSerializerBase * FdogSerializerBase::FdogSerializerbase = nullptr;
+mutex * FdogSerializerBase::mutex_base = new(mutex);
 
-FdogSerializeBase * FdogSerializeBase::Instance(){
+FdogSerializerBase * FdogSerializerBase::Instance(){
     mutex_base->lock();
-    if(fdogserializebase == nullptr){
-        fdogserializebase = new FdogSerializeBase();
+    if(FdogSerializerbase == nullptr){
+        FdogSerializerbase = new FdogSerializerBase();
     }
     mutex_base->unlock();
-    return fdogserializebase;
+    return FdogSerializerbase;
 }
 
 
-FdogSerialize * FdogSerialize::fdogserialize = nullptr;
-mutex * FdogSerialize::mutex_serialize = new(mutex);
+FdogSerializer * FdogSerializer::FdogSerializer = nullptr;
+mutex * FdogSerializer::mutex_serialize = new(mutex);
 
-FdogSerialize::FdogSerialize(){
+FdogSerializer::FdogSerializer(){
     ObjectInfo * objectinfo = new ObjectInfo();
     objectinfo->objectType = "NULL";
     objectinfo->objectTypeInt = -1;
@@ -114,37 +114,37 @@ FdogSerialize::FdogSerialize(){
 
 }
 
-FdogSerialize::~FdogSerialize(){
+FdogSerializer::~FdogSerializer(){
     //释放内存
-    delete(FdogSerialize::mutex_serialize);
-    delete(FdogSerialize::fdogserialize);
+    delete(FdogSerializer::mutex_serialize);
+    delete(FdogSerializer::FdogSerializer);
 }
 
-FdogSerialize * FdogSerialize::Instance(){
+FdogSerializer * FdogSerializer::Instance(){
     mutex_serialize->lock();
-    if(fdogserialize == nullptr){
-        fdogserialize = new FdogSerialize();
+    if(FdogSerializer == nullptr){
+        FdogSerializer = new FdogSerializer();
     }
     mutex_serialize->unlock();
-    return fdogserialize;
+    return FdogSerializer;
 }
 
-void FdogSerialize::addObjectInfo(ObjectInfo * objectinfo){
+void FdogSerializer::addObjectInfo(ObjectInfo * objectinfo){
     this->objectInfoList.push_back(objectinfo);
 }
 
-ObjectInfo & FdogSerialize::getObjectInfo(string objectName){
-    for(auto objectinfo : FdogSerialize::Instance()->objectInfoList){
+ObjectInfo & FdogSerializer::getObjectInfo(string objectName){
+    for(auto objectinfo : FdogSerializer::Instance()->objectInfoList){
         if(objectinfo->objectType == objectName){
             return *objectinfo;
         }
     }
-    return *(FdogSerialize::Instance()->objectInfoList[0]);
+    return *(FdogSerializer::Instance()->objectInfoList[0]);
 }
 
-MetaInfo * FdogSerialize::getMetaInfo(string TypeName){
+MetaInfo * FdogSerializer::getMetaInfo(string TypeName){
     //cout << "getMetaInfo - TypeName = "  << TypeName << endl;
-    for(auto metainfo : FdogSerialize::Instance()->baseInfoList){
+    for(auto metainfo : FdogSerializer::Instance()->baseInfoList){
         if(metainfo->memberType == TypeName){
             return metainfo;
         }
@@ -152,7 +152,7 @@ MetaInfo * FdogSerialize::getMetaInfo(string TypeName){
     return nullptr;
 }
 
-void FdogSerialize::setAliasName(string type, string memberName, string aliasName){
+void FdogSerializer::setAliasName(string type, string memberName, string aliasName){
     ObjectInfo & objectinfo = this->getObjectInfo(type);
     for(auto metainfoObject : objectinfo.metaInfoObjectList){
         if(metainfoObject->memberName == memberName){
@@ -162,7 +162,7 @@ void FdogSerialize::setAliasName(string type, string memberName, string aliasNam
     }
 }
 
-void FdogSerialize::setIgnoreField(string Type, string memberName){
+void FdogSerializer::setIgnoreField(string Type, string memberName){
     ObjectInfo & objectinfo = this->getObjectInfo(Type);
     for(auto metainfoObject : objectinfo.metaInfoObjectList){
         if(metainfoObject->memberName == memberName){
@@ -172,7 +172,7 @@ void FdogSerialize::setIgnoreField(string Type, string memberName){
     }
 }
 
-void FdogSerialize::setIgnoreLU(string Type, string memberName){
+void FdogSerializer::setIgnoreLU(string Type, string memberName){
     ObjectInfo & objectinfo = this->getObjectInfo(Type);
     for(auto metainfoObject : objectinfo.metaInfoObjectList){
         if(metainfoObject->memberName == memberName){
@@ -182,22 +182,22 @@ void FdogSerialize::setIgnoreLU(string Type, string memberName){
     }
 }
 
-void FdogSerialize::setFuzzy(string Type) {
+void FdogSerializer::setFuzzy(string Type) {
 
 }
 
 /***********************************
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
 ************************************/
-memberAttribute FdogSerialize::getMemberAttribute(string typeName){
+memberAttribute FdogSerializer::getMemberAttribute(string typeName){
     //cout << "getMemberAttribute = " <<typeName << endl;
     memberAttribute resReturn;
     smatch result;
-    if(FdogSerialize::isBaseType(typeName)){
+    if(FdogSerializer::isBaseType(typeName)){
         resReturn.valueType = typeName;
         resReturn.ArraySize = 0;
         resReturn.valueTypeInt = OBJECT_BASE;
-    }else if(FdogSerialize::isVectorType("", typeName)){
+    }else if(FdogSerializer::isVectorType("", typeName)){
         //cout << "=========>>1  typeName ============= = " << typeName << endl;
         resReturn.valueType = typeName;
         regex pattern(complexRegex[5]);
@@ -212,7 +212,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
             }
         }
         resReturn.valueTypeInt = OBJECT_VECTOR;
-    }else if(FdogSerialize::isMapType("", typeName)){
+    }else if(FdogSerializer::isMapType("", typeName)){
         resReturn.valueType = typeName;
         regex pattern(complexRegex[6]);
         if(regex_search(typeName, result, pattern)){
@@ -224,7 +224,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
             resReturn.second = value2;
         }
         resReturn.valueTypeInt = OBJECT_MAP;
-    }else if(FdogSerialize::isListType("", typeName)){
+    }else if(FdogSerializer::isListType("", typeName)){
         resReturn.valueType = typeName;
         regex pattern(complexRegex[7]);
         if(regex_search(typeName, result, pattern)){
@@ -234,7 +234,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         }
         resReturn.valueTypeInt = OBJECT_LIST;
         //getTypeOfList
-    }else if(FdogSerialize::isSetType("", typeName)){
+    }else if(FdogSerializer::isSetType("", typeName)){
         resReturn.valueType = typeName;
         regex pattern(complexRegex[8]);
         if(regex_search(typeName, result, pattern)){
@@ -244,7 +244,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         }
         resReturn.valueTypeInt = OBJECT_SET;
         //getTypeOfList
-    }else if(FdogSerialize::isDequeType("", typeName)){
+    }else if(FdogSerializer::isDequeType("", typeName)){
         resReturn.valueType = typeName;
         regex pattern(complexRegex[9]);
         if(regex_search(typeName, result, pattern)){
@@ -254,7 +254,7 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
         }
         resReturn.valueTypeInt = OBJECT_DEQUE;
         //getTypeOfList
-    }else if(FdogSerialize::isArrayType("", typeName)){
+    }else if(FdogSerializer::isArrayType("", typeName)){
         resReturn.valueType = typeName;
         // ObjectInfo objectinfo = getObjectInfoByType(typeName, OBJECT_ARRAY);  
         // resReturn.valueType = objectinfo.objectType;
@@ -276,30 +276,30 @@ memberAttribute FdogSerialize::getMemberAttribute(string typeName){
     return resReturn;
 }
 
-int FdogSerialize::getObjectTypeInt(string objectName, string typeName){
+int FdogSerializer::getObjectTypeInt(string objectName, string typeName){
     //cout << "进入getObjectTypeInt" << endl;
-    if(FdogSerialize::Instance()->isBaseType(typeName)){
+    if(FdogSerializer::Instance()->isBaseType(typeName)){
         return OBJECT_BASE;
     }
-    if(FdogSerialize::Instance()->isVectorType(objectName, typeName)){
+    if(FdogSerializer::Instance()->isVectorType(objectName, typeName)){
         return OBJECT_VECTOR;
     }
-    if(FdogSerialize::Instance()->isMapType(objectName, typeName)){
+    if(FdogSerializer::Instance()->isMapType(objectName, typeName)){
         return OBJECT_MAP;
     }
-    if(FdogSerialize::Instance()->isListType(objectName, typeName)){
+    if(FdogSerializer::Instance()->isListType(objectName, typeName)){
         return OBJECT_LIST;
     }
-    if(FdogSerialize::Instance()->isStructType(objectName, typeName)){
+    if(FdogSerializer::Instance()->isStructType(objectName, typeName)){
         //这里也存在问题 判断
         return OBJECT_STRUCT;    
     }
-    if(FdogSerialize::Instance()->isArrayType(objectName, typeName)){
+    if(FdogSerializer::Instance()->isArrayType(objectName, typeName)){
         return OBJECT_ARRAY;
     }
 }
 
-ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt){
+ObjectInfo FdogSerializer::getObjectInfoByType(string typeName, int objectTypeInt){
     smatch result;
     regex pattern(complexRegex[objectTypeInt]);
     switch (objectTypeInt)
@@ -338,11 +338,11 @@ ObjectInfo FdogSerialize::getObjectInfoByType(string typeName, int objectTypeInt
     }
 }
 
-int FdogSerialize::getObjectTypeByObjectInfo(string objectName){
+int FdogSerializer::getObjectTypeByObjectInfo(string objectName){
     return getObjectInfo(objectName).objectTypeInt;
 }
 
-bool FdogSerialize::isBaseType(string typeName){
+bool FdogSerializer::isBaseType(string typeName){
     //cout << "isBaseType = " << typeName << endl;
     vector<string>::iterator result = find(baseType.begin(), baseType.end(), typeName);
     if(result != baseType.end()){
@@ -352,7 +352,7 @@ bool FdogSerialize::isBaseType(string typeName){
 }
 //这里存在问题，当类型是基本类型是不会错，但是当stl包含char* string，就会出问题
 
-bool FdogSerialize::isBaseTypeByMap(string typeName){
+bool FdogSerializer::isBaseTypeByMap(string typeName){
     smatch result;
     regex pattern(complexRegex[10]);
     if(regex_search(typeName, result, pattern)){
@@ -368,7 +368,7 @@ bool FdogSerialize::isBaseTypeByMap(string typeName){
 }
 
 //判断是否为vector类型
-bool FdogSerialize::isVectorType(string objectName, string typeName){
+bool FdogSerializer::isVectorType(string objectName, string typeName){
     auto x = typeName.find("std::vector<");
     if(x != string::npos && x == 0){
         return true;
@@ -377,7 +377,7 @@ bool FdogSerialize::isVectorType(string objectName, string typeName){
 }
 
 //判断是否为map类型
-bool FdogSerialize::isMapType(string objectName, string typeName){
+bool FdogSerializer::isMapType(string objectName, string typeName){
     auto x = typeName.find("std::map<");
     if(x != string::npos && x == 0){
         return true;
@@ -386,7 +386,7 @@ bool FdogSerialize::isMapType(string objectName, string typeName){
 }
 
 //判断是否是list类型
-bool FdogSerialize::isListType(string objectName, string typeName){
+bool FdogSerializer::isListType(string objectName, string typeName){
     auto x = typeName.find("std::__cxx11::list");
     if(x != string::npos && x == 0){
         return true;
@@ -394,7 +394,7 @@ bool FdogSerialize::isListType(string objectName, string typeName){
     return false;
 }
 
-bool FdogSerialize::isSetType(string objectName, string typeName){
+bool FdogSerializer::isSetType(string objectName, string typeName){
     auto x = typeName.find("std::set<");
     if(x != string::npos && x == 0){
         return true;
@@ -402,7 +402,7 @@ bool FdogSerialize::isSetType(string objectName, string typeName){
     return false;
 }
 
-bool FdogSerialize::isDequeType(string objectName, string typeName){
+bool FdogSerializer::isDequeType(string objectName, string typeName){
     auto x = typeName.find("std::deque<");
     if(x != string::npos && x == 0){
         return true;
@@ -411,7 +411,7 @@ bool FdogSerialize::isDequeType(string objectName, string typeName){
 }
 
 
-bool FdogSerialize::isStructType(string objectName, string typeName){
+bool FdogSerializer::isStructType(string objectName, string typeName){
     if(objectName == typeName){
         return true;
     }
@@ -419,7 +419,7 @@ bool FdogSerialize::isStructType(string objectName, string typeName){
 }
 
 //是数组返回对于值，不是数组返回0 
-bool FdogSerialize::isArrayType(string objectName, string typeName){
+bool FdogSerializer::isArrayType(string objectName, string typeName){
     memberAttribute resReturn;
     smatch result;
     resReturn.valueType = typeName;
@@ -436,15 +436,15 @@ bool FdogSerialize::isArrayType(string objectName, string typeName){
     return false;
 }
 
-void FdogSerialize::removeFirstComma(string & return_){
+void FdogSerializer::removeFirstComma(string & return_){
     return_ = return_.substr(1);
 }
 
-void FdogSerialize::removeLastComma(string & return_){
+void FdogSerializer::removeLastComma(string & return_){
     return_.pop_back();
 }
 
-void FdogSerialize::removeNumbers(string & return_){
+void FdogSerializer::removeNumbers(string & return_){
     string::iterator it = return_.begin();
     while (it != return_.end()) {
         if ((*it >= '0') && (*it <= '9')) {
@@ -455,7 +455,7 @@ void FdogSerialize::removeNumbers(string & return_){
     }
 }
 
-vector<string> FdogSerialize::CuttingArray(string data){
+vector<string> FdogSerializer::CuttingArray(string data){
 	int sum = 0;
 	int first = 0;
 	int end = 0;
@@ -480,7 +480,7 @@ vector<string> FdogSerialize::CuttingArray(string data){
 	return StrArray;
 }
 
-vector<string> FdogSerialize::split(string str, string pattern){
+vector<string> FdogSerializer::split(string str, string pattern){
     std::string::size_type pos;
     std::vector<std::string> result;
     str+=pattern;
@@ -499,7 +499,7 @@ vector<string> FdogSerialize::split(string str, string pattern){
     return result;
 }
 
-string FdogSerialize::getTypeOfVector(string objectName, string typeName){
+string FdogSerializer::getTypeOfVector(string objectName, string typeName){
     smatch result;
     regex pattern(complexRegex[5]);
     if(regex_search(typeName, result, pattern)){
@@ -508,7 +508,7 @@ string FdogSerialize::getTypeOfVector(string objectName, string typeName){
     return "";
 }
 
-FdogMap FdogSerialize::getTypeOfMap(string objectName, string typeName){
+FdogMap FdogSerializer::getTypeOfMap(string objectName, string typeName){
     smatch result;
     regex pattern(complexRegex[5]);
     FdogMap fdogMap;
@@ -520,7 +520,7 @@ FdogMap FdogSerialize::getTypeOfMap(string objectName, string typeName){
     return fdogMap;
 }
 
-string FdogSerialize::getTypeOfList(string objectName, string typeName){
+string FdogSerializer::getTypeOfList(string objectName, string typeName){
     smatch result;
     regex pattern(complexRegex[5]);
     if(regex_search(typeName, result, pattern)){

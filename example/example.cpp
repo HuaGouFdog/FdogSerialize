@@ -137,8 +137,8 @@ int main()
     // Fdog::FJson(stu_json, stu);
     // cout << stu_json << endl;
     // stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
-    // FdogSerialize::Instance()->setIgnoreLU("student", "name");
-    // FdogSerialize::Instance()->setIgnoreLU("student", "age");
+    // FdogSerializer::Instance()->setIgnoreLU("student", "name");
+    // FdogSerializer::Instance()->setIgnoreLU("student", "age");
     // Fdog::FObject(stu, stu_json);
     // cout << stu.name << "," << stu.age << endl;
     //**********************************************************************
