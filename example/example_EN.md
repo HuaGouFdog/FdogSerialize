@@ -33,9 +33,9 @@ struct school{
     Serialize_type_judgment(student)\
     Serialize_type_judgment(teacher)\
 //This is used for JSON-to-structure
-#define DesSerialize_type_judgment_all\
-    DesSerialize_type_judgment(student)\
-    DesSerialize_type_judgment(teacher)\
+#define Deserialize_type_judgment_all\
+    Deserialize_type_judgment(student)\
+    Deserialize_type_judgment(teacher)\
 
 
 //The test file

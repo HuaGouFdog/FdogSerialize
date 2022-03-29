@@ -33,9 +33,9 @@ struct school{
     Serialize_type_judgment(student)\
     Serialize_type_judgment(teacher)\
 //这个用于json转结构体
-#define DesSerialize_type_judgment_all\
-    DesSerialize_type_judgment(student)\
-    DesSerialize_type_judgment(teacher)\
+#define Deserialize_type_judgment_all\
+    Deserialize_type_judgment(student)\
+    Deserialize_type_judgment(teacher)\
 
 
 //测试文件
