@@ -132,7 +132,7 @@ vector<string> CuttingJson(string json_){
         }
 
         if(json_[i] == ',' && json_[i-1] == '"' && status == 2){
-            cout << "出错" << endl;
+            cout << ",后面是\" 且 status = 2 出错" << endl;
         }
 
         if(json_[i] == '"' && json_[i+1] == ':' && json_[i+2] == '{'){
@@ -295,7 +295,21 @@ vector<string> CuttingJson(string json_){
             count = count + json_array[i].length() + 1;
         }
         if(count + 1 != json_.length()){
-            cout << "出错 :" << json_ << "---原字符串长度：" << json_.length() << "---现在长度:" << count + 1 << endl;
+            cout << "长度出错 :" << json_ << "---原字符串长度：" << json_.length() << "---现在长度:" << count + 1 << endl;
+        }
+    }
+    if(1){
+        string json_a = "{";
+        for(int i = 0; i < json_array.size(); i++){
+            if(i + 1 == json_array.size()){
+                json_a = json_a + json_array[i];
+                break;
+            }
+            json_a = json_a + json_array[i] + ",";
+        }
+        json_ = json_a + "}";
+        if(json_ != json_a){
+            cout << "加逗号还原，不匹配" << json_ << endl;
         }
     }
     return json_array;
@@ -433,31 +447,64 @@ void JsonValidS_s(result & res, string & json_){
     return;
 }
 
+bool isMatch(string json_){
+    int h_sum = 0;
+    int f_sum = 0;
+    for(int i = 0; i < json_.length(); i++){
+		if (json_[i] == '{'){
+			h_sum++;
+		}
+		if (json_[i] == '}'){
+			h_sum--;
+		}    
+		if (json_[i] == '['){
+			f_sum++;
+		}
+		if (json_[i] == ']'){
+			f_sum--;
+		}
+    }
+    if( h_sum == f_sum && f_sum == 0){
+        return true;
+    }else{
+        return false;
+    }
+    return false;
+}
+
 result JsonValidS(string json_) {
     result res;
     res.code = 1;
-    if (!IsCurlyBraces(json_)){
+    //检查左右括号
+    if(!IsCurlyBraces(json_)){
         res.code = 0;
         res.message = "缺少花括号";
         return res;
     }
-    string regexStr = "\"\\w+\":((\\{(.*?)\\})|(\\[(.*?)\\])|(\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?)|(true|false))";
-    smatch result;
-    regex pattern(regexStr);
-
-    string::const_iterator iterStart = json_.begin();
-    string::const_iterator iterEnd = json_.end();
-    string temp;
-    while (regex_search(iterStart, iterEnd, result, pattern))
-    {
-        temp = result[0];
-        cout << "类型：" << temp << endl;
-        //JsonValidS_s(res, temp);
-        // if (statusType == 3 || statusType == 4){
-
-        // }
-        iterStart = result[0].second;	//更新搜索起始位置,搜索剩下的字符串
+    //检查总符号数是否匹配([]{})
+    if(!isMatch(json_)){
+        res.code = 0;
+        res.message = "括号不匹配";
+        return res;
     }
+
+    // string regexStr = "\"\\w+\":((\\{(.*?)\\})|(\\[(.*?)\\])|(\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?)|(true|false))";
+    // smatch result;
+    // regex pattern(regexStr);
+
+    // string::const_iterator iterStart = json_.begin();
+    // string::const_iterator iterEnd = json_.end();
+    // string temp;
+    // while (regex_search(iterStart, iterEnd, result, pattern))
+    // {
+    //     temp = result[0];
+    //     cout << "类型：" << temp << endl;
+    //     //JsonValidS_s(res, temp);
+    //     // if (statusType == 3 || statusType == 4){
+
+    //     // }
+    //     iterStart = result[0].second;	//更新搜索起始位置,搜索剩下的字符串
+    // }
     return res;
 }
 
@@ -553,7 +600,7 @@ int main(){
 
     string json_ = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48},\"stu\":[\"zhan\",\"xv\",\"321%90^$%\"],\"tex\":\"dsa\",\"wxc\":-312,\"dsa\":456,\"oew\":-412.3123,\"dae\":true}";
 
-    string json_2 = "{\"class\":423,\"name\":\"张三\",\"age\":21,\"stu\":true,\"student\":{\"name\":\"李四\",\"age\":13},\"school\":[\"2506892\",\"186598\",\"12344687\"],\"addr\":[{\"name\":\"王五\",\"age\":22},{\"name\":\"于静\",\"age\":23},{\"name\":\"张旭\",\"age\":33}],\"all\":{\"name\":\"胡瑞敏\",\"age\":32,\"stu\":true,\"student\":{\"name\":\"zhangxv\",\"age\":1343},\"school\":[\"3f4312\",\"321089\",\"756896\"],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13}],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13},{\"name\":\"hgftre\",\"age\":13}]}}}}";
+    string json_2 = "{\"class\":423,\"name\":\"张三\",\"age\":21,\"stu\":true,\"student\":{\"name\":\"李四\",\"age\":13},\"school\":[\"2506892\",\"186598\",\"12344687\"],\"addr\":[{\"name\":\"王五\",\"age\":22},{\"name\":\"于静\",\"age\":23},{\"name\":\"张旭\",\"age\":33}],\"all\":{\"name\":\"胡瑞敏\",\"age\":32,\"stu\":true,\"student\":{\"name\":\"zhangxv\",\"age\":1343},\"school\":[\"3f4312\",\"321089\",\"756896\"],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13}],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13},{\"name\":\"hgftre\",\"age\":13}]}}";
     cout << "原值：" << js << endl;
 
     string json_3 = "{\"all\":{\"name\":\"胡瑞敏\",\"age\":32,\"stu\":true,\"student\":{\"name\":\"zhangxv\",\"age\":1343},\"school\":[\"3f4312\",\"321089\",\"756896\"],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13}],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13},{\"name\":\"hgftre\",\"age\":13}]}}";
@@ -564,5 +611,17 @@ int main(){
     //cout << json_2 << endl;
     //result res = JsonValidS(json_2);
     //cout << "返回值：" << res.code << endl;
+    string d1 = "{\"name\":\"321\"\"age\":\"321}}";
+    string d2 = "{[\"name\":\"321\"\"age\":\"321]}";
+    string d3 = "{[\"name\":\"321\"\"age\":\"321}";
+    string d4 = "{\"name\":\"321\"\"age\":\"321}[]{";
+    result r1 =  JsonValidS(d1);
+    result r2 =  JsonValidS(d2);
+    result r3 =  JsonValidS(d3);
+    result r4 =  JsonValidS(d4);
+    cout << r1.code << endl;
+    cout << r2.code << endl;
+    cout << r3.code << endl;
+    cout << r3.code << endl;
     return 0;
 }
