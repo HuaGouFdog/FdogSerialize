@@ -548,31 +548,90 @@ vector<string> split(string str, string pattern){
 bool Exist(string json_, string key){
     auto num = key.find(".");
     if(num != key.npos){
-        if(json_.find(json_.substr(0, num)) != json_.npos){
+        cout << "json_.substr(0, num) = " << key.substr(0, num) << endl;
+        if(json_.find(key.substr(0, num)) != json_.npos){
             //这里需要在找到的里面找对应字符串
             string resp = "";
-            string jsonNew = "\"" + json_.substr(0, num) + "\":";
+            string jsonNew = "\"" + key.substr(0, num) + "\":";
+            cout << "n = " << num << endl;
+            cout << "jsonNew :" << jsonNew << endl;
             auto num2 = json_.find(jsonNew);
+            cout << "num2 = " << num2 << endl;
             if(num2 != json_.npos){
                 if(json_[num2 + jsonNew.length()] == '{'){
-
+                    string json_2 = json_.substr(num2 + jsonNew.length());
+                    int len = json_2.length();
+                    int sum = 0;
+                    int first = 0;
+                    int end = 0;
+                    for (int i = 0; i <= len; i++) {
+                        if (json_2[i] == '{'){
+                            sum++;
+                            if (sum == 1) {
+                                first = i;
+                            }
+                        }
+                        if (json_2[i] == '}'){
+                            sum--;
+                            if (sum == 0) {
+                                end = i;
+                            }
+                        }
+                    }
+                    cout << "进来1 = " << json_2.substr(first, end - first + 1) << "-- key = " << key.substr(num + 1) << endl;
+                    return Exist(json_2.substr(first, end - first + 1), key.substr(num + 1));
                 }else if(json_[num2 + jsonNew.length()] == '['){
-                    
+                    string json_2 = json_.substr(num2 + jsonNew.length());
+                    int len = json_2.length();
+                    int sum = 0;
+                    int first = 0;
+                    int end = 0;
+                    for (int i = 0; i <= len; i++) {
+                        if (json_2[i] == '['){
+                            sum++;
+                            if (sum == 1) {
+                                first = i;
+                            }
+                        }
+                        if (json_2[i] == ']'){
+                            sum--;
+                            if (sum == 0) {
+                                end = i;
+                            }
+                        }
+                    }
+                    cout << "进来2 = " << json_2.substr(first, end - first + 1) << "-- key = " << key.substr(num + 1) << endl;
+                    return Exist(json_2.substr(first, end - first + 1), key.substr(num + 1));
                 }else {
-                    //基础类型可以使用正则表达式获取
-                    string regex = "\"\\w+\":((\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?))";
-                    smatch result;
-                    regex pattern(regex);
+                    // cout << "进来3" << endl;
+                    // //基础类型可以使用正则表达式获取
+                    // //string res = "(\"\\w+\":)((\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?))";
+                    // //string res = "(\"\\w+\":)((\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?))";
+                    // string res = "(\"stu\":)((\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?))";
+                    // cout << res << endl;
+                    // smatch result;
+                    // regex pattern(res);
+                    // if(regex_search(json_, result, pattern)){
+                    //     cout << "值：" << result.str(1) << endl;
+                    //     cout << "值：" << result.str(2) << endl;
+                    //     return Exist(resp, json_.substr(num + 1));
+                    // }
+                    return false;
                 }
             }
-
-            return Exist(resp, json_.substr(num + 1));
         } else {
             return false;
         }
     } else {
-        if(json_.find(key) != json_.npos){
-            return true;
+        int x = json_.find(key);
+        if(x != json_.npos){
+            cout <<"json_ :" << json_ << "  下标：" << x << endl;
+            if(json_[x - 1] == '"' && json_[x + key.length()] == '"'){
+                return true;
+            } else {
+                return false;
+            }
+            
         } else {
             return false;
         }
@@ -582,12 +641,12 @@ bool Exist(string json_, string key){
 
 int main(){
     //{"stu":{"name":"liuliu","age":18},"tea":{"name":"wufang","age":48}}
-    string js = "{\"name\":\"liuliu\",\"age\":18}";
+    string js = "{\"red\":\"liuliu\",\"class\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18}}";
     cout << "js = " << js << endl;
-    vector<string> valueList = CuttingJson(js);
+    //vector<string> valueList = CuttingJson(js);
     // data.name.ckdsa
-    string key = "name";
-    //.表示层级将按照层级去查值，
+    string key = "stu.age";
+    //.表示层级将按照层级去查值，如果只有name 则返回遇到的第一个
     cout << "是否存在：" << Exist(js, key) << endl;
 
 
