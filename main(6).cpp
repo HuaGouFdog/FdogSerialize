@@ -544,19 +544,16 @@ vector<string> split(string str, string pattern){
     return result;
 }
 //可以做一个缓存
-
+//直接查不缓存 有一些浪费，先这样，后期可以考虑
 bool Exist(string json_, string key){
     auto num = key.find(".");
     if(num != key.npos){
-        cout << "json_.substr(0, num) = " << key.substr(0, num) << endl;
         if(json_.find(key.substr(0, num)) != json_.npos){
             //这里需要在找到的里面找对应字符串
             string resp = "";
             string jsonNew = "\"" + key.substr(0, num) + "\":";
             cout << "n = " << num << endl;
-            cout << "jsonNew :" << jsonNew << endl;
             auto num2 = json_.find(jsonNew);
-            cout << "num2 = " << num2 << endl;
             if(num2 != json_.npos){
                 if(json_[num2 + jsonNew.length()] == '{'){
                     string json_2 = json_.substr(num2 + jsonNew.length());
@@ -578,7 +575,6 @@ bool Exist(string json_, string key){
                             }
                         }
                     }
-                    cout << "进来1 = " << json_2.substr(first, end - first + 1) << "-- key = " << key.substr(num + 1) << endl;
                     return Exist(json_2.substr(first, end - first + 1), key.substr(num + 1));
                 }else if(json_[num2 + jsonNew.length()] == '['){
                     string json_2 = json_.substr(num2 + jsonNew.length());
@@ -600,22 +596,8 @@ bool Exist(string json_, string key){
                             }
                         }
                     }
-                    cout << "进来2 = " << json_2.substr(first, end - first + 1) << "-- key = " << key.substr(num + 1) << endl;
                     return Exist(json_2.substr(first, end - first + 1), key.substr(num + 1));
                 }else {
-                    // cout << "进来3" << endl;
-                    // //基础类型可以使用正则表达式获取
-                    // //string res = "(\"\\w+\":)((\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?))";
-                    // //string res = "(\"\\w+\":)((\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?))";
-                    // string res = "(\"stu\":)((\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?))";
-                    // cout << res << endl;
-                    // smatch result;
-                    // regex pattern(res);
-                    // if(regex_search(json_, result, pattern)){
-                    //     cout << "值：" << result.str(1) << endl;
-                    //     cout << "值：" << result.str(2) << endl;
-                    //     return Exist(resp, json_.substr(num + 1));
-                    // }
                     return false;
                 }
             }
@@ -625,7 +607,6 @@ bool Exist(string json_, string key){
     } else {
         int x = json_.find(key);
         if(x != json_.npos){
-            cout <<"json_ :" << json_ << "  下标：" << x << endl;
             if(json_[x - 1] == '"' && json_[x + key.length()] == '"'){
                 return true;
             } else {
@@ -638,6 +619,130 @@ bool Exist(string json_, string key){
     }
     return false;
 }
+// C++11 中增加了返回类型后置（trailing-return-type，又称跟踪返回类型）语法 可以用到
+string GetStringValue(string json_, string key){
+    auto num = key.find(".");
+    if(num != key.npos){
+        if(json_.find(key.substr(0, num)) != json_.npos){
+            //这里需要在找到的里面找对应字符串
+            string resp = "";
+            string jsonNew = "\"" + key.substr(0, num) + "\":";
+            cout << "n = " << num << endl;
+            auto num2 = json_.find(jsonNew);
+            if(num2 != json_.npos){
+                if(json_[num2 + jsonNew.length()] == '{'){
+                    string json_2 = json_.substr(num2 + jsonNew.length());
+                    int len = json_2.length();
+                    int sum = 0;
+                    int first = 0;
+                    int end = 0;
+                    for (int i = 0; i <= len; i++) {
+                        if (json_2[i] == '{'){
+                            sum++;
+                            if (sum == 1) {
+                                first = i;
+                            }
+                        }
+                        if (json_2[i] == '}'){
+                            sum--;
+                            if (sum == 0) {
+                                end = i;
+                            }
+                        }
+                    }
+                    return GetStringValue(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                }else if(json_[num2 + jsonNew.length()] == '['){
+                    string json_2 = json_.substr(num2 + jsonNew.length());
+                    int len = json_2.length();
+                    int sum = 0;
+                    int first = 0;
+                    int end = 0;
+                    for (int i = 0; i <= len; i++) {
+                        if (json_2[i] == '['){
+                            sum++;
+                            if (sum == 1) {
+                                first = i;
+                            }
+                        }
+                        if (json_2[i] == ']'){
+                            sum--;
+                            if (sum == 0) {
+                                end = i;
+                            }
+                        }
+                    }
+                    return GetStringValue(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                }else {
+                    return "";
+                }
+            }
+        } else {
+            return "";
+        }
+    } else {
+        int x = json_.find(key);
+        if(x != json_.npos){
+            if(json_[x - 1] == '"' && json_[x + key.length()] == '"'){
+                // //基础类型可以使用正则表达式获取
+                string res = "(\"" + key + "\":)((\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?))";
+                string res2 = "(\"" + key + "\":)((true)|(false))";
+                smatch result;
+                regex pattern(res);
+                if(regex_search(json_, result, pattern)){
+                    return result.str(2);
+                }
+                regex pattern2(res2);
+                if(regex_search(json_, result, pattern2)){
+                    return result.str(2);
+                }
+                return "";
+            } else {
+                return "";
+            }
+            
+        } else {
+            return "";
+        }
+    }
+    return "";
+}
+
+int GetIntValue(string json_, string key) {
+    string value =  GetStringValue(json_, key);
+    if (value == "") {
+        return -1;
+    } else {
+        return atoi(value.c_str());
+    }
+}
+
+double GetDoubleValue(string json_, string key) {
+    string value =  GetStringValue(json_, key);
+    if (value == "") {
+        return -1.0;
+    } else {
+        return atof(value.c_str());
+    }
+}
+
+long GetLongValue(string json_, string key) {
+    string value =  GetStringValue(json_, key);
+    if (value == "") {
+        return -1.0l;
+    } else {
+        return atol(value.c_str());
+    }
+}
+
+bool GetBoolValue(string json_, string key) {
+    string value = GetStringValue(json_, key);
+    if(value == "true"){
+        return 1;
+    } else {
+        return 0;
+    }
+    return 0;
+}
 
 int main(){
     //{"stu":{"name":"liuliu","age":18},"tea":{"name":"wufang","age":48}}
@@ -648,8 +753,14 @@ int main(){
     string key = "stu.age";
     //.表示层级将按照层级去查值，如果只有name 则返回遇到的第一个
     cout << "是否存在：" << Exist(js, key) << endl;
+    cout << "值：" << GetStringValue(js, key) << endl;
 
-
+    //明天任务
+    //1. 解决杂项问题的接口
+    //2. 一次性接口，支持多个参数
+    //3. 解决掉map的问题 可以先支持几个
+    //4. string,string   string,int   int,string  string,bool   int,bool
+    //5. STL支持自定义类型考虑写法
 
 
     string js2 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
