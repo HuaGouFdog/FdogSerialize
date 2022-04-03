@@ -307,9 +307,9 @@ vector<string> CuttingJson(string json_){
             }
             json_a = json_a + json_array[i] + ",";
         }
-        json_ = json_a + "}";
+        json_a = json_a + "}";
         if(json_ != json_a){
-            cout << "加逗号还原，不匹配" << json_ << endl;
+            cout << "加逗号还原，不匹配" << json_a << endl;
         }
     }
     return json_array;
@@ -525,73 +525,244 @@ void func(string json_2){
 }
 
 
+vector<string> split(string str, string pattern){
+    std::string::size_type pos;
+    std::vector<std::string> result;
+    str+=pattern;
+    int size=str.size();
+
+    for(int i=0; i<size; i++)
+    {
+        pos=str.find(pattern,i);
+        if(pos<size)
+        {
+            std::string s=str.substr(i,pos-i);
+            result.push_back(s);
+            i=pos+pattern.size()-1;
+        }
+    }
+    return result;
+}
+//可以做一个缓存
+//直接查不缓存 有一些浪费，先这样，后期可以考虑
+bool Exist(string json_, string key){
+    auto num = key.find(".");
+    if(num != key.npos){
+        if(json_.find(key.substr(0, num)) != json_.npos){
+            //这里需要在找到的里面找对应字符串
+            string resp = "";
+            string jsonNew = "\"" + key.substr(0, num) + "\":";
+            cout << "n = " << num << endl;
+            auto num2 = json_.find(jsonNew);
+            if(num2 != json_.npos){
+                if(json_[num2 + jsonNew.length()] == '{'){
+                    string json_2 = json_.substr(num2 + jsonNew.length());
+                    int len = json_2.length();
+                    int sum = 0;
+                    int first = 0;
+                    int end = 0;
+                    for (int i = 0; i <= len; i++) {
+                        if (json_2[i] == '{'){
+                            sum++;
+                            if (sum == 1) {
+                                first = i;
+                            }
+                        }
+                        if (json_2[i] == '}'){
+                            sum--;
+                            if (sum == 0) {
+                                end = i;
+                            }
+                        }
+                    }
+                    return Exist(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                }else if(json_[num2 + jsonNew.length()] == '['){
+                    string json_2 = json_.substr(num2 + jsonNew.length());
+                    int len = json_2.length();
+                    int sum = 0;
+                    int first = 0;
+                    int end = 0;
+                    for (int i = 0; i <= len; i++) {
+                        if (json_2[i] == '['){
+                            sum++;
+                            if (sum == 1) {
+                                first = i;
+                            }
+                        }
+                        if (json_2[i] == ']'){
+                            sum--;
+                            if (sum == 0) {
+                                end = i;
+                            }
+                        }
+                    }
+                    return Exist(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                }else {
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+    } else {
+        int x = json_.find(key);
+        if(x != json_.npos){
+            if(json_[x - 1] == '"' && json_[x + key.length()] == '"'){
+                return true;
+            } else {
+                return false;
+            }
+            
+        } else {
+            return false;
+        }
+    }
+    return false;
+}
+// C++11 中增加了返回类型后置（trailing-return-type，又称跟踪返回类型）语法 可以用到
+string GetStringValue(string json_, string key){
+    auto num = key.find(".");
+    if(num != key.npos){
+        if(json_.find(key.substr(0, num)) != json_.npos){
+            //这里需要在找到的里面找对应字符串
+            string resp = "";
+            string jsonNew = "\"" + key.substr(0, num) + "\":";
+            cout << "n = " << num << endl;
+            auto num2 = json_.find(jsonNew);
+            if(num2 != json_.npos){
+                if(json_[num2 + jsonNew.length()] == '{'){
+                    string json_2 = json_.substr(num2 + jsonNew.length());
+                    int len = json_2.length();
+                    int sum = 0;
+                    int first = 0;
+                    int end = 0;
+                    for (int i = 0; i <= len; i++) {
+                        if (json_2[i] == '{'){
+                            sum++;
+                            if (sum == 1) {
+                                first = i;
+                            }
+                        }
+                        if (json_2[i] == '}'){
+                            sum--;
+                            if (sum == 0) {
+                                end = i;
+                            }
+                        }
+                    }
+                    return GetStringValue(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                }else if(json_[num2 + jsonNew.length()] == '['){
+                    string json_2 = json_.substr(num2 + jsonNew.length());
+                    int len = json_2.length();
+                    int sum = 0;
+                    int first = 0;
+                    int end = 0;
+                    for (int i = 0; i <= len; i++) {
+                        if (json_2[i] == '['){
+                            sum++;
+                            if (sum == 1) {
+                                first = i;
+                            }
+                        }
+                        if (json_2[i] == ']'){
+                            sum--;
+                            if (sum == 0) {
+                                end = i;
+                            }
+                        }
+                    }
+                    return GetStringValue(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                }else {
+                    return "";
+                }
+            }
+        } else {
+            return "";
+        }
+    } else {
+        int x = json_.find(key);
+        if(x != json_.npos){
+            if(json_[x - 1] == '"' && json_[x + key.length()] == '"'){
+                // //基础类型可以使用正则表达式获取
+                string res = "(\"" + key + "\":)((\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?))";
+                string res2 = "(\"" + key + "\":)((true)|(false))";
+                smatch result;
+                regex pattern(res);
+                if(regex_search(json_, result, pattern)){
+                    return result.str(2);
+                }
+                regex pattern2(res2);
+                if(regex_search(json_, result, pattern2)){
+                    return result.str(2);
+                }
+                return "";
+            } else {
+                return "";
+            }
+            
+        } else {
+            return "";
+        }
+    }
+    return "";
+}
+
+int GetIntValue(string json_, string key) {
+    string value =  GetStringValue(json_, key);
+    if (value == "") {
+        return -1;
+    } else {
+        return atoi(value.c_str());
+    }
+}
+
+double GetDoubleValue(string json_, string key) {
+    string value =  GetStringValue(json_, key);
+    if (value == "") {
+        return -1.0;
+    } else {
+        return atof(value.c_str());
+    }
+}
+
+long GetLongValue(string json_, string key) {
+    string value =  GetStringValue(json_, key);
+    if (value == "") {
+        return -1.0l;
+    } else {
+        return atol(value.c_str());
+    }
+}
+
+bool GetBoolValue(string json_, string key) {
+    string value = GetStringValue(json_, key);
+    if(value == "true"){
+        return 1;
+    } else {
+        return 0;
+    }
+    return 0;
+}
 
 int main(){
-    string text1 = "{\"name\":\"liuliu\"\"age\":18}";
-    CuttingJson(text1);
-    cout << endl;
-    string text2 = "{\"name\":\"liuliu\",\"age\":18,}";
-    CuttingJson(text2);
-    cout << endl;
-    string text3 = "{\"name\":\"liuliu}";
-    CuttingJson(text3);
-    cout << endl;
-    string text4 = "{\"name\":\"liuliu\",age\":18}";
-    CuttingJson(text4);
-    cout << endl;
-    string text5 = "{\"name\":liuliu\",\"age\":18}";
-    CuttingJson(text5);
-    cout << endl;
-    string text6 = "{name\":\"liuliu\",age\":18}";
-    CuttingJson(text6);
-    cout << endl;
-    string text7 = "{\"name\":\"liuliu\",\"age:18}";
-    CuttingJson(text7);
-    cout << endl;
-    string text8 = "{\"name\":\"liuliu\",,\"age\":18}";
-    CuttingJson(text8);
-    cout << endl;
-    string text9 = "{,\"name\":\"liuliu\",\"age:18}";
-    CuttingJson(text9);
-    cout << endl;
-    string text10 = "{\"name\":\"liuliu\",\"age:18}";
-    CuttingJson(text10);
-    cout << endl;
-    string text11 = "{\"name\":\"liuliu\",age:18}";
-    CuttingJson(text11);
-    cout << endl;
-    string text12 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
-    CuttingJson(text12);
-    cout << endl;
-    string text13 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18,\"tea\":{\"name\":\"wufang\",\"age\":48}}";
-    CuttingJson(text13);
-    cout << endl;
-    string text14 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18}\"tea\":{\"name\":\"wufang\",\"age\":48}}";
-    CuttingJson(text14);
-    cout << endl;
-    string text15 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":\"name\":\"wufang\",\"age\":48}}";
-    CuttingJson(text15);
-    cout << endl;
-    string text16 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\"{\"name\":\"wufang\",\"age\":48}}";
-    CuttingJson(text16);
-    cout << endl;
-    string text17 = "{\"name\":\"liuliu\",\"age\"18,\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
-    CuttingJson(text17);
-    cout << endl;
-    string text18 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48";
-    CuttingJson(text18);
-    cout << endl;
-    string text19 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":\"name\":\"liuliu\",\"age\":18},\"tea\":\"name\":\"wufang\",\"age\":48}}";
-    CuttingJson(text19);
-    cout << endl;
-    string text20 = "{\"name\":\"liuliu\",\"age\":18,\"stu\"::\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
-    CuttingJson(text20);
-    cout << endl;
-
-
-
     //{"stu":{"name":"liuliu","age":18},"tea":{"name":"wufang","age":48}}
-    string js = "{\"name\":\"liuliu\"\"age\":18}";
+    string js = "{\"red\":\"liuliu\",\"class\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18}}";
+    cout << "js = " << js << endl;
+    //vector<string> valueList = CuttingJson(js);
+    // data.name.ckdsa
+    string key = "stu.age";
+    //.表示层级将按照层级去查值，如果只有name 则返回遇到的第一个
+    cout << "是否存在：" << Exist(js, key) << endl;
+    cout << "值：" << GetStringValue(js, key) << endl;
+
+    //明天任务
+    //1. 解决杂项问题的接口
+    //2. 一次性接口，支持多个参数
+    //3. 解决掉map的问题 可以先支持几个
+    //4. string,string   string,int   int,string  string,bool   int,bool
+    //5. STL支持自定义类型考虑写法
+
+
     string js2 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
     string js3 = "{\"name\":\"liuliu\",\"age\":18,\"addr\":321}";
     //cout << js2 << endl;
@@ -600,28 +771,92 @@ int main(){
 
     string json_ = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48},\"stu\":[\"zhan\",\"xv\",\"321%90^$%\"],\"tex\":\"dsa\",\"wxc\":-312,\"dsa\":456,\"oew\":-412.3123,\"dae\":true}";
 
-    string json_2 = "{\"class\":423,\"name\":\"张三\",\"age\":21,\"stu\":true,\"student\":{\"name\":\"李四\",\"age\":13},\"school\":[\"2506892\",\"186598\",\"12344687\"],\"addr\":[{\"name\":\"王五\",\"age\":22},{\"name\":\"于静\",\"age\":23},{\"name\":\"张旭\",\"age\":33}],\"all\":{\"name\":\"胡瑞敏\",\"age\":32,\"stu\":true,\"student\":{\"name\":\"zhangxv\",\"age\":1343},\"school\":[\"3f4312\",\"321089\",\"756896\"],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13}],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13},{\"name\":\"hgftre\",\"age\":13}]}}";
-    cout << "原值：" << js << endl;
+    string json_2 = "{\"class\":423,\"name\":\"张三\",\"age\":21,\"stu\":true,\"student\":{\"name\":\"李四\",\"age\":13},\"school\":[\"2506892\",\"186598\",\"12344687\"],\"addr\":[{\"name\":\"王五\",\"age\":22},{\"name\":\"于静\",\"age\":23},{\"name\":\"张旭\",\"age\":33}],\"all\":{\"name\":\"胡瑞敏\",\"age\":32,\"stu\":true,\"student\":{\"name\":\"zhangxv\",\"age\":1343},\"school\":[\"3f4312\",\"321089\",\"756896\"],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13}],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13},{\"name\":\"hgftre\",\"age\":113}]}}";
+    
+    
+    // cout << "原值：" << js << endl;
 
-    string json_3 = "{\"all\":{\"name\":\"胡瑞敏\",\"age\":32,\"stu\":true,\"student\":{\"name\":\"zhangxv\",\"age\":1343},\"school\":[\"3f4312\",\"321089\",\"756896\"],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13}],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13},{\"name\":\"hgftre\",\"age\":13}]}}";
-    //cout << json_3 << endl;
-    //func(json_2);
-    string dsa = "{\"name\":\"321\"\"age\":\"321}";
-    CuttingJson(json_2);
-    //cout << json_2 << endl;
-    //result res = JsonValidS(json_2);
-    //cout << "返回值：" << res.code << endl;
-    string d1 = "{\"name\":\"321\"\"age\":\"321}}";
-    string d2 = "{[\"name\":\"321\"\"age\":\"321]}";
-    string d3 = "{[\"name\":\"321\"\"age\":\"321}";
-    string d4 = "{\"name\":\"321\"\"age\":\"321}[]{";
-    result r1 =  JsonValidS(d1);
-    result r2 =  JsonValidS(d2);
-    result r3 =  JsonValidS(d3);
-    result r4 =  JsonValidS(d4);
-    cout << r1.code << endl;
-    cout << r2.code << endl;
-    cout << r3.code << endl;
-    cout << r3.code << endl;
+    // string json_3 = "{\"all\":{\"name\":\"胡瑞敏\",\"age\":32,\"stu\":true,\"student\":{\"name\":\"zhangxv\",\"age\":1343},\"school\":[\"3f4312\",\"321089\",\"756896\"],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13}],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13},{\"name\":\"hgftre\",\"age\":13}]}}";
+    // //cout << json_3 << endl;
+    // //func(json_2);
+    // string dsa = "{\"name\":\"321\"\"age\":\"321}";
+    // cout << endl;
+    // cout << json_2 << endl;
+    // CuttingJson(json_2);
+    // //cout << json_2 << endl;
+    // //result res = JsonValidS(json_2);
+    // //cout << "返回值：" << res.code << endl;
+    // string d1 = "{\"name\":\"321\"\"age\":\"321}}";
+    // string d2 = "{[\"name\":\"321\"\"age\":\"321]}";
+    // string d3 = "{[\"name\":\"321\"\"age\":\"321}";
+    // string d4 = "{\"name\":\"321\"\"age\":\"321}[]{";
+    // result r1 =  JsonValidS(d1);
+    // result r2 =  JsonValidS(d2);
+    // result r3 =  JsonValidS(d3);
+    // result r4 =  JsonValidS(d4);
+    // cout << r1.code << endl;
+    // cout << r2.code << endl;
+    // cout << r3.code << endl;
+    // cout << r3.code << endl;
+    // string text1 = "{\"name\":\"liuliu\"\"age\":18}";
+    // CuttingJson(text1);
+    // cout << endl;
+    // string text2 = "{\"name\":\"liuliu\",\"age\":18,}";
+    // CuttingJson(text2);
+    // cout << endl;
+    // string text3 = "{\"name\":\"liuliu}";
+    // CuttingJson(text3);
+    // cout << endl;
+    // string text4 = "{\"name\":\"liuliu\",age\":18}";
+    // CuttingJson(text4);
+    // cout << endl;
+    // string text5 = "{\"name\":liuliu\",\"age\":18}";
+    // CuttingJson(text5);
+    // cout << endl;
+    // string text6 = "{name\":\"liuliu\",age\":18}";
+    // CuttingJson(text6);
+    // cout << endl;
+    // string text7 = "{\"name\":\"liuliu\",\"age:18}";
+    // CuttingJson(text7);
+    // cout << endl;
+    // string text8 = "{\"name\":\"liuliu\",,\"age\":18}";
+    // CuttingJson(text8);
+    // cout << endl;
+    // string text9 = "{,\"name\":\"liuliu\",\"age:18}";
+    // CuttingJson(text9);
+    // cout << endl;
+    // string text10 = "{\"name\":\"liuliu\",\"age:18}";
+    // CuttingJson(text10);
+    // cout << endl;
+    // string text11 = "{\"name\":\"liuliu\",age:18}";
+    // CuttingJson(text11);
+    // cout << endl;
+    // string text12 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
+    // CuttingJson(text12);
+    // cout << endl;
+    // string text13 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18,\"tea\":{\"name\":\"wufang\",\"age\":48}}";
+    // CuttingJson(text13);
+    // cout << endl;
+    // string text14 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18}\"tea\":{\"name\":\"wufang\",\"age\":48}}";
+    // CuttingJson(text14);
+    // cout << endl;
+    // string text15 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":\"name\":\"wufang\",\"age\":48}}";
+    // CuttingJson(text15);
+    // cout << endl;
+    // string text16 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\"{\"name\":\"wufang\",\"age\":48}}";
+    // CuttingJson(text16);
+    // cout << endl;
+    // string text17 = "{\"name\":\"liuliu\",\"age\"18,\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
+    // CuttingJson(text17);
+    // cout << endl;
+    // string text18 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48";
+    // CuttingJson(text18);
+    // cout << endl;
+    // string text19 = "{\"name\":\"liuliu\",\"age\":18,\"stu\":\"name\":\"liuliu\",\"age\":18},\"tea\":\"name\":\"wufang\",\"age\":48}}";
+    // CuttingJson(text19);
+    // cout << endl;
+    // string text20 = "{\"name\":\"liuliu\",\"age\":18,\"stu\"::\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
+    // CuttingJson(text20);
+    // cout << endl;
     return 0;
 }
