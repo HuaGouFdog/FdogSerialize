@@ -6,8 +6,8 @@
 Copyright 2021-2022 花狗Fdog(张旭)
 */
 
-#ifndef FdogSerializer_H
-#define FdogSerializer_H
+#ifndef FSTRUCT_H
+#define FSTRUCT_H
 
 #include "definition.h"
 #include <map>
@@ -133,6 +133,12 @@ struct memberAttribute {
     string first;  //如果是map类型 first表示key的类型，如果是其他类型，表示value类型
     string second; //如果是map类型，second表示value类型
     int ArraySize;
+};
+
+//结构体用于返回信息
+struct result {
+    int code;   //1.正确 0.错误
+    string message;
 };
 
 //声明序列化base类
@@ -697,7 +703,7 @@ class FdogSerializer {
 
     private:
     static mutex * mutex_serialize;
-    static FdogSerializer * FdogSerializer;
+    static FdogSerializer * fdogSerializer;
     vector<ObjectInfo *> objectInfoList;
     vector<MetaInfo *> baseInfoList;
 
@@ -736,7 +742,7 @@ class FdogSerializer {
 
     //一次性设置忽略多个字段序列化
     template<class T, class ...Args>
-    void setIgnoreField();
+    void setIgnoreFieldAll();
 
     void removeFirstComma(string & return_);
 
@@ -745,7 +751,7 @@ class FdogSerializer {
     void removeNumbers(string & return_);
 
     template<class T, class ...Args>
-    void setIgnoreLU();
+    void setIgnoreLUAll();
 
     //获取成员属性
     memberAttribute getMemberAttribute(string key);
@@ -800,6 +806,39 @@ class FdogSerializer {
 
     //切割
     vector<string> split(string str, string pattern);
+
+    //判断json格式是否正确
+    vector<string> CuttingJson(string json_);
+
+    //判断方括号是否匹配
+    bool IsSquareBracket(string json_);
+
+    //判断花括号是否匹配
+    bool IsCurlyBraces(string json_);
+
+    //判断总符号数是否匹配
+    bool isMatch(string json_);
+    
+    //判断json正确性
+    result JsonValidS(string json_);
+    
+    //判断字段是否存在
+    bool Exist(string json_, string key);
+    
+    //获取字段的值
+    string GetStringValue(string json_, string key);
+
+    //获取字段的值
+    int GetIntValue(string json_, string key);
+
+    //获取字段的值
+    double GetDoubleValue(string json_, string key);
+
+    //获取字段的值
+    long GetLongValue(string json_, string key);
+
+    //获取字段的值
+    bool GetBoolValue(string json_, string key);
 
     //序列化
     template<typename T>
@@ -1806,8 +1845,9 @@ class FdogSerializer {
         }
     }
 };
+
 namespace Fdog{
-    
+ 
 template<typename T>
 void FJson(string & json_, T & object_, string name = "") {
     FdogSerializer::Instance()->FSerialize(json_, object_, typename TagDispatchTrait<T>::Tag{}, name);
@@ -1817,6 +1857,10 @@ template<typename T>
 void FObject(T & object_, string & json_, string name = ""){
   FdogSerializer::Instance()->FDeserialize(object_, json_, typename TagDispatchTrait<T>::Tag{}, name);
 }
+
+// void setAliasName1(string Type, string memberName, string AliasName){
+//     FdogSerializer::Instance()->setAliasName(Type, memberName, AliasName);
+// }   
 
 // //设置别名
 // void setAliasName1(string Type, string memberName, string AliasName){

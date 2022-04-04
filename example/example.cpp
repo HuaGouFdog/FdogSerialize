@@ -17,8 +17,15 @@ int main()
     stu.age = 21;
     string stu_json = ""; 
     //结构体转json
+    FdogSerializer::Instance()->setAliasName("student", "name", "Zname");
     Fdog::FJson(stu_json, stu);  //结果 stu_json = 
     cout << stu_json << endl;
+    cout << "字符串是否正确：" << endl;
+    FdogSerializer::Instance()->JsonValidS(stu_json);
+    if(FdogSerializer::Instance()->Exist(stu_json, "age")) {
+        cout << "age的值:" << FdogSerializer::Instance()->GetStringValue(stu_json, "age") << endl; 
+    }
+
     student stu2;
     string stu2_json = "{\"name\":\"zhangxv\",\"age\":21}";
     //json转结构体
