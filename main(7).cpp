@@ -169,7 +169,7 @@ vector<string> CuttingJson(string json_){
                 if(sum == 0){
                     end = i;
                     string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值1：" << da << endl;
+                    cout << "获取到的值1：" << da << endl;  //不在尾部的纯字符串 value is string
                     status = -1;
                     json_array.push_back(da);
                 }
@@ -179,30 +179,22 @@ vector<string> CuttingJson(string json_){
                 if(sum == 0){
                     end = i;
                     string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值1：" << da << endl;
+                    cout << "获取到的值2：" << da << endl; //在尾部的纯字符串
                     status = -1;
                     json_array.push_back(da);
                 }            
-            }else if(json_[i+1] == ']' && status == 1){
-                sum--;
-                if(sum == 0){
-                    end = i;
-                    string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值1：" << da << endl;
-                    status = -1;
-                    json_array.push_back(da);
-                }
             }else{
                 if(sum - 1 == 0 && xiabiao < i){
                     //cout << "字符串找不到匹配值" << endl;
                 }
             }
-            if(json_[i+1] == ']' && status == 4){
+            if(json_[i+1] == ']' && json_[i+2] == ',' && status == 4){
                 sum--;
                 if(sum == 0){
                     end = i + 1;
                     string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值3：" << da << endl;
+                    cout << "获取到的值4：" << da << endl; //基础类型数组 不在尾部的string类型
+                    //不存在:
                     status = -1;
                     json_array.push_back(da);
                 }
@@ -217,7 +209,7 @@ vector<string> CuttingJson(string json_){
                         if(da.npos != da.find(",")){
                             cout << "失败" << endl;
                         }
-                    cout << "获取到的值4：" << da << endl;
+                    cout << "获取到的值5：" << da << endl;  //包含数值
                     status = -1;
                     json_array.push_back(da);
                 }
@@ -228,23 +220,41 @@ vector<string> CuttingJson(string json_){
                 if(sum == 0){
                     end = i;
                     string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值5：" << da << endl;
-                    status = -1;
-                    json_array.push_back(da);
-                }
-                continue;
-            }
-            //3 和 6可以区分是不是对象数组
-            if(status == 4 && json_[i] == ']' && json_[i+1] == ','){
-                sum--;
-                if(sum == 0){
-                    end = i;
-                    string da = json_.substr(first, end - first + 1);
                     cout << "获取到的值6：" << da << endl;
                     status = -1;
                     json_array.push_back(da);
+                    int n = da.find(":");
+                    auto json_array_ = CuttingJson("{" + da.substr(n) + "}");
+                    json_array.insert(json_array.end(), json_array_.begin(), json_array_.end());
                 }
                 continue;
+            }
+            if(status == 4 && json_[i] == ']' && json_[i+1] == ','){
+                if(json_[i-1] == '}'){
+                    sum--;
+                    if(sum == 0){
+                        end = i;
+                        string da = json_.substr(first, end - first + 1);
+                        cout << "获取到的值7：" << da << endl; //包含对象的数组  在中间的数组
+                        status = -1;
+                        json_array.push_back(da);
+                        int n = da.find(":");
+                        auto json_array_ = CuttingJson("{" + da.substr(n) + "}");
+                        json_array.insert(json_array.end(), json_array_.begin(), json_array_.end());
+                    }
+                    continue;
+                } else {
+                    sum--;
+                    if(sum == 0){
+                        end = i;
+                        string da = json_.substr(first, end - first + 1);
+                        cout << "获取到的值11：" << da << endl; //包含对象的数组  在中间的数组
+                        status = -1;
+                        json_array.push_back(da);
+                        //不存在:
+                    }
+                    continue;
+                }
             }
             if((status == 3 || status == 2) && json_[i] == '}'){
                 if(isadd == true){
@@ -257,28 +267,60 @@ vector<string> CuttingJson(string json_){
                         if(da.npos != da.find(",")){
                             cout << "失败" << endl;
                         }
-                        cout << "获取到的值71：" << da << endl;
+                        cout << "获取到的值8：" << da << endl;  //在尾部的数值
                         status = -1;
                         json_array.push_back(da);
                     }else{
                         string da = json_.substr(first, end - first + 1);
-                        cout << "获取到的值72：" << da << endl;
+                        cout << "获取到的值9：" << da << endl;
                         status = -1;
+                        //递归
                         json_array.push_back(da);
+                        int n = da.find(":");
+                        auto json_array_ = CuttingJson("{" + da.substr(n) + "}");
+                        json_array.insert(json_array.end(), json_array_.begin(), json_array_.end());
                     }
                 }
                 continue;
             }
             if(status == 4 && json_[i] == ']'){
-                sum--;
-                if(sum == 0){
-                    end = i;
-                    string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值8：" << da << endl;
-                    status = -1;
-                    json_array.push_back(da);
+                if(json_[i-1] == '}'){
+                    sum--;
+                    if(sum == 0){
+                        end = i;
+                        string da = json_.substr(first, end - first + 1);
+                        cout << "获取到的值10：" << da << endl;
+                        status = -1;
+                        //递归
+                        json_array.push_back(da);
+                        int n = da.find(":");
+                        auto json_array_ = CuttingJson("{" + da.substr(n) + "}");
+                        json_array.insert(json_array.end(), json_array_.begin(), json_array_.end());
+                    }
+                    continue;
+                }else if(json_[i-1] == '"') {
+                    sum--;
+                    if(sum == 0){
+                        end = i;
+                        string da = json_.substr(first, end - first + 1);
+                        cout << "获取到的值12：" << da << endl; 
+                        status = -1;
+                        //不存在:
+                        json_array.push_back(da);
+                    }
+                    continue;
+                } else {
+                    sum--;
+                    if(sum == 0){
+                        end = i;
+                        string da = json_.substr(first, end - first + 1);
+                        cout << "获取到的值13：" << da << endl;
+                        status = -1;
+                        json_array.push_back(da);
+                        //不存在:
+                    }
+                    continue;                   
                 }
-                continue;
             }
         }
     }
@@ -487,6 +529,8 @@ result JsonValidS(string json_) {
         res.message = "括号不匹配";
         return res;
     }
+    return res;
+}
 
     // string regexStr = "\"\\w+\":((\\{(.*?)\\})|(\\[(.*?)\\])|(\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?)|(true|false))";
     // smatch result;
@@ -505,8 +549,6 @@ result JsonValidS(string json_) {
     //     // }
     //     iterStart = result[0].second;	//更新搜索起始位置,搜索剩下的字符串
     // }
-    return res;
-}
 
 void func(string json_2){
     removeFirstComma(json_2);
@@ -752,8 +794,8 @@ int main(){
     // data.name.ckdsa
     string key = "stu.age";
     //.表示层级将按照层级去查值，如果只有name 则返回遇到的第一个
-    cout << "是否存在：" << Exist(js, key) << endl;
-    cout << "值：" << GetStringValue(js, key) << endl;
+    //cout << "是否存在：" << Exist(js, key) << endl;
+    //cout << "值：" << GetStringValue(js, key) << endl;
 
     //明天任务
     //1. 解决杂项问题的接口
@@ -771,7 +813,7 @@ int main(){
 
     string json_ = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48},\"stu\":[\"zhan\",\"xv\",\"321%90^$%\"],\"tex\":\"dsa\",\"wxc\":-312,\"dsa\":456,\"oew\":-412.3123,\"dae\":true}";
 
-    string json_2 = "{\"class\":423,\"name\":\"张三\",\"age\":21,\"stu\":true,\"student\":{\"name\":\"李四\",\"age\":13},\"school\":[\"2506892\",\"186598\",\"12344687\"],\"addr\":[{\"name\":\"王五\",\"age\":22},{\"name\":\"于静\",\"age\":23},{\"name\":\"张旭\",\"age\":33}],\"all\":{\"name\":\"胡瑞敏\",\"age\":32,\"stu\":true,\"student\":{\"name\":\"zhangxv\",\"age\":1343},\"school\":[\"3f4312\",\"321089\",\"756896\"],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13}],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13},{\"name\":\"hgftre\",\"age\":113}]}}";
+    string json_2 = "{\"class\":423,\"name\":\"张三\",\"age\":21,\"stu\":true,\"student\":{\"name\":\"李四\",\"age\":13},\"school\":[2506892,186598,12344687],\"addr\":[{\"name\":\"王五\",\"age\":22},{\"name\":\"于静\",\"age\":23},{\"name\":\"张旭\",\"age\":33}],\"all\":{\"name\":\"胡瑞敏\",\"age\":32,\"stu\":true,\"student\":{\"name\":\"zhangxv\",\"age\":1343},\"school\":[\"3f4312\",\"321089\",\"756896\"],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13}],\"addr\":[{\"name\":\"dasdas\",\"age\":13},{\"name\":\"ytrhfg\",\"age\":13},{\"name\":\"hgftre\",\"age\":113}]},\"name\":\"zhangxu\",\"age\":321,\"array\":[{\"name\":\"hgftre\",\"age\":113},{\"name\":\"hgftre\",\"age\":113}]}";
     
     
     // cout << "原值：" << js << endl;
@@ -782,7 +824,7 @@ int main(){
     // string dsa = "{\"name\":\"321\"\"age\":\"321}";
     // cout << endl;
     // cout << json_2 << endl;
-    // CuttingJson(json_2);
+    CuttingJson(json_2);
     // //cout << json_2 << endl;
     // //result res = JsonValidS(json_2);
     // //cout << "返回值：" << res.code << endl;

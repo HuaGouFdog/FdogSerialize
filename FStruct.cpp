@@ -21,7 +21,7 @@ FdogSerializerBase * FdogSerializerBase::Instance(){
 }
 
 
-FdogSerializer * FdogSerializer::FdogSerializer = nullptr;
+FdogSerializer * FdogSerializer::fdogSerializer = nullptr;
 mutex * FdogSerializer::mutex_serialize = new(mutex);
 
 FdogSerializer::FdogSerializer(){
@@ -117,16 +117,16 @@ FdogSerializer::FdogSerializer(){
 FdogSerializer::~FdogSerializer(){
     //释放内存
     delete(FdogSerializer::mutex_serialize);
-    delete(FdogSerializer::FdogSerializer);
+    delete(FdogSerializer::fdogSerializer);
 }
 
 FdogSerializer * FdogSerializer::Instance(){
     mutex_serialize->lock();
-    if(FdogSerializer == nullptr){
-        FdogSerializer = new FdogSerializer();
+    if(fdogSerializer == nullptr){
+        fdogSerializer = new FdogSerializer();
     }
     mutex_serialize->unlock();
-    return FdogSerializer;
+    return fdogSerializer;
 }
 
 void FdogSerializer::addObjectInfo(ObjectInfo * objectinfo){
@@ -497,6 +497,493 @@ vector<string> FdogSerializer::split(string str, string pattern){
         }
     }
     return result;
+}
+
+//判断json格式是否正确
+vector<string> FdogSerializer::CuttingJson(string json_){
+    vector<string> json_array;
+    //这个函数可以完成对json消息的分割，只分割第一层，如果其他消息体有多层，依次分析
+    int status = -1; //0 表示下一个类型任意  1 表示基本类型(不包含嵌套) 2 表示对象  3 表示数组
+    int first = 0;  //字符串初始位置
+    int end = 0;    //字符串结束位置
+    int len = json_.length();
+    int sum = 0;
+    int xiabiao = 0; //记录匹配下标
+    bool isadd = false;
+    for(int i = 0; i < len; i++){
+        //cout << "i = " << i << endl;
+        if(json_[i] == '"'){
+			if(sum == 0 && status == -1){
+                status = 0;
+                first = i;
+                //cout << "i = " << i << endl;
+            }
+        }
+        if(status == 3 && json_[i] == '{' && isadd == true){
+            sum++;
+        }
+
+        if(status == 4 && json_[i] == '[' && isadd == true){
+            sum++;
+        }
+
+        if(json_[i] == ',' && json_[i-1] == '"' && status == 2){
+            cout << ",后面是\" 且 status = 2 出错" << endl;
+        }
+
+        if(json_[i] == '"' && json_[i+1] == ':' && json_[i+2] == '{'){
+            if(status == 0){
+                //cout << "status = 3" << endl;
+                status = 3;
+                //sum++;
+                isadd = true;
+            }
+        } else if(json_[i] == '"' && json_[i+1] == ':' && json_[i+2] == '['){
+            if(status == 0){
+                status = 4;
+                //sum++;
+                isadd = true;
+            }
+        } else if(json_[i] == '"' && json_[i+1] == ':' && json_[i+2] == '"'){
+            if(status == 0){
+                status = 1;
+                sum++;
+                //cout << "sum+1 =" << sum << endl;
+                xiabiao = i + 2;
+                isadd = true;
+            }
+        } else if(json_[i] == '"' && json_[i+1] == ':'){
+            if(status == 0){
+                status = 2;
+                sum++;
+                isadd = true;
+            }
+        }
+        if(json_[i] == '"'){
+            if(json_[i+1] == ',' && status == 1){
+                sum--;
+                if(sum == 0){
+                    end = i;
+                    string da = json_.substr(first, end - first + 1);
+                    cout << "获取到的值1：" << da << endl;
+                    status = -1;
+                    json_array.push_back(da);
+                }
+            }else if(json_[i+1] == '}' && status == 1){
+                sum--;
+                //cout << "sum-1 =" << sum << endl;
+                if(sum == 0){
+                    end = i;
+                    string da = json_.substr(first, end - first + 1);
+                    cout << "获取到的值1：" << da << endl;
+                    status = -1;
+                    json_array.push_back(da);
+                }            
+            }else if(json_[i+1] == ']' && status == 1){
+                sum--;
+                if(sum == 0){
+                    end = i;
+                    string da = json_.substr(first, end - first + 1);
+                    cout << "获取到的值1：" << da << endl;
+                    status = -1;
+                    json_array.push_back(da);
+                }
+            }else{
+                if(sum - 1 == 0 && xiabiao < i){
+                    //cout << "字符串找不到匹配值" << endl;
+                }
+            }
+            if(json_[i+1] == ']' && status == 4){
+                sum--;
+                if(sum == 0){
+                    end = i + 1;
+                    string da = json_.substr(first, end - first + 1);
+                    cout << "获取到的值3：" << da << endl;
+                    status = -1;
+                    json_array.push_back(da);
+                }
+            }
+        }
+        if((status == 2 || status == 3 || status == 4) && sum != 0){
+            if(status == 2 && json_[i-1] != '"' && json_[i] == ',' && json_[i+1] == '"'){
+                sum--;
+                if(sum == 0){
+                    end = i;
+                    string da = json_.substr(first, end - first);
+                        if(da.npos != da.find(",")){
+                            cout << "失败" << endl;
+                        }
+                    cout << "获取到的值4：" << da << endl;
+                    status = -1;
+                    json_array.push_back(da);
+                }
+                continue;
+            }
+            if(status == 3 && json_[i] == '}' && json_[i+1] == ','){
+                sum--;
+                if(sum == 0){
+                    end = i;
+                    string da = json_.substr(first, end - first + 1);
+                    cout << "获取到的值5：" << da << endl;
+                    status = -1;
+                    json_array.push_back(da);
+                }
+                continue;
+            }
+            //3 和 6可以区分是不是对象数组
+            if(status == 4 && json_[i] == ']' && json_[i+1] == ','){
+                sum--;
+                if(sum == 0){
+                    end = i;
+                    string da = json_.substr(first, end - first + 1);
+                    cout << "获取到的值6：" << da << endl;
+                    status = -1;
+                    json_array.push_back(da);
+                }
+                continue;
+            }
+            if((status == 3 || status == 2) && json_[i] == '}'){
+                if(isadd == true){
+                    sum--;
+                }
+                if(sum == 0){
+                    end = i;
+                    if (status == 2 && json_[i-1] != '"'){
+                        string da = json_.substr(first, end - first);
+                        if(da.npos != da.find(",")){
+                            cout << "失败" << endl;
+                        }
+                        cout << "获取到的值71：" << da << endl;
+                        status = -1;
+                        json_array.push_back(da);
+                    }else{
+                        string da = json_.substr(first, end - first + 1);
+                        cout << "获取到的值72：" << da << endl;
+                        status = -1;
+                        json_array.push_back(da);
+                    }
+                }
+                continue;
+            }
+            if(status == 4 && json_[i] == ']'){
+                sum--;
+                if(sum == 0){
+                    end = i;
+                    string da = json_.substr(first, end - first + 1);
+                    cout << "获取到的值8：" << da << endl;
+                    status = -1;
+                    json_array.push_back(da);
+                }
+                continue;
+            }
+        }
+    }
+    if(status != -1){
+        cout << "匹配失败在字符串<";
+        int a = first;
+        for(int i = 0; i < (json_.length()-a > 20 ? 20 : json_.length() - a); i++){
+            cout << json_[a++];
+        }
+        cout << ">附近"<< endl;
+    } else {
+        int count = 0;
+        for(int i = 0; i < json_array.size(); i++){
+            count = count + json_array[i].length() + 1;
+        }
+        if(count + 1 != json_.length()){
+            cout << "长度出错 :" << json_ << "---原字符串长度：" << json_.length() << "---现在长度:" << count + 1 << endl;
+        }
+    }
+    if(1){
+        string json_a = "{";
+        for(int i = 0; i < json_array.size(); i++){
+            if(i + 1 == json_array.size()){
+                json_a = json_a + json_array[i];
+                break;
+            }
+            json_a = json_a + json_array[i] + ",";
+        }
+        json_a = json_a + "}";
+        if(json_ != json_a){
+            cout << "加逗号还原，不匹配" << json_a << endl;
+        }
+    }
+    return json_array;
+}
+
+//判断方括号是否匹配
+bool FdogSerializer::IsSquareBracket(string json_){
+    char start = json_[0];
+    char end = json_[json_.length()-1];
+    if(start != '[' || end != ']'){
+        return false;
+    }  
+    return true;
+}
+
+//判断花括号是否匹配
+bool FdogSerializer::IsCurlyBraces(string json_){
+    char start = json_[0];
+    char end = json_[json_.length()-1];
+    if(start != '{' || end != '}'){
+        return false;
+    }
+    return true;
+}
+
+//判断总符号数是否匹配
+bool FdogSerializer::isMatch(string json_){
+    int h_sum = 0;
+    int f_sum = 0;
+    for(int i = 0; i < json_.length(); i++){
+		if (json_[i] == '{'){
+			h_sum++;
+		}
+		if (json_[i] == '}'){
+			h_sum--;
+		}    
+		if (json_[i] == '['){
+			f_sum++;
+		}
+		if (json_[i] == ']'){
+			f_sum--;
+		}
+    }
+    if( h_sum == f_sum && f_sum == 0){
+        return true;
+    }else{
+        return false;
+    }
+    return false;
+}
+
+//判断json正确性
+result FdogSerializer::JsonValidS(string json_){
+    result res;
+    res.code = 1;
+    //检查左右括号
+    if(!IsCurlyBraces(json_)){
+        res.code = 0;
+        res.message = "缺少花括号";
+        return res;
+    }
+    //检查总符号数是否匹配([]{})
+    if(!isMatch(json_)){
+        res.code = 0;
+        res.message = "括号不匹配";
+        return res;
+    }
+    vector<string> array_json = CuttingJson(json_);
+    if(array_json.size() == 0){
+        res.code = 0;
+        return res;
+    }
+    return res;
+}
+
+//判断字段是否存在
+bool FdogSerializer::Exist(string json_, string key){
+   auto num = key.find(".");
+    if(num != key.npos){
+        if(json_.find(key.substr(0, num)) != json_.npos){
+            //这里需要在找到的里面找对应字符串
+            string resp = "";
+            string jsonNew = "\"" + key.substr(0, num) + "\":";
+            cout << "n = " << num << endl;
+            auto num2 = json_.find(jsonNew);
+            if(num2 != json_.npos){
+                if(json_[num2 + jsonNew.length()] == '{'){
+                    string json_2 = json_.substr(num2 + jsonNew.length());
+                    int len = json_2.length();
+                    int sum = 0;
+                    int first = 0;
+                    int end = 0;
+                    for (int i = 0; i <= len; i++) {
+                        if (json_2[i] == '{'){
+                            sum++;
+                            if (sum == 1) {
+                                first = i;
+                            }
+                        }
+                        if (json_2[i] == '}'){
+                            sum--;
+                            if (sum == 0) {
+                                end = i;
+                            }
+                        }
+                    }
+                    return Exist(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                }else if(json_[num2 + jsonNew.length()] == '['){
+                    string json_2 = json_.substr(num2 + jsonNew.length());
+                    int len = json_2.length();
+                    int sum = 0;
+                    int first = 0;
+                    int end = 0;
+                    for (int i = 0; i <= len; i++) {
+                        if (json_2[i] == '['){
+                            sum++;
+                            if (sum == 1) {
+                                first = i;
+                            }
+                        }
+                        if (json_2[i] == ']'){
+                            sum--;
+                            if (sum == 0) {
+                                end = i;
+                            }
+                        }
+                    }
+                    return Exist(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                }else {
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+    } else {
+        int x = json_.find(key);
+        if(x != json_.npos){
+            if(json_[x - 1] == '"' && json_[x + key.length()] == '"'){
+                return true;
+            } else {
+                return false;
+            }
+            
+        } else {
+            return false;
+        }
+    }
+    return false;
+}
+
+//获取字段的值
+string FdogSerializer::GetStringValue(string json_, string key){
+    auto num = key.find(".");
+    if(num != key.npos){
+        if(json_.find(key.substr(0, num)) != json_.npos){
+            //这里需要在找到的里面找对应字符串
+            string resp = "";
+            string jsonNew = "\"" + key.substr(0, num) + "\":";
+            cout << "n = " << num << endl;
+            auto num2 = json_.find(jsonNew);
+            if(num2 != json_.npos){
+                if(json_[num2 + jsonNew.length()] == '{'){
+                    string json_2 = json_.substr(num2 + jsonNew.length());
+                    int len = json_2.length();
+                    int sum = 0;
+                    int first = 0;
+                    int end = 0;
+                    for (int i = 0; i <= len; i++) {
+                        if (json_2[i] == '{'){
+                            sum++;
+                            if (sum == 1) {
+                                first = i;
+                            }
+                        }
+                        if (json_2[i] == '}'){
+                            sum--;
+                            if (sum == 0) {
+                                end = i;
+                            }
+                        }
+                    }
+                    return GetStringValue(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                }else if(json_[num2 + jsonNew.length()] == '['){
+                    string json_2 = json_.substr(num2 + jsonNew.length());
+                    int len = json_2.length();
+                    int sum = 0;
+                    int first = 0;
+                    int end = 0;
+                    for (int i = 0; i <= len; i++) {
+                        if (json_2[i] == '['){
+                            sum++;
+                            if (sum == 1) {
+                                first = i;
+                            }
+                        }
+                        if (json_2[i] == ']'){
+                            sum--;
+                            if (sum == 0) {
+                                end = i;
+                            }
+                        }
+                    }
+                    return GetStringValue(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                }else {
+                    return "";
+                }
+            }
+        } else {
+            return "";
+        }
+    } else {
+        int x = json_.find(key);
+        if(x != json_.npos){
+            if(json_[x - 1] == '"' && json_[x + key.length()] == '"'){
+                // //基础类型可以使用正则表达式获取
+                string res = "(\"" + key + "\":)((\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?))";
+                string res2 = "(\"" + key + "\":)((true)|(false))";
+                smatch result;
+                regex pattern(res);
+                if(regex_search(json_, result, pattern)){
+                    return result.str(2);
+                }
+                regex pattern2(res2);
+                if(regex_search(json_, result, pattern2)){
+                    return result.str(2);
+                }
+                return "";
+            } else {
+                return "";
+            }
+            
+        } else {
+            return "";
+        }
+    }
+    return "";
+}
+
+//获取字段的值
+int FdogSerializer::GetIntValue(string json_, string key){
+    string value =  GetStringValue(json_, key);
+    if (value == "") {
+        return -1;
+    } else {
+        return atoi(value.c_str());
+    }
+}
+
+//获取字段的值
+double FdogSerializer::GetDoubleValue(string json_, string key){
+    string value =  GetStringValue(json_, key);
+    if (value == "") {
+        return -1.0;
+    } else {
+        return atof(value.c_str());
+    }
+}
+
+//获取字段的值
+long FdogSerializer::GetLongValue(string json_, string key){
+    string value =  GetStringValue(json_, key);
+    if (value == "") {
+        return -1.0l;
+    } else {
+        return atol(value.c_str());
+    }
+}
+
+//获取字段的值
+bool FdogSerializer::GetBoolValue(string json_, string key){
+    string value = GetStringValue(json_, key);
+    if(value == "true"){
+        return 1;
+    } else {
+        return 0;
+    }
+    return 0;
 }
 
 string FdogSerializer::getTypeOfVector(string objectName, string typeName){
