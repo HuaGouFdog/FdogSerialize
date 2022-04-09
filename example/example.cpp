@@ -17,13 +17,13 @@ int main()
     stu.age = 21;
     string stu_json = ""; 
     //结构体转json
-    FdogSerializer::Instance()->setAliasName("student", "name", "Zname");
+    //Fdog::setAliasName("student", "name", "Zname");
     Fdog::FJson(stu_json, stu);  //结果 stu_json = 
     cout << stu_json << endl;
-    cout << "字符串是否正确：" << endl;
-    FdogSerializer::Instance()->JsonValidS(stu_json);
-    if(FdogSerializer::Instance()->Exist(stu_json, "age")) {
-        cout << "age的值:" << FdogSerializer::Instance()->GetStringValue(stu_json, "age") << endl; 
+    auto res = Fdog::JsonValidS(stu_json);
+    cout << "字符串是否正确：" << res.code << endl;
+    if(Fdog::Exist(stu_json, "age")) {
+        cout << "age的值:" << Fdog::GetStringValue(stu_json, "age") << endl; 
     }
 
     student stu2;
@@ -32,17 +32,17 @@ int main()
     Fdog::FObject(stu2, stu2_json);  //结果  stu2
     cout << stu2.name << "-" << stu2.age << endl;
 
-    REGISTEREDMEMBER(teacher, name, age);  //注册teacher成员
-    REGISTEREDMEMBER(school, stu, tea);  //注册school成员
-    school sch;
-    sch.stu.name = "liuliu";
-    sch.stu.age = 18;
-    sch.tea.name = "wufang";
-    sch.tea.age = 48;
-    string sch_json = "";
-    //结构体转json
-    Fdog::FJson(sch_json, sch);
-    cout << sch_json << endl;
+    // REGISTEREDMEMBER(teacher, name, age);  //注册teacher成员
+    // REGISTEREDMEMBER(school, stu, tea);  //注册school成员
+    // school sch;
+    // sch.stu.name = "liuliu";
+    // sch.stu.age = 18;
+    // sch.tea.name = "wufang";
+    // sch.tea.age = 48;
+    // string sch_json = "";
+    // //结构体转json
+    // Fdog::FJson(sch_json, sch);
+    // cout << sch_json << endl;
 
     //text tx;
     //string a[2] = {"nihao","buhao"};

@@ -152,7 +152,7 @@ MetaInfo * FdogSerializer::getMetaInfo(string TypeName){
     return nullptr;
 }
 
-void FdogSerializer::setAliasName(string type, string memberName, string aliasName){
+void FdogSerializer::__setAliasName(string type, string memberName, string aliasName){
     ObjectInfo & objectinfo = this->getObjectInfo(type);
     for(auto metainfoObject : objectinfo.metaInfoObjectList){
         if(metainfoObject->memberName == memberName){
@@ -162,7 +162,7 @@ void FdogSerializer::setAliasName(string type, string memberName, string aliasNa
     }
 }
 
-void FdogSerializer::setIgnoreField(string Type, string memberName){
+void FdogSerializer::__setIgnoreField(string Type, string memberName){
     ObjectInfo & objectinfo = this->getObjectInfo(Type);
     for(auto metainfoObject : objectinfo.metaInfoObjectList){
         if(metainfoObject->memberName == memberName){
@@ -172,7 +172,7 @@ void FdogSerializer::setIgnoreField(string Type, string memberName){
     }
 }
 
-void FdogSerializer::setIgnoreLU(string Type, string memberName){
+void FdogSerializer::__setIgnoreLU(string Type, string memberName){
     ObjectInfo & objectinfo = this->getObjectInfo(Type);
     for(auto metainfoObject : objectinfo.metaInfoObjectList){
         if(metainfoObject->memberName == memberName){
@@ -182,9 +182,26 @@ void FdogSerializer::setIgnoreLU(string Type, string memberName){
     }
 }
 
-void FdogSerializer::setFuzzy(string Type) {
+void FdogSerializer::__setFuzzy(string Type) {
 
 }
+
+void Fdog::setAliasName(string Type, string memberName, string AliasName){
+    FdogSerializer::Instance()->__setAliasName(Type, memberName, AliasName);
+}
+
+void Fdog::setIgnoreField(string Type, string memberName){
+    FdogSerializer::Instance()->__setIgnoreField(Type, memberName);
+}
+
+void Fdog::setIgnoreLU(string Type, string memberName){
+    FdogSerializer::Instance()->__setIgnoreLU(Type, memberName);
+}
+
+void Fdog::setFuzzy(string Type){
+    FdogSerializer::Instance()->__setFuzzy(Type);
+}
+
 
 /***********************************
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
@@ -758,7 +775,7 @@ bool FdogSerializer::isMatch(string json_){
 }
 
 //判断json正确性
-result FdogSerializer::JsonValidS(string json_){
+result FdogSerializer::__JsonValidS(string json_){
     result res;
     res.code = 1;
     //检查左右括号
@@ -782,7 +799,7 @@ result FdogSerializer::JsonValidS(string json_){
 }
 
 //判断字段是否存在
-bool FdogSerializer::Exist(string json_, string key){
+bool FdogSerializer::__Exist(string json_, string key){
    auto num = key.find(".");
     if(num != key.npos){
         if(json_.find(key.substr(0, num)) != json_.npos){
@@ -812,7 +829,7 @@ bool FdogSerializer::Exist(string json_, string key){
                             }
                         }
                     }
-                    return Exist(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                    return __Exist(json_2.substr(first, end - first + 1), key.substr(num + 1));
                 }else if(json_[num2 + jsonNew.length()] == '['){
                     string json_2 = json_.substr(num2 + jsonNew.length());
                     int len = json_2.length();
@@ -833,7 +850,7 @@ bool FdogSerializer::Exist(string json_, string key){
                             }
                         }
                     }
-                    return Exist(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                    return __Exist(json_2.substr(first, end - first + 1), key.substr(num + 1));
                 }else {
                     return false;
                 }
@@ -858,7 +875,7 @@ bool FdogSerializer::Exist(string json_, string key){
 }
 
 //获取字段的值
-string FdogSerializer::GetStringValue(string json_, string key){
+string FdogSerializer::__GetStringValue(string json_, string key){
     auto num = key.find(".");
     if(num != key.npos){
         if(json_.find(key.substr(0, num)) != json_.npos){
@@ -888,7 +905,7 @@ string FdogSerializer::GetStringValue(string json_, string key){
                             }
                         }
                     }
-                    return GetStringValue(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                    return __GetStringValue(json_2.substr(first, end - first + 1), key.substr(num + 1));
                 }else if(json_[num2 + jsonNew.length()] == '['){
                     string json_2 = json_.substr(num2 + jsonNew.length());
                     int len = json_2.length();
@@ -909,7 +926,7 @@ string FdogSerializer::GetStringValue(string json_, string key){
                             }
                         }
                     }
-                    return GetStringValue(json_2.substr(first, end - first + 1), key.substr(num + 1));
+                    return __GetStringValue(json_2.substr(first, end - first + 1), key.substr(num + 1));
                 }else {
                     return "";
                 }
@@ -946,8 +963,8 @@ string FdogSerializer::GetStringValue(string json_, string key){
 }
 
 //获取字段的值
-int FdogSerializer::GetIntValue(string json_, string key){
-    string value =  GetStringValue(json_, key);
+int FdogSerializer::__GetIntValue(string json_, string key){
+    string value =  __GetStringValue(json_, key);
     if (value == "") {
         return -1;
     } else {
@@ -956,8 +973,8 @@ int FdogSerializer::GetIntValue(string json_, string key){
 }
 
 //获取字段的值
-double FdogSerializer::GetDoubleValue(string json_, string key){
-    string value =  GetStringValue(json_, key);
+double FdogSerializer::__GetDoubleValue(string json_, string key){
+    string value =  __GetStringValue(json_, key);
     if (value == "") {
         return -1.0;
     } else {
@@ -966,8 +983,8 @@ double FdogSerializer::GetDoubleValue(string json_, string key){
 }
 
 //获取字段的值
-long FdogSerializer::GetLongValue(string json_, string key){
-    string value =  GetStringValue(json_, key);
+long FdogSerializer::__GetLongValue(string json_, string key){
+    string value =  __GetStringValue(json_, key);
     if (value == "") {
         return -1.0l;
     } else {
@@ -976,8 +993,8 @@ long FdogSerializer::GetLongValue(string json_, string key){
 }
 
 //获取字段的值
-bool FdogSerializer::GetBoolValue(string json_, string key){
-    string value = GetStringValue(json_, key);
+bool FdogSerializer::__GetBoolValue(string json_, string key){
+    string value = __GetStringValue(json_, key);
     if(value == "true"){
         return 1;
     } else {
@@ -1014,4 +1031,39 @@ string FdogSerializer::getTypeOfList(string objectName, string typeName){
         return result.str(1).c_str();
     }
     return "";
+}
+
+//判断json正确性
+result Fdog::JsonValidS(string json_){
+    return FdogSerializer::Instance()->__JsonValidS(json_);
+}
+
+//判断字段是否存在
+bool Fdog::Exist(string json_, string key){
+    return FdogSerializer::Instance()->__Exist(json_, key);
+}
+
+//获取字段的值
+string Fdog::GetStringValue(string json_, string key){
+    return FdogSerializer::Instance()->__GetStringValue(json_, key);
+}
+
+//获取字段的值
+int Fdog::GetIntValue(string json_, string key){
+    return FdogSerializer::Instance()->__GetIntValue(json_, key);
+}
+
+//获取字段的值
+double Fdog::GetDoubleValue(string json_, string key){
+    return FdogSerializer::Instance()->__GetDoubleValue(json_, key);
+}
+
+//获取字段的值
+long Fdog::GetLongValue(string json_, string key){
+    return FdogSerializer::Instance()->__GetLongValue(json_, key);
+}
+
+//获取字段的值
+bool Fdog::GetBoolValue(string json_, string key){
+    return FdogSerializer::Instance()->__GetBoolValue(json_, key);
 }

@@ -164,6 +164,12 @@ FStructm目前期望提供的接口支持：
 | setAliasName(string Type, string memberName, string AliasName) | 使用别名（单个变量设置）   |
 | setIgnoreField(string Type, string memberName)               | 忽略字段（单个变量设置）   |
 | setIgnoreLU(string Type, string memberName)                  | 忽略大小写（单个变量设置） |
+| JsonValids()                                                 | json格式是否正确           |
+| Exist()                                                      | 查找字段是否存在           |
+| *GetIntValue*                                                | *获取int类型的值*          |
+| GetDoubleValue                                               | 获取double类型的值         |
+| GetStringValue                                               | 获取string类型的值         |
+| GetBoolValue                                                 | 获取bool类型的值           |
 
 未完成：
 
@@ -175,14 +181,7 @@ FStructm目前期望提供的接口支持：
 | setIgnoreFieldAll()     | 忽略字段（支持多个同时设置）                                 |
 | setIgnoreLUAll()        | 忽略大小写（支持多个同时设置）                               |
 | setFuzzy(string Type)() | 模糊转换（设置后，对于字段名设置不正确，将尝试模糊匹配，考虑加入到默认） |
-| JsonValid()             | json格式是否正确                                             |
 | XmlValid()              | xml格式是否正确                                              |
-| Exist()                 | 查找字段是否存在                                             |
-| *GetIntValue*           | *获取int类型的值*                                            |
-| GetDoubleValue          | 获取double类型的值                                           |
-| GetStringValue          | 获取string类型的值                                           |
-| GetBoolValue            | 获取bool类型的值                                             |
-|                         |                                                              |
 
 如果您还希望提供什么好的接口，请联系我。
 

@@ -724,16 +724,16 @@ class FdogSerializer {
     MetaInfo * getMetaInfo(string TypeName);
 
     //设置别名
-    void setAliasName(string Type, string memberName, string AliasName);
+    void __setAliasName(string Type, string memberName, string AliasName);
 
     //设置是否忽略该字段序列化
-    void setIgnoreField(string Type, string memberName);
+    void __setIgnoreField(string Type, string memberName);
 
 	//设置是否忽略大小写
-    void setIgnoreLU(string Type, string memberName);
+    void __setIgnoreLU(string Type, string memberName);
 
 	//设置进行模糊转换 结构体转json不存在这个问题主要是针对json转结构体的问题，如果存在分歧，可以尝试进行模糊转换
-	void setFuzzy(string Type);
+	void __setFuzzy(string Type);
 
 
     //一次性设置多个别名
@@ -820,25 +820,25 @@ class FdogSerializer {
     bool isMatch(string json_);
     
     //判断json正确性
-    result JsonValidS(string json_);
+    result __JsonValidS(string json_);
     
     //判断字段是否存在
-    bool Exist(string json_, string key);
+    bool __Exist(string json_, string key);
     
     //获取字段的值
-    string GetStringValue(string json_, string key);
+    string __GetStringValue(string json_, string key);
 
     //获取字段的值
-    int GetIntValue(string json_, string key);
+    int __GetIntValue(string json_, string key);
 
     //获取字段的值
-    double GetDoubleValue(string json_, string key);
+    double __GetDoubleValue(string json_, string key);
 
     //获取字段的值
-    long GetLongValue(string json_, string key);
+    long __GetLongValue(string json_, string key);
 
     //获取字段的值
-    bool GetBoolValue(string json_, string key);
+    bool __GetBoolValue(string json_, string key);
 
     //序列化
     template<typename T>
@@ -1857,6 +1857,38 @@ template<typename T>
 void FObject(T & object_, string & json_, string name = ""){
   FdogSerializer::Instance()->FDeserialize(object_, json_, typename TagDispatchTrait<T>::Tag{}, name);
 }
+
+void setAliasName(string Type, string memberName, string AliasName);
+
+//设置是否忽略该字段序列化
+void setIgnoreField(string Type, string memberName);
+
+//设置是否忽略大小写
+void setIgnoreLU(string Type, string memberName);
+
+//设置进行模糊转换 结构体转json不存在这个问题主要是针对json转结构体的问题，如果存在分歧，可以尝试进行模糊转换
+void setFuzzy(string Type);
+
+//判断json正确性
+result JsonValidS(string json_);
+
+//判断字段是否存在
+bool Exist(string json_, string key);
+
+//获取字段的值
+string GetStringValue(string json_, string key);
+
+//获取字段的值
+int GetIntValue(string json_, string key);
+
+//获取字段的值
+double GetDoubleValue(string json_, string key);
+
+//获取字段的值
+long GetLongValue(string json_, string key);
+
+//获取字段的值
+bool GetBoolValue(string json_, string key);
 
 // void setAliasName1(string Type, string memberName, string AliasName){
 //     FdogSerializer::Instance()->setAliasName(Type, memberName, AliasName);
