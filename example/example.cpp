@@ -4,6 +4,7 @@
 #include <iostream>
 #include <list>
 #include <functional>
+#include <time.h>//clock()需要的头文件
 using namespace std;
 
 //g++ -std=c++11 ../FStruct.cpp example.cpp -o main -w
@@ -12,25 +13,48 @@ int main()
 {
     //1.结构体只包含基础类型(int,char,char*,string,以及由基础类型构成的数组)，则只需要注册成员即可。
     REGISTEREDMEMBER(student, name, age);  //注册成员
-    student stu;
-    stu.name = "yujing";
-    stu.age = 21;
-    string stu_json = ""; 
-    //结构体转json
-    //Fdog::setAliasName("student", "name", "Zname");
-    Fdog::FJson(stu_json, stu);  //结果 stu_json = 
-    cout << stu_json << endl;
-    auto res = Fdog::JsonValidS(stu_json);
-    cout << "字符串是否正确：" << res.code << endl;
-    if(Fdog::Exist(stu_json, "age")) {
-        cout << "age的值:" << Fdog::GetStringValue(stu_json, "age") << endl; 
+    REGISTEREDMEMBER(maptest, name);
+    maptest mt;
+    mt.name["zhangxu"] = 22;
+    mt.name["yujing"] = 23;
+    string str;
+    Fdog::FJson(str, mt);
+    cout << str << endl;
+    maptest mt2;
+    string str2 = "{\"name\":{\"lisi\":33,\"wangwu\":11}}";
+    Fdog::FObject(mt2, str2);
+    for(auto j : mt2.name){
+        cout << "first = " << j.first << " second = " << j.second << endl;
     }
+    // clock_t start, finish;
+    // double totaltime;
+    // start = clock();
+    // for(int i = 0; i < 10000; i++){
+    //     student stu;
+    //     stu.name = "yujing";
+    //     stu.age = 21;
+    //     string stu_json = ""; 
+    //     //结构体转json
+    //     //Fdog::setAliasName("student", "name", "Zname");
+    //     Fdog::FJson(stu_json, stu);  //结果 stu_json = 
+    //     //cout << stu_json << endl;
+    //     auto res = Fdog::JsonValidS(stu_json);
+    //     //cout << "字符串是否正确：" << res.code << endl;
+    //     if(Fdog::Exist(stu_json, "age")) {
+    //         //cout << "age的值:" << Fdog::GetStringValue(stu_json, "age") << endl; 
+    //     }
+    //     student stu2;
+    //     string stu2_json = "{\"name\":\"zhangxv\",\"age\":21}";
+    //     //json转结构体
+    //     Fdog::FObject(stu2, stu2_json);  //结果  stu2
+    //     //cout << stu2.name << "-" << stu2.age << endl;
+    // }
+    // finish = clock();
+    // totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
+    // cout << "clock " << totaltime << "s" << endl;  
+    //打印      clock 20.7354s 
+    //不打印    clock 5.48499s
 
-    student stu2;
-    string stu2_json = "{\"name\":\"zhangxv\",\"age\":21}";
-    //json转结构体
-    Fdog::FObject(stu2, stu2_json);  //结果  stu2
-    cout << stu2.name << "-" << stu2.age << endl;
 
     // REGISTEREDMEMBER(teacher, name, age);  //注册teacher成员
     // REGISTEREDMEMBER(school, stu, tea);  //注册school成员

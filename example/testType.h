@@ -27,6 +27,11 @@ struct school{
     teacher tea;
 };
 
+struct maptest
+{
+    map<string, int> name;
+};
+
 // struct zhang {
 //     int age;
 //     vector<char *> a;
