@@ -231,14 +231,26 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName){
         resReturn.valueTypeInt = OBJECT_VECTOR;
     }else if(FdogSerializer::isMapType("", typeName)){
         resReturn.valueType = typeName;
-        regex pattern(complexRegex[6]);
+        regex pattern(complexRegex[62]);
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            string value2 = result.str(2).c_str();
-            //cout << "=========>>1  isMapType " << value << endl;
+            if(value == "std::__cxx11::basic_string<char"){
+                string value2 = result.str(4).c_str();
+                resReturn.second = value2;
+            } else {
+                string value2 = result.str(2).c_str();
+                resReturn.second = value2;                
+            }
             //cout << "=========>>2  isMapType " << value2 << endl;
             resReturn.first = value;
-            resReturn.second = value2;
+        } else {
+            regex pattern2(complexRegex[6]);
+            if(regex_search(typeName, result, pattern)){
+                string value = result.str(1).c_str();
+                string value2 = result.str(2).c_str();               
+                resReturn.first = value;
+                resReturn.second = value2; 
+            }
         }
         resReturn.valueTypeInt = OBJECT_MAP;
     }else if(FdogSerializer::isListType("", typeName)){
@@ -582,7 +594,7 @@ vector<string> FdogSerializer::CuttingJson(string json_){
                 if(sum == 0){
                     end = i;
                     string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值1：" << da << endl;
+                    //cout << "获取到的值1：" << da << endl;
                     status = -1;
                     json_array.push_back(da);
                 }
@@ -592,7 +604,7 @@ vector<string> FdogSerializer::CuttingJson(string json_){
                 if(sum == 0){
                     end = i;
                     string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值1：" << da << endl;
+                    //cout << "获取到的值1：" << da << endl;
                     status = -1;
                     json_array.push_back(da);
                 }            
@@ -601,7 +613,7 @@ vector<string> FdogSerializer::CuttingJson(string json_){
                 if(sum == 0){
                     end = i;
                     string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值1：" << da << endl;
+                    //cout << "获取到的值1：" << da << endl;
                     status = -1;
                     json_array.push_back(da);
                 }
@@ -615,7 +627,7 @@ vector<string> FdogSerializer::CuttingJson(string json_){
                 if(sum == 0){
                     end = i + 1;
                     string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值3：" << da << endl;
+                    //cout << "获取到的值3：" << da << endl;
                     status = -1;
                     json_array.push_back(da);
                 }
@@ -630,7 +642,7 @@ vector<string> FdogSerializer::CuttingJson(string json_){
                         if(da.npos != da.find(",")){
                             cout << "失败" << endl;
                         }
-                    cout << "获取到的值4：" << da << endl;
+                    //cout << "获取到的值4：" << da << endl;
                     status = -1;
                     json_array.push_back(da);
                 }
@@ -641,7 +653,7 @@ vector<string> FdogSerializer::CuttingJson(string json_){
                 if(sum == 0){
                     end = i;
                     string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值5：" << da << endl;
+                    //cout << "获取到的值5：" << da << endl;
                     status = -1;
                     json_array.push_back(da);
                 }
@@ -653,7 +665,7 @@ vector<string> FdogSerializer::CuttingJson(string json_){
                 if(sum == 0){
                     end = i;
                     string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值6：" << da << endl;
+                    //cout << "获取到的值6：" << da << endl;
                     status = -1;
                     json_array.push_back(da);
                 }
@@ -670,12 +682,12 @@ vector<string> FdogSerializer::CuttingJson(string json_){
                         if(da.npos != da.find(",")){
                             cout << "失败" << endl;
                         }
-                        cout << "获取到的值71：" << da << endl;
+                        //cout << "获取到的值71：" << da << endl;
                         status = -1;
                         json_array.push_back(da);
                     }else{
                         string da = json_.substr(first, end - first + 1);
-                        cout << "获取到的值72：" << da << endl;
+                        //cout << "获取到的值72：" << da << endl;
                         status = -1;
                         json_array.push_back(da);
                     }
@@ -687,7 +699,7 @@ vector<string> FdogSerializer::CuttingJson(string json_){
                 if(sum == 0){
                     end = i;
                     string da = json_.substr(first, end - first + 1);
-                    cout << "获取到的值8：" << da << endl;
+                    //cout << "获取到的值8：" << da << endl;
                     status = -1;
                     json_array.push_back(da);
                 }
