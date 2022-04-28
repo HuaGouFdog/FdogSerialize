@@ -21,7 +21,7 @@ int main()
     Fdog::FJson(str, mt);
     cout << str << endl;
     maptest mt2;
-    string str2 = "{\"name\":{\"lisi\":33,\"wangwu\":11}}";
+    string str2 = "{\"name\":{\"lisi\":33,\"angwu\":11}}";
     Fdog::FObject(mt2, str2);
     for(auto j : mt2.name){
         cout << "first = " << j.first << " second = " << j.second << endl;

@@ -202,6 +202,16 @@ void Fdog::setFuzzy(string Type){
     FdogSerializer::Instance()->__setFuzzy(Type);
 }
 
+//获取key值
+string FdogSerializer::getKey(string json){
+    smatch result;
+    regex pattern("\"(.*)\":(.*)");
+        if(regex_search(json, result, pattern)){
+            string key = result.str(1).c_str();
+            return key;
+        }
+    return "";
+}
 
 /***********************************
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
