@@ -10,20 +10,20 @@ Copyright 2021-2022 花狗Fdog(张旭)
 #define FSTRUCT_H
 
 #include "definition.h"
-#include <map>
-#include <vector>
-#include <list>
-#include <map>
-#include <set>
-#include <deque>
-#include <regex>
 #include <algorithm>
-#include <mutex>
-#include <sstream>
-#include <string>
 #include <cxxabi.h>
 #include <cstring>
 #include <ctime>
+#include <deque>
+#include <mutex>
+#include <map>
+#include <map>
+#include <list>
+#include <sstream>
+#include <string>
+#include <set>
+#include <vector>
+#include <regex>
 using namespace std;
 
 
@@ -323,9 +323,14 @@ class FdogSerializerBase {
     }
 };
 
-struct BaseTag {}; //处理基础类型
-struct ArrayTag {};  //处理 array vector list deque set
-struct MapTag {};   //处理 map
+
+//BaseTag ArrayTag MapTag 用于处理在Serialize，Deserialize上的分发
+//处理 base
+struct BaseTag {};
+//处理 array vector list deque set
+struct ArrayTag {};
+//处理 map  
+struct MapTag {};
 
 template<typename T> struct TagDispatchTrait {
     using Tag = BaseTag;
@@ -351,11 +356,12 @@ template<> struct TagDispatchTrait<map<int,int>> {
     using Tag = MapTag;
 };
 
-struct OtherTag{};
+// 区分非字符串和字符串 处理在FSerialize(map) key的值，可能是数值，可能是非数值
+struct NoStringTag{};
 struct StringTag{};
 
 template<typename T> struct TagString {
-    using Tag = OtherTag;
+    using Tag = NoStringTag;
 };
 
 template<> struct TagString<char *> {
@@ -367,94 +373,104 @@ template<> struct TagString<string> {
 };
 
 template<typename T>
-string F_to_string_s(T object, OtherTag){
+string F_toString_s(T object, NoStringTag){
     return to_string(object);
 }
 template<typename T>
-string F_to_string_s(T object, StringTag){
+string F_toString_s(T object, StringTag){
     return object;
 }
 template<typename T>
-string F_to_string(T object){
-    return F_to_string_s(object, typename TagString<T>::Tag{});
+string F_toString(T object){
+    return F_toString_s(object, typename TagString<T>::Tag{});
 }
 
-struct Base1Tag{};
-struct VectorTag{};
-struct DequeTag{};
-struct ListTag{};
-struct Map1Tag{};
-struct SetTag{};
+// 用于反序列化时对象为空的情况，需要根据数据进行扩展长度 Init  分为数值和非数值类型
+struct InitBaseTag{};
 
-//对应字符串特殊版本
-struct VectorStrTag{};
-struct DequeStrTag{};
-struct ListStrTag{};
-struct SetStrTag{};
-struct Map1StrTag{};
+struct InitVectorTag{};
+struct InitVectorStrTag{};
+
+struct InitDequeTag{};
+struct InitDequeStrTag{};
+
+struct InitListTag{};
+struct InitListStrTag{};
+
+struct InitMapTag{};
+struct InitMapStrTag{};
+
+struct InitSetTag{};
+struct InitSetStrTag{};
+
 
 template<typename T> struct TagSTLType {
-    using Tag = Base1Tag;
+    using Tag = InitBaseTag;
 };
 
 template<> struct TagSTLType<vector<int>> {
-    using Tag = VectorTag;
+    using Tag = InitVectorTag;
 };
 
 template<> struct TagSTLType<vector<char *>> {
-    using Tag = VectorStrTag;
+    using Tag = InitVectorStrTag;
 };
 
 template<> struct TagSTLType<vector<string>> {
-    using Tag = VectorStrTag;
+    using Tag = InitVectorStrTag;
 };
 
 template<> struct TagSTLType<list<int>> {
-    using Tag = ListTag;
+    using Tag = InitListTag;
 };
 
 template<> struct TagSTLType<list<char *>> {
-    using Tag = ListStrTag;
+    using Tag = InitListStrTag;
 };
 
 template<> struct TagSTLType<list<string>> {
-    using Tag = ListStrTag;
+    using Tag = InitListStrTag;
 };
 
 template<> struct TagSTLType<set<int>> {
-    using Tag = SetTag;
+    using Tag = InitSetTag;
 };
 
 template<> struct TagSTLType<set<char *>> {
-    using Tag = SetStrTag;
+    using Tag = InitSetStrTag;
 };
 
 template<> struct TagSTLType<set<string>> {
-    using Tag = SetStrTag;
+    using Tag = InitSetStrTag;
 };
 
 template<> struct TagSTLType<deque<int>> {
-    using Tag = DequeTag;
+    using Tag = InitDequeTag;
 };
 
 template<> struct TagSTLType<deque<char *>> {
-    using Tag = DequeStrTag;
+    using Tag = InitDequeStrTag;
 };
 
 template<> struct TagSTLType<deque<string>> {
-    using Tag = DequeStrTag;
+    using Tag = InitDequeStrTag;
 };
 
 template<> struct TagSTLType<map<int,int>> {
-    using Tag = Map1Tag;
+    using Tag = InitMapTag;
+};
+
+template<> struct TagSTLType<map<string,int>> {
+    using Tag = InitMapStrTag;
 };
 
 template<typename T>
-void F_init_s(T & object, Base1Tag, string first, string second = ""){
+void F_init_s(T & object, InitBaseTag, string first, string second = "", string key = ""){
+
 }
 
 template<typename T>
-void F_init_s(T & object, VectorTag, string first, string second = ""){
+void F_init_s(T & object, InitVectorTag, string first, string second = "", string key = ""){
     if (first == "int"){
         object.push_back(0);
     }
@@ -490,7 +506,7 @@ void F_init_s(T & object, VectorTag, string first, string second = ""){
 }
 
 template<typename T>
-void F_init_s(T & object, VectorStrTag, string first, string second = ""){
+void F_init_s(T & object, InitVectorStrTag, string first, string second = "", string key = ""){
     if (first == "char*"){
         object.push_back("");
     }else if (first == "string" || first == "std::__cxx11::basic_string<char"){
@@ -501,7 +517,7 @@ void F_init_s(T & object, VectorStrTag, string first, string second = ""){
 }
 
 template<typename T>
-void F_init_s(T & object, DequeTag, string first, string second = ""){
+void F_init_s(T & object, InitDequeTag, string first, string second = "", string key = ""){
     if (first == "char"){
         object.push_back('0');
     }else if (first == "unsigned char"){
@@ -534,7 +550,7 @@ void F_init_s(T & object, DequeTag, string first, string second = ""){
 }
 
 template<typename T>
-void F_init_s(T & object, DequeStrTag, string first, string second = ""){
+void F_init_s(T & object, InitDequeStrTag, string first, string second = "", string key = ""){
     if (first == "char*"){
         object.push_back("");
     }else if (first == "string" || first == "std::__cxx11::basic_string<char"){
@@ -545,7 +561,7 @@ void F_init_s(T & object, DequeStrTag, string first, string second = ""){
 }
 
 template<typename T>
-void F_init_s(T & object, ListTag, string first, string second = ""){
+void F_init_s(T & object, InitListTag, string first, string second = "", string key = ""){
     if (first == "int"){
         object.push_back(0);
     }
@@ -581,7 +597,7 @@ void F_init_s(T & object, ListTag, string first, string second = ""){
 }
 
 template<typename T>
-void F_init_s(T & object, ListStrTag, string first, string second = ""){
+void F_init_s(T & object, InitListStrTag, string first, string second = "", string key = ""){
     if (first == "char*"){
         object.push_back("");
     }else if (first == "string" || first == "std::__cxx11::basic_string<char"){
@@ -592,7 +608,7 @@ void F_init_s(T & object, ListStrTag, string first, string second = ""){
 }
 
 template<typename T>
-void F_init_s(T & object, SetTag, string first, string second = ""){
+void F_init_s(T & object, InitSetTag, string first, string second = "", string key = ""){
         //set是不可以重复的，可以拿随机数
     int a = rand()%100;
     if (first == "int"){
@@ -635,7 +651,7 @@ void F_init_s(T & object, SetTag, string first, string second = ""){
 static vector<char *> temp;
 
 template<typename T>
-void F_init_s(T & object, SetStrTag, string first, string second = ""){
+void F_init_s(T & object, InitSetStrTag, string first, string second = "", string key = ""){
     int a = rand()%100;
     //cout << "a = " << a << endl;
     if (first == "char*"){
@@ -658,20 +674,28 @@ void F_init_s(T & object, SetStrTag, string first, string second = ""){
 }
 
 template<typename T>
-void F_init_s(T & object, Map1Tag, string first, string second = ""){
-    int a = rand()%100;
+void F_init_s(T & object, InitMapTag, string first, string second = "", string key = ""){
+    int a = atoi(key.c_str());
     if(first == "int" && second == "int"){
-        object.insert(make_pair(a+1, a));
-    }
-    if(first == "std::map<std::__cxx11::basic_string<char" && second == "int"){
-        stringstream sstr;
-        sstr << a;
-        object.insert(make_pair("__fdog__xx" + sstr.str(), a));
+        object.insert(make_pair(a, a));
     }
 }
 
 template<typename T>
-void F_init_(T & object, int stlType, string first, string second = ""){
+void F_init_s(T & object, InitMapStrTag, string first, string second = "", string key = ""){
+    cout << "进来! " << first << " " << second << endl;
+    int a = rand()%100;
+    if(first == "std::__cxx11::basic_string<char" && second == "int"){
+        cout << "进来--!" << endl;
+        stringstream sstr;
+        sstr << a;
+        //string value = key;
+        object.insert(make_pair(key, a));
+    }
+}
+
+template<typename T>
+void F_init(T & object, int stlType, string first, string second = "", string key = ""){
 
     if(stlType == OBJECT_VECTOR){
         F_init_s(object, typename TagSTLType<T>::Tag{}, first);
@@ -686,7 +710,7 @@ void F_init_(T & object, int stlType, string first, string second = ""){
         F_init_s(object, typename TagSTLType<T>::Tag{}, first);      
     }
     if(stlType == OBJECT_MAP){
-        F_init_s(object, typename TagSTLType<T>::Tag{}, first, second);    
+        F_init_s(object, typename TagSTLType<T>::Tag{}, first, second, key);    
     }
 }
 
@@ -759,6 +783,9 @@ class FdogSerializer {
 
     template<class T, class ...Args>
     void setIgnoreLUAll();
+
+    //获取key值
+    string getKey(string json);
 
     //获取成员属性
     memberAttribute getMemberAttribute(string key);
@@ -1307,7 +1334,7 @@ class FdogSerializer {
         int len = object_.size();
         for(auto & object_one : object_){
             //看情况，如果是结构体，需要花括号，基本类型不需要
-            json_ = json_ + "\"" + F_to_string(object_one.first) + "\"" + ":";
+            json_ = json_ + "\"" + F_toString(object_one.first) + "\"" + ":";
             Serialize(json_, object_one.second);
             removeLastComma(json_);
             json_ = json_ + ",";
@@ -1793,7 +1820,7 @@ class FdogSerializer {
         for(int i = 0; i < json_array.size(); i++){
             //cout << "xunhuan :" << i << endl;
             if(json_array.size() > object_.size()){
-                F_init_(object_, Member.valueTypeInt, Member.first);
+                F_init(object_, Member.valueTypeInt, Member.first);
             }
         }
         // int len = json_array.size();
@@ -1842,16 +1869,20 @@ class FdogSerializer {
         }
         int i = 0;
         int len = json_array.size();
+        sort(json_array.begin(), json_array.end());
         cout << "changdu:" << len << endl;
         memberAttribute Member = getMemberAttribute(abi::__cxa_demangle(typeid(T).name(),0,0,0));
         for(int i = 0; i < json_array.size(); i++){
             if(json_array.size() > object_.size()){
-                F_init_(object_, Member.valueTypeInt, Member.first, Member.second);
+                F_init(object_, Member.valueTypeInt, Member.first, Member.second, getKey(json_array[i]));
             }
         }
         //这里有个问题，就是可能key的顺序不匹配
         //这里存在问题，进来的STL容器长度为0，需要重新指定长度
         for(auto & object_one : object_){
+            cout << "进来啦 object_one.second = " << object_one.second << " json_array[i] = " << json_array[i] << endl;
+            //提取key:
+            //object_one.first = getKey(json_array[i]);
             Deserialize(object_one.second, json_array[i]);
             i++;
         }
