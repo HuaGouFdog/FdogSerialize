@@ -96,26 +96,26 @@ enum ObjectType{
 *   存储结构体元信息
 ************************************/
 typedef struct MetaInfo{
-    string memberName;  
-    string memberAliasName;
-    string memberType;
-    size_t memberOffset;
-    size_t memberTypeSize;                                                         
-    size_t memberArraySize;
-    int memberTypeInt;   
-    string first;  //如果是map类型 first表示key的类型，如果是其他类型，表示value类型
-    string second; //如果是map类型，second表示value类型
-    bool memberIsIgnore = false;
-    bool memberIsIgnoreLU = false;                                                                                                                                                                                 
+    string memberName;          //成员名
+    string memberAliasName;     //成员别名
+    string memberType;          //成员类型
+    size_t memberOffset;        //偏移值
+    size_t memberTypeSize;      //类型大小
+    size_t memberArraySize;     //如果类型是数组，表示数组大小
+    int    memberTypeInt;       //成员类型 数值型
+    string first;               //如果是map类型 first表示key的类型，如果是其他类型，表示value类型
+    string second;              //如果是map类型，second表示value类型
+    bool   memberIsIgnore = false;    //是否忽略字段
+    bool   memberIsIgnoreLU = false;  //是否忽略大小写                                                                                                                                                                               
 }MetaInfo;
 
 /***********************************
 *   存储对象元信息
 ************************************/
 typedef struct ObjectInfo{
-    string objectType;  //结构体类型 字符串表示
-    int objectTypeInt;  //结构体类型 数值表示
-    int objectSize;     //结构体大小
+    string objectType;                      //结构体类型 字符串表示
+    int objectTypeInt;                      //结构体类型 数值表示
+    int objectSize;                         //结构体大小
     vector<MetaInfo *> metaInfoObjectList;  //结构体元信息 
 }ObjectInfo;
 
@@ -130,16 +130,16 @@ typedef struct FdogMap{
 ************************************/
 struct memberAttribute {
     string valueType;
-    int valueTypeInt; //类型 数值表示
-    string first;  //如果是map类型 first表示key的类型，如果是其他类型，表示value类型
-    string second; //如果是map类型，second表示value类型
+    int valueTypeInt;   //类型 数值表示
+    string first;       //如果是map类型 first表示key的类型，如果是其他类型，表示value类型
+    string second;      //如果是map类型，second表示value类型
     int ArraySize;
 };
 
 //结构体用于返回信息
 struct result {
-    int code;   //1.正确 0.错误
-    string message;
+    int code;           //1.正确 0.错误
+    string message;     //如果错误，返回错误提示
 };
 
 //声明序列化base类
@@ -160,7 +160,6 @@ class FdogSerializerBase {
 
     template<class T>
     string getValueByAddress(string valueType, T & object, int offsetValue){
-        //cout <<"取值阶段：" << valueType << endl;
         if(valueType == "char*"){
             auto value = *((const char **)((void *)&object + offsetValue));
             string str_value = value;
@@ -237,18 +236,15 @@ class FdogSerializerBase {
 
     template<class T>
     void setValueByAddress(string valueType, T &object, int offsetValue, string value){
-        //cout <<"赋值阶段：" << valueType << endl;
         if(valueType == "char*"){
             *((char **)((void *)&object + offsetValue)) = new char[strlen(value.c_str())];
             strcpy(*((char **)((void *)&object + offsetValue)), value.c_str());
         }
         if(valueType == "string" || valueType == "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >"){
-            *((string *)((void *)&object + offsetValue)) = value;//new string[strlen(value.c_str())];
-            //strcpy(*((string *)((void *)&object + offsetValue)), value);
+            *((string *)((void *)&object + offsetValue)) = value;
         }
         std::stringstream ss;
         ss.str(value);
-        //只是用一次不用clear
         if(valueType == "bool"){
             ss >> *((bool *)((void *)&object + offsetValue));
         }
@@ -293,7 +289,7 @@ class FdogSerializerBase {
         }
     }
 
-    // //基础类型转json
+    // 基础类型转json
     template<class T>
     void BaseToJson(string & json_, MetaInfo * metainfoobject, T & object_){
         
@@ -308,17 +304,13 @@ class FdogSerializerBase {
     // //基础类型转json
     template<class T>
     void BaseToJsonA(string & json_, MetaInfo * metainfoobject, T & object_){
-        //cout << "+++++++++++++++1 = " << metainfoobject->memberType << "---" << metainfoobject->memberOffset << endl;
         string value = getValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset);
-        //cout << "metainfoobject->memberName ：" << metainfoobject->memberName << "--" << value << endl;
-        //cout << "+++++++++++++++2 = " << value << endl;
         json_ = json_ + value + ",";
     }    
 
     // //json转基础类型
     template<class T>
     void JsonToBase(T & object_, MetaInfo * metainfoobject, string json_){
-        //cout << "setValueByAddress=" << json_ << endl;
         setValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset, json_);
     }
 };
@@ -683,10 +675,8 @@ void F_init_s(T & object, InitMapTag, string first, string second = "", string k
 
 template<typename T>
 void F_init_s(T & object, InitMapStrTag, string first, string second = "", string key = ""){
-    cout << "进来! " << first << " " << second << endl;
     int a = rand()%100;
     if(first == "std::__cxx11::basic_string<char" && second == "int"){
-        cout << "进来--!" << endl;
         stringstream sstr;
         sstr << a;
         //string value = key;
@@ -891,7 +881,7 @@ class FdogSerializer {
         //cout << "sum：" << sum << endl;
         int i = 1;
         //获取到的objectType才是真正的类型，根据这个类型进行操作
-        cout << "objectType type = " << objectType  << " json_ : " << json_ << endl;
+        //cout << "objectType type = " << objectType  << " json_ : " << json_ << endl;
         switch(objectType){
             //第一次调用进来表示其本身类型 只有两种 结构体或着基础类型
             case OBJECT_BASE:
@@ -910,7 +900,7 @@ class FdogSerializer {
             {
                 for(auto metainfoObject : objectinfo.metaInfoObjectList){
                     string json_s;
-                    cout <<"成员类型：" << metainfoObject->memberType << "--" << metainfoObject->memberTypeInt << "--"<< metainfoObject->first << endl;
+                    //cout <<"成员类型：" << metainfoObject->memberType << "--" << metainfoObject->memberTypeInt << "--"<< metainfoObject->first << endl;
                     if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
                         FdogSerializerBase::Instance()->BaseToJson(json_s, metainfoObject, object_);
                         json_ = json_ + json_s;
@@ -1221,7 +1211,6 @@ class FdogSerializer {
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";                       
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberIsIgnore != true){
-                        cout << "1 = " << metainfoObject->first << " 2 = " << metainfoObject->second << endl;
                         if(metainfoObject->first == "char*" && metainfoObject->second == "int"){
                             FSerialize(json_s, *(map<char *, int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
                         }
@@ -1287,8 +1276,8 @@ class FdogSerializer {
     //用于解析基础类型，数组(只需要判断有没有[]就能确定是不是数组，结构体和基础类型都不具备[]条件)，结构体
     template<typename T>
     void FSerialize(string & json_, T & object_, BaseTag, string name = ""){
-        //cout << "类型：" << abi::__cxa_demangle(typeid(T).name(),0,0,0) << endl;
-        //cout << "是否是数组 ： " << isArrayType("", abi::__cxa_demangle(typeid(T).name(),0,0,0)) << endl;
+        cout << "类型：" << abi::__cxa_demangle(typeid(T).name(),0,0,0) << endl;
+        cout << "是否是数组 ： " << isArrayType("", abi::__cxa_demangle(typeid(T).name(),0,0,0)) << endl;
         bool isArray = isArrayType("", abi::__cxa_demangle(typeid(T).name(),0,0,0));
         SerializeS_s(json_, object_, isArray, name);
         //Serialize(json_, object_, name);
@@ -1308,7 +1297,7 @@ class FdogSerializer {
     //用于解析STL（map除外）
     template<typename T>
     void FSerialize(string & json_, T & object_, ArrayTag, string name = ""){
-        //cout << "进入array==========" << endl;
+        //cout << "进入array==========1" << typeid(T).name() << endl;
         for(auto & object_one : object_){
             //ji
             int objectType = isBaseType(abi::__cxa_demangle(typeid(object_one).name(),0,0,0));
@@ -1317,6 +1306,7 @@ class FdogSerializer {
             }
             //cout << "1=====" << endl;
             Serialize(json_, object_one);
+            //cout << "进入array==========2" << typeid(object_one).name() << endl;
             if (!objectType){
                 json_ = json_ + "},";
             }
@@ -1429,7 +1419,7 @@ class FdogSerializer {
                 }
                 if(regex_search(json_, result, *pattern)){
                     string value = result.str(2).c_str();
-                    cout << endl << "正则表达式 获取的值：" << value << "   type = " << metainfoObject->memberTypeInt << endl;
+                    //cout << endl << "正则表达式 获取的值：" << value << "   type = " << metainfoObject->memberTypeInt << endl;
                     if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
                         //cout << "反序列化进入base：" << value << endl << endl;
                         FdogSerializerBase::Instance()->JsonToBase(object_, metainfoObject, value);
@@ -1732,7 +1722,6 @@ class FdogSerializer {
                         }                         
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberIsIgnore != true){
-                        cout << "1 = " << metainfoObject->first << " 2 = " << metainfoObject->second << endl;
                         if(metainfoObject->first == "char*" && metainfoObject->second == "int"){
                             FDeserialize(*(map<char *, int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
                         }
@@ -1844,16 +1833,16 @@ class FdogSerializer {
     //用于map
     template<typename T>
     void FDeserialize(T & object_, string & json_, MapTag){
-        cout << "反序列化进入~map：" << json_ << endl;
-        cout << "类型" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
+        //cout << "反序列化进入~map：" << json_ << endl;
+        //cout << "类型" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
         int objectType;
         for(auto & object_one : object_){
             //判断内部类型是否为基础类型
             objectType = isBaseTypeByMap(abi::__cxa_demangle(typeid(object_one).name(),0,0,0));
-            cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
+            //cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
             break;
         }
-        //这里有问题 objectType永远为0
+        //这里有问题 objectType永远为0 找第二种方法
         vector<string> json_array;
         if (objectType){
                 smatch result;
@@ -1870,7 +1859,7 @@ class FdogSerializer {
         int i = 0;
         int len = json_array.size();
         sort(json_array.begin(), json_array.end());
-        cout << "changdu:" << len << endl;
+        //cout << "changdu:" << len << endl;
         memberAttribute Member = getMemberAttribute(abi::__cxa_demangle(typeid(T).name(),0,0,0));
         for(int i = 0; i < json_array.size(); i++){
             if(json_array.size() > object_.size()){
@@ -1880,7 +1869,7 @@ class FdogSerializer {
         //这里有个问题，就是可能key的顺序不匹配
         //这里存在问题，进来的STL容器长度为0，需要重新指定长度
         for(auto & object_one : object_){
-            cout << "进来啦 object_one.second = " << object_one.second << " json_array[i] = " << json_array[i] << endl;
+            //cout << "进来啦 object_one.second = " << object_one.second << " json_array[i] = " << json_array[i] << endl;
             //提取key:
             //object_one.first = getKey(json_array[i]);
             Deserialize(object_one.second, json_array[i]);

@@ -11,21 +11,207 @@ using namespace std;
 
 int main()
 {
-    //1.结构体只包含基础类型(int,char,char*,string,以及由基础类型构成的数组)，则只需要注册成员即可。
-    REGISTEREDMEMBER(student, name, age);  //注册成员
-    REGISTEREDMEMBER(maptest, name);
-    maptest mt;
-    mt.name["zhangxu"] = 22;
-    mt.name["yujing"] = 23;
-    string str;
-    Fdog::FJson(str, mt);
-    cout << str << endl;
-    maptest mt2;
-    string str2 = "{\"name\":{\"lisi\":33,\"angwu\":11}}";
-    Fdog::FObject(mt2, str2);
-    for(auto j : mt2.name){
-        cout << "first = " << j.first << " second = " << j.second << endl;
+    cout << "===============================================================" << endl;
+    //1.结构体只包含基础类型(int,char,char*,string,以及由基础类型构成的数组,或者是STL容器(map暂不支持全类型))，则只需要注册成员即可。
+    REGISTEREDMEMBER(student, name, age);  //注册student成员
+    student stu;
+    stu.name = "yujing";
+    stu.age = 21;
+    string stu_json = "";
+    //结构体转json
+    Fdog::FJson(stu_json, stu);  
+    //结果 输出stu_json为： {"name":"yujing","age":21}
+    cout << stu_json << endl;
+    student stu2;
+    string stu2_json = "{\"name\":\"zhangxv\",\"age\":21}"; //引号要做处理
+    //json转结构体
+    Fdog::FObject(stu2, stu2_json);  
+    //结果  stu2.name = zhangxv   stu2.age = 21
+    cout << "name = " << stu2.name << " age = " << stu2.age << endl;
+
+    cout << "\n1------------------------------------\n";
+
+    //2.结构体中除了基础类型，还包括自定义结构体
+    REGISTEREDMEMBER(teacher, name, age);  //注册teacher成员
+    REGISTEREDMEMBER(school, stu, tea);     //注册school成员
+    school sch;
+    sch.stu.name = "liuliu";
+    sch.stu.age = 18;
+    sch.tea.name = "wufang";
+    sch.tea.age = 48;
+    string sch_json = "";
+    //结构体转json
+    Fdog::FJson(sch_json, sch); 
+    //结果 输出sch_json为：{"stu":{"name":"liuliu","age":18},"tea":{"name":"wufang","age":48}}
+  	cout << sch_json << endl;
+    //json转结构体
+    school sch2;
+    string sch2_json = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
+    Fdog::FObject(sch2, sch2_json);
+    //结果  
+    cout << "name = " << sch.stu.name << " age = " << sch.stu.age << endl;
+    cout << "name = " << sch.tea.name << " age = " << sch.tea.age << endl;
+
+    cout << "\n2------------------------------------\n";
+
+    //3.结构体中使用STL容器map
+    REGISTEREDMEMBER(class_map, grade);
+    class_map cm;
+    cm.grade["zhangxu"] = 88;
+    cm.grade["yujing"] = 99;
+    string cm_json;
+    Fdog::FJson(cm_json, cm);
+    cout << cm_json << endl;
+    class_map cm2;
+    string cm2_json = "{\"grade\":{\"lisi\":33,\"angwu\":11}}";
+    Fdog::FObject(cm2, cm2_json);
+    for(auto j : cm2.grade){
+        cout << "name = " << j.first << " age = " << j.second << endl;
     }
+
+    cout << "\n3------------------------------------\n";
+
+    //4.结构体成员存在数组，且数组存储的基础类型数据
+    REGISTEREDMEMBER(class_base_array, numbers)
+    class_base_array cba;
+    cba.numbers[0] = 0;
+    cba.numbers[1] = 1;
+    cba.numbers[2] = 2;
+    cba.numbers[3] = 3;
+    cba.numbers[4] = 4;
+    string cba_json = "";
+    //结构体转json
+    Fdog::FJson(cba_json, cba);
+    cout << cba_json << endl;
+    //json转结构体
+    class_base_array cba2;
+    string cba2_json = "{\"cba2_json\":{\"numbers\":[0,1,2,3,4]}}";
+    Fdog::FObject(cba2, cba2_json);
+    cout << "numbers is " << cba2.numbers[0] << " " << cba2.numbers[1] << " " << cba2.numbers[2] << " " << cba2.numbers[3] << " " << cba2.numbers[4] << endl;
+
+    cout << "\n4------------------------------------\n";
+
+    //5.结构体成员存在STL容器，且容器为基础类型
+    REGISTEREDMEMBER(class_base_vector, numbers)
+    class_base_vector cbv; //要注意刚声明的变量 vector长度为0，使用下角标赋值会出错
+    cbv.numbers.push_back(0);
+    cbv.numbers.push_back(1);
+    cbv.numbers.push_back(2);
+    cbv.numbers.push_back(3);
+    cbv.numbers.push_back(4);
+    string cbv_json = "";
+    //结构体转json
+    Fdog::FJson(cbv_json, cbv);
+    cout << cbv_json << endl;
+    //json转结构体
+    class_base_vector cbv2;
+    string cbv2_json = "{\"cbv2_json\":{\"numbers\":[0,1,2,3,4]}}";
+    Fdog::FObject(cbv2, cbv2_json);
+    cout << "numbers is " << cbv2.numbers[0] << " " << cbv2.numbers[1] << " " << cbv2.numbers[2] << " " << cbv2.numbers[3] << " " << cbv2.numbers[4] << endl;
+
+    cout << "\n5------------------------------------\n";
+
+    //6.结构体成员存在自定义类型的数组
+    REGISTEREDMEMBER(class_object_array, stus)
+    class_object_array coa;
+    coa.stus[0].name = "zhangxu";
+    coa.stus[0].age = 21;
+    coa.stus[1].name = "yujing";
+    coa.stus[1].age = 22;
+    string coa_json = "";
+    //结构体转json
+    Fdog::FJson(coa_json, coa);
+    cout << coa_json << endl;
+    //json转结构体
+    class_object_array coa2;
+    string coa2_json = "{\"coa2\":{\"stus\":[{\"name\":\"jinqi\",\"age\":25},{\"name\":\"ruiming\",\"age\":12}]}}";
+    Fdog::FObject(coa2, coa2_json);
+    cout << " name = " << coa2.stus[0].name << " age = " << coa2.stus[0].age << endl;
+    cout << " name = " << coa2.stus[1].name << " age = " << coa2.stus[1].age << endl;
+
+    cout << "\n6------------------------------------\n";
+
+    //7.结构体成员存在自定义类型STL容器
+    REGISTEREDMEMBER(class_object_vector, stus)
+    class_object_array cov;
+    cov.stus[0].name = "zhangxu";
+    cov.stus[0].age = 21;
+    cov.stus[1].name = "yujing";
+    cov.stus[1].age = 22;
+    string cov_json = "";
+    //结构体转json
+    Fdog::FJson(cov_json, cov);
+    cout << cov_json << endl;
+    //json转结构体
+    class_object_array cov2;
+    string cov2_json = "{\"cov2\":{\"stus\":[{\"name\":\"jinqi\",\"age\":25},{\"name\":\"ruiming\",\"age\":12}]}}";
+    Fdog::FObject(cov2, cov2_json);
+    cout << " name = " << cov2.stus[0].name << " age = " << cov2.stus[0].age << endl;
+    cout << " name = " << cov2.stus[1].name << " age = " << cov2.stus[1].age << endl;
+
+    cout << "\n7------------------------------------\n";
+
+    //8.支持别名
+    Fdog::setAliasName("student", "name", "Aliasname"); //第一个参数为类型，第二参数为原名，第三个参数为别名
+    Fdog::FJson(stu_json, stu);  
+    //结果 输出stu_json为： {"Aliasname":"yujing","age":21}
+    cout << stu_json << endl;
+
+    cout << "\n8------------------------------------\n";
+
+    //9.支持字段忽略
+    Fdog::setIgnoreField("student", "name");  //第一个参数为类型，第二参数为需要忽略的字段
+    Fdog::FJson(stu_json, stu);  
+    //结果 输出stu_json为： {"age":21}  //name字段的数据将被忽略
+    cout <<  stu_json << endl;
+
+    cout << "\n9------------------------------------\n";
+
+    //10.支持忽略字段大小写，当将json转为对象时，如json中的键值与对象中的成员名存在大小写不同，可以设定忽略大小写。
+    Fdog::setIgnoreLU("student", "name");
+    Fdog::setIgnoreLU("student", "age");
+    stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
+    Fdog::FObject(stu, stu_json);  //将Name对应name，AGE对应age
+    cout << "name = " << stu.name << " age = " << stu.age << endl;
+
+    cout << "\n10------------------------------------\n";
+
+    //11.针对7，8，9接口增加对应的一次性接口，避免有多个字段需要设置，从而多次调用接口
+    
+    
+    //12.默认支持模糊匹配
+    //马上支持，当不小心写错字段名时，程序将自动进行模糊匹配，最大可能完成转换。
+    
+    
+    //13.检测Json格式是否正确
+    //马上支持
+    
+    
+    //14.查找json中某个字段是否存在
+    //马上支持
+    
+    //15.支持获取某个字段的值(返回类型支持int, double, string, bool)
+    //马上支持
+    
+    //16.支持其他类型指针(指针类型将拥有可选字段属性，对于指针变量，在转换时，将先判断指针地址是否为空，若为空，将不进行转换，类似于忽略字段)
+    //下个版本
+    
+    //17.支持xml序列化
+    //下下版本～
+
+    // REGISTEREDMEMBER(maptest, name);
+    // maptest mt;
+    // mt.name["zhangxu"] = 22;
+    // mt.name["yujing"] = 23;
+    // string str;
+    // Fdog::FJson(str, mt);
+    // cout << str << endl;
+    // maptest mt2;
+    // string str2 = "{\"name\":{\"lisi\":33,\"angwu\":11}}";
+    // Fdog::FObject(mt2, str2);
+    // for(auto j : mt2.name){
+    //     cout << "first = " << j.first << " second = " << j.second << endl;
+    // }
     // clock_t start, finish;
     // double totaltime;
     // start = clock();
@@ -54,191 +240,7 @@ int main()
     // cout << "clock " << totaltime << "s" << endl;  
     //打印      clock 20.7354s 
     //不打印    clock 5.48499s
-
-
-    // REGISTEREDMEMBER(teacher, name, age);  //注册teacher成员
-    // REGISTEREDMEMBER(school, stu, tea);  //注册school成员
-    // school sch;
-    // sch.stu.name = "liuliu";
-    // sch.stu.age = 18;
-    // sch.tea.name = "wufang";
-    // sch.tea.age = 48;
-    // string sch_json = "";
-    // //结构体转json
-    // Fdog::FJson(sch_json, sch);
-    // cout << sch_json << endl;
-
-    //text tx;
-    //string a[2] = {"nihao","buhao"};
-    //string a[2] ={"10", "20"};
-    // tx.a[0]="11.3";
-    // tx.a[1]="22.4";
-    // tx.b[0]="e32";
-    // tx.b[1]="das";
-    // string json1;
-    // Fdog::FJson(json1, tx);
-    //cout << "addr1 = " << &(tx.a[0]) << "--" << tx.a[0] << endl;
-    //cout << "addr2 = " << &(tx.a[1]) << "--" << tx.a[1] << endl;
-    // cout << json1 << endl;
-
-    // text tx2;
-    // Fdog::FObject(tx2, json1);
-    // cout << "addr1 = " << &(tx.a[0]) << "--" << tx.a[0] << endl;
-    // cout << "addr2 = " << &(tx.a[1]) << "--" << tx.a[1] << endl;
-    // int c[2]={1,2};
-    // string json2;
-    // Fdog::FJson(json2, c, "c");
-    //cout << json2 << endl;
-
-
-    // string json2 = "{\"a\":[312,321]}";
-    // Fdog::FObject(tx, json2);
-    // cout << json2 << endl;
-
-    // zhang z;
-    // z.age = 10;
-    // z.a.push_back("312");
-    // z.a.push_back("432");
-    // z.b[1]=10;
-    // z.b[2]=20;
-    // z.c.push_back("不好不好");
-    // z.c.push_back("你好不好");
-    // z.d.push_back("张旭");
-    // z.d.push_back("张旭");
-    // z.e.insert("张旭2");
-    // z.e.insert("张旭1");
-    // z.f[0]=11;
-    // z.f[1]=12;
-    // string zjson;
-    // Fdog::FJson(zjson, z);
-    // cout << zjson << endl;
-
-    // zhang x;
-    // string xjson = "{\"age\":99,\"a\":[\"张旭\",\"是的萨\"],\"b\":{\"4\":44,\"5\":55},\"c\":[\"你好不好\",\"你好不好\"],\"d\":[\"你好不好1\",\"你好不好2\"],\"e\":[\"你好不好2\",\"你好不好1\"],\"f\":[23,24]}";
-    // cout << xjson << endl;
-    // Fdog::FObject(x, xjson);
-    // cout << "z.age ：" << x.age << endl;
-    // cout << "z.a ：" << x.a[0] << endl;
-    // cout << "z.a ：" << x.a[1] << endl;
-    // cout << "z.b ：" << x.b[0] << endl;
-    // cout << "z.b ：" << x.b[1] << endl;
-    // for( auto s1 : x.c){
-    //     cout << "z.c ：" << s1 << endl;
-    // }
-    // cout << "z.d ：" << x.d[0] << endl;
-    // cout << "z.d ：" << x.d[1] << endl;
-
-    // for( auto s1 : x.e){
-    //     cout << "z.e ：" << s1 << endl;
-    // }
-    // cout << "z.age ：" << x.f[0] << endl;
-    // cout << "z.age ：" << x.f[1] << endl;
-    // //**********************************************************************
-    // cout << "基础类型序列化==================================================" << endl;
-    // int base_a = 10;
-    // string base_ajson;
-
-    // //基础类型序列化为json
-    // Fdog::FJson(base_ajson, base_a, "base_a");
-    // cout << base_ajson << endl;
-    // base_ajson = "{\"base_a\":20}";
-    // //将json类型转为基础类型
-    // Fdog::FObject(base_a, base_ajson, "base_a");
-    // cout << base_a << endl;
-    // //**********************************************************************
-
-    // //**********************************************************************
-    // cout << "基础类型数组序列化==============================================" << endl;
-    // float base_array[5] = {1.2, 3.4, 5.6, 4.3, 5.6};
-    // string base_arrayjson;
-    // Fdog::FJson(base_arrayjson, base_array, "base_array");
-    // cout << base_arrayjson << endl;
-    // base_arrayjson = "{\"base_array\":[2.2, 3.6, 7.6, 2.3, 6.8]}";
-    // Fdog::FObject(base_array, base_arrayjson);
-    // cout << base_array[0] << "," << base_array[1] << "," << base_array[2] << "," << base_array[3] << "," << base_array[4] << endl;
-    // //**********************************************************************
-
-    //**********************************************************************
-    // cout << "结构体类型序列化================================================" << endl;
-    // struct student stu; //该结构体定义在text.h
-    // stu.name = "zhangxv";
-    // stu.age = 22;
-    // REGISTEREDMEMBER(student, name, age); //注册成员
-    // string stu_json;
-    // Fdog::FJson(stu_json, stu);
-    // cout << stu_json << endl;
-    // stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
-    // FdogSerializer::Instance()->setIgnoreLU("student", "name");
-    // FdogSerializer::Instance()->setIgnoreLU("student", "age");
-    // Fdog::FObject(stu, stu_json);
-    // cout << stu.name << "," << stu.age << endl;
-    //**********************************************************************
-
-    // //**********************************************************************
-    // cout << "包含结构体成员的结构体序列化=====================================" << endl;
-    // school sch;
-    // sch.id = 1;
-    // sch.stu.name = "zhangxv";
-    // sch.stu.age = 22;
-    // //REGISTEREDMEMBER(student, name, age)注册成员 上面已经注册
-    // REGISTEREDMEMBER(school, id, stu); //注册成员
-    // //在behavior.h中的两个宏定义中添加student，因为student结构体是作为成员出现的
-    // string sch_json;
-    // Fdog::FJson(sch_json, sch);
-    // cout << sch_json << endl;
-    // sch_json = "{\"id\":3, \"stu\":{\"name\":\"yujing\", \"age\":22}}";
-    // Fdog::FObject(sch, sch_json);
-    // cout << sch.id << "," << sch.stu.name << "," << sch.stu.age << endl;
-    // //**********************************************************************
-
-    // //**********************************************************************
-    // cout << "vector<基础类型>序列化==========================================" << endl;
-    // vector<int> av;
-    // av.push_back(20);
-    // av.push_back(10);
-    // av.push_back(5);
-    // string av_json;
-    // Fdog::FJson(av_json, av, "av");
-    // cout << av_json << endl;
-    // av_json = "{\"av\":[30, 20, 10]}";
-    // Fdog::FObject(av, av_json);
-    // cout << av[0] << "," << av[1] << "," << av[2] << endl;
-    // //**********************************************************************
-
-    // //**********************************************************************
-    // cout << "vector<结构体>序列化,list,set类型用法一致=======================" << endl;
-    // vector<student> stuv;
-    // student stu_1 = {"zhangxv", 21};
-    // student stu_2 = {"yujing", 21};
-    // student stu_3 = {"lisi", 21};
-    // stuv.push_back(stu_1);
-    // stuv.push_back(stu_2);
-    // stuv.push_back(stu_3);
-    // string stuv_json;
-    // Fdog::FJsonA(stuv_json, stuv, "stuv");
-    // cout << stuv_json << endl;
-    // av_json = "{\"stuv\":[{\"name\":\"zhangsan\", \"age\":32},{\"name\":\"anjing\", \"age\":12},{\"name\":\"lifei\", \"age\":20}]}";
-    // Fdog::FObjectA(stuv, stuv_json);
-    // cout << stuv[0].name << "," << stuv[0].age << "," << stuv[1].name << "," << stuv[1].age << "," << stuv[2].name << "," << stuv[2].age << endl;
-    // //**********************************************************************
-
-    // //**********************************************************************
-    // cout << "map<基础类型,结构体>序列化======================================" << endl;
-    // map<int, student> stum;
-    // stum[0] = {"zhangxv", 21};
-    // stum[1] = {"yujing", 21};
-    // stum[2] = {"lisi", 21};
-    // string stum_json;
-    // Fdog::FJsonM(stum_json, stum);
-    // cout << stum_json << endl;
-    // stum_json = "{\"0\":{\"name\":\"huhansan\",\"age\":21},\"1\":{\"name\":\"lifei\",\"age\":11},\"2\":{\"name\":\"huruiming\",\"age\":20}}";
-    // Fdog::FObjectM(stum, stum_json);
-    // int len = stum.size();
-    // for(int i = 0; i < len; i++){
-    //     cout << stum[i].name << "," << stum[i].age << endl;
-    // }
-    // //**********************************************************************    
-    // cout << "===============================================================" << endl;
+    cout << "===============================================================" << endl;
     return 0;
 }
 
