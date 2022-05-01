@@ -712,6 +712,10 @@ template<typename T> struct TagSTLAAAType {
     using Tag = BaseAndStructTag;
 };
 
+// template<> struct TagSTLAAAType<student[2]> {
+//     using Tag = BaseArrayTag;
+// };
+
 template<> struct TagSTLAAAType<int[2]> {
     using Tag = BaseArrayTag;
 };
@@ -900,7 +904,7 @@ class FdogSerializer {
             {
                 for(auto metainfoObject : objectinfo.metaInfoObjectList){
                     string json_s;
-                    //cout <<"成员类型：" << metainfoObject->memberType << "--" << metainfoObject->memberTypeInt << "--"<< metainfoObject->first << endl;
+                    //cout <<"成员类型：" << metainfoObject->memberType << "--" << metainfoObject->memberTypeInt << "--" << metainfoObject->first << "--" << metainfoObject->memberOffset << endl;
                     if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
                         FdogSerializerBase::Instance()->BaseToJson(json_s, metainfoObject, object_);
                         json_ = json_ + json_s;
@@ -998,10 +1002,13 @@ class FdogSerializer {
                         }
                         if(metainfoObject->first == "long double"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
-                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long double)));
+                                string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset + (i * sizeof(long double)));
                                 json_s = json_s + value + ",";
                             }
                         }
+                        //添加容器自定义参数宏
+                        Serialize_arraytype_judgment_all;
+
                         removeLastComma(json_s);
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";                
                     }
@@ -1053,7 +1060,17 @@ class FdogSerializer {
                         }
                         if(metainfoObject->first == "long double"){
                             FSerialize(json_s, *(vector<long double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
-                        }                                                                                                                                                                                                                                                                                                
+                        }
+                        Serialize_vector_type_judgment_all;
+                        // if(metainfoObject->first == "student"){
+                        //     for(int i = 0; i < 2; i++){
+                        //         cout << "aaaaa" << endl;
+                        //         string json_z = "";
+                        //         FSerialize(json_z, *( *)((void *)&object_ + metainfoObject->memberOffset + (i * sizeof(TYPE))), TagDispatchTrait<TYPE>::Tag{});
+                        //         cout << "aaaaa2" << endl;
+                        //         json_s = json_s + "{" + json_z + "}" + ",";
+                        //     }
+                        // }                                                                                                                                                                                                                                                                                     
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_LIST && metainfoObject->memberIsIgnore != true){
@@ -1229,9 +1246,7 @@ class FdogSerializer {
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";
                     }
 
-
                     //还需要添加容器自定义参数宏
-
                     //这个宏用于进入OBJECT_STRUCT
                     Serialize_type_judgment_all;
                     if(i == sum){
@@ -1245,6 +1260,7 @@ class FdogSerializer {
             }
             break;
             //普通map需要在这里定义
+            //处理直接是STL类型
         }
     }
 
@@ -1256,7 +1272,7 @@ class FdogSerializer {
 
     template<typename T>
     void SerializeS(string & json_, T & object_, BaseArrayTag, string name = ""){
-        // << "SerializeS2" << endl;
+        //cout << "SerializeS2" << endl;
         for(auto & object_one : object_){
             Serialize(json_, object_one);
         }
@@ -1276,9 +1292,9 @@ class FdogSerializer {
     //用于解析基础类型，数组(只需要判断有没有[]就能确定是不是数组，结构体和基础类型都不具备[]条件)，结构体
     template<typename T>
     void FSerialize(string & json_, T & object_, BaseTag, string name = ""){
-        cout << "类型：" << abi::__cxa_demangle(typeid(T).name(),0,0,0) << endl;
-        cout << "是否是数组 ： " << isArrayType("", abi::__cxa_demangle(typeid(T).name(),0,0,0)) << endl;
+        //cout << "类型：" << abi::__cxa_demangle(typeid(T).name(),0,0,0) << endl;
         bool isArray = isArrayType("", abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        //cout << "是否是数组 ： " << isArray << endl;
         SerializeS_s(json_, object_, isArray, name);
         //Serialize(json_, object_, name);
         //这里需要判断类型 如果是基础类型直接使用name 不是基础类型，可以使用
@@ -1294,7 +1310,7 @@ class FdogSerializer {
         }
         json_ = "{" + json_ + "}";
     }
-    //用于解析STL（map除外）
+    //用于解析STL（map除外）其实上面接口也可以处理vector，但其他类型无法处理，所以这个处理STL
     template<typename T>
     void FSerialize(string & json_, T & object_, ArrayTag, string name = ""){
         //cout << "进入array==========1" << typeid(T).name() << endl;
@@ -1521,6 +1537,7 @@ class FdogSerializer {
                                 FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(long double)), json_array[j++]);
                             }
                         }
+                        Deserialize_arraytype_judgment_all;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_VECTOR && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "char"){
@@ -1568,7 +1585,8 @@ class FdogSerializer {
                         }
                         if(metainfoObject->first == "long double"){
                             FDeserialize(*(vector<long double> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
-                        }                                                                                                                                                                                                                                                                                                
+                        }
+                        Deserialize_vector_type_judgment_all;                                                                                                                                                                                                                                                                                       
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_LIST && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "bool"){
@@ -1764,6 +1782,7 @@ class FdogSerializer {
         // if(isArray){
         //     DeserializeS(json_, object_, TagSTLAAAType<int[2]>::Tag{}, name);
         // }else{
+
         DeserializeS(json_, object_, typename TagSTLAAAType<T>::Tag{}, name);
         //}
     }
