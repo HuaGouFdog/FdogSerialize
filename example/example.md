@@ -23,6 +23,22 @@ struct school{
     teacher tea;
 };
 
+struct class_base_array{
+    int numbers[5];
+};
+
+struct class_base_vector{
+    vector<int> numbers;
+};
+
+struct class_object_array{
+    student stus[2];
+};
+
+struct class_object_vector{
+    vector<student> stus;
+};
+
 //将需要定义结构体的头文件添加在definition.h头文件中
 //definition.h 添加结构体，定义结构体
 #include "example/testType.h"
@@ -73,50 +89,58 @@ int main(){
     school sch2;
     string sch2_json = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
     Fdog::FObject(sch2, sch2_json);
+
     
-    //3.结构体成员存在自定义类型的数组
-    //马上支持
+    //3.结构体成员存在数组，且数组存储的基础类型数据
+    REGISTEREDMEMBER(class_base_array, numbers)
+    
+        
+    //4.结构体成员存在STL容器，且容器为基础类型
+    REGISTEREDMEMBER(class_base_vector, numbers)
+    
+        
+    //5.结构体成员存在自定义类型的数组
+    REGISTEREDMEMBER(class_object_array, stus)
     
     
-    //4.结构体成员存在自定义类型STL容器
-    //马上支持
+    //6.结构体成员存在自定义类型STL容器
+    REGISTEREDMEMBER(class_object_vector, stus)
     
     
-    //5.支持别名(这个接口调用太复杂，后期会优化)
-    FdogSerialize::Instance()->setAliasName("student", "name", "Aliasname"); //第一个参数为类型，第二参数为原名，第三个参数为别名
+    //7.支持别名
+    Fdog::setAliasName("student", "name", "Aliasname"); //第一个参数为类型，第二参数为原名，第三个参数为别名
     Fdog::FJson(stu_json, stu);  //结果 输出stu_json为： {"Aliasname":"yujing","age":21}
     
     
-    //6.支持字段忽略(这个接口调用太复杂，后期会优化)
-    FdogSerialize::Instance()->setIgnoreField("student", "name");  //第一个参数为类型，第二参数为需要忽略的字段
+    //8.支持字段忽略
+    Fdog::setIgnoreField("student", "name");  //第一个参数为类型，第二参数为需要忽略的字段
     Fdog::FJson(stu_json, stu);  //结果 输出stu_json为： {"age":21}  //name字段的数据将被忽略
     
     
-    //7.支持忽略字段大小写(这个接口调用太复杂，后期会优化)
-    //当将json转为对象时，如json中的键值与对象中的成员名存在大小写不同，可以设定忽略大小写。
-    FdogSerialize::Instance()->setIgnoreLU("student", "name");
-    FdogSerialize::Instance()->setIgnoreLU("student", "age");
+    //9.支持忽略字段大小写，当将json转为对象时，如json中的键值与对象中的成员名存在大小写不同，可以设定忽略大小写。
+    Fdog::setIgnoreLU("student", "name");
+    Fdog::setIgnoreLU("student", "age");
     string stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
     Fdog::FObject(stu, stu_json);  //将Name对应name，AGE对应age
     
-    //8.针对5，6，7接口增加对应的一次性接口，避免有多个字段需要设置，从而多次调用接口
-    //下个版本支持
+    //10.针对7，8，9接口增加对应的一次性接口，避免有多个字段需要设置，从而多次调用接口
     
-    //9.默认支持模糊匹配
+    
+    //11.默认支持模糊匹配
     //马上支持，当不小心写错字段名时，程序将自动进行模糊匹配，最大可能完成转换。
     
     
-    //10.检测Json格式是否正确
+    //12.检测Json格式是否正确
     //马上支持
     
     
-    //11.查找json中某个字段是否存在
+    //13.查找json中某个字段是否存在
     //马上支持
     
-    //12.支持获取某个字段的值(返回类型支持int, double, string, bool)
+    //14.支持获取某个字段的值(返回类型支持int, double, string, bool)
     //马上支持
     
-    //13.支持其他类型指针(指针类型将拥有可选字段属性，对于指针变量，在转换时，将先判断指针地址是否为空，若为空，将不进行转换，类似于忽略字段)
+    //15.支持其他类型指针(指针类型将拥有可选字段属性，对于指针变量，在转换时，将先判断指针地址是否为空，若为空，将不进行转换，类似于忽略字段)
     //下个版本
     
     //14.支持xml序列化
