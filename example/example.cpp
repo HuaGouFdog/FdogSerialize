@@ -125,7 +125,7 @@ int main()
     cout << coa_json << endl;
     //json转结构体
     class_object_array coa2;
-    string coa2_json = "{\"stus\":[{\"name\":\"jinqi\",\"age\":25},{\"name\":\"ruiming\",\"age\":12}]}}";
+    string coa2_json = "{\"stus\":[{\"name\":\"jinqi\",\"age\":25},{\"name\":\"ruiming\",\"age\":12}]}";
     Fdog::FObject(coa2, coa2_json);
     cout << " name = " << coa2.stus[0].name << " age = " << coa2.stus[0].age << endl;
     cout << " name = " << coa2.stus[1].name << " age = " << coa2.stus[1].age << endl;
@@ -158,7 +158,8 @@ int main()
     cout << "\n8：支持别名------------------------------------\n";
 
     //8.支持别名
-    Fdog::setAliasName("student", "name", "Aliasname"); //第一个参数为类型，第二参数为原名，第三个参数为别名
+    //Fdog::setAliasName("student", "name", "Aliasname"); //第一个参数为类型，第二参数为原名，第三个参数为别名 单字段设置
+    Fdog::setAliasNameS("student", "name", "Aliasname", "age", "Aliasage"); //支持多个字段设置
     stu_json = "";
     Fdog::FJson(stu_json, stu);  
     //结果 输出stu_json为： {"Aliasname":"yujing","age":21}
@@ -167,7 +168,8 @@ int main()
     cout << "\n9：支持字段忽略------------------------------------\n";
 
     //9.支持字段忽略
-    Fdog::setIgnoreField("student", "name");  //第一个参数为类型，第二参数为需要忽略的字段
+    //Fdog::setIgnoreField("student", "name");  //第一个参数为类型，第二参数为需要忽略的字段 单字段设置
+    Fdog::setIgnoreFieldS("student", "name", "age"); //支持多个字段
     stu_json = "";
     Fdog::FJson(stu_json, stu);
     //结果 输出stu_json为： {"age":21}  //name字段的数据将被忽略
@@ -176,76 +178,61 @@ int main()
     cout << "\n10：支持忽略字段大小写------------------------------------\n";
 
     //10.支持忽略字段大小写，当将json转为对象时，如json中的键值与对象中的成员名存在大小写不同，可以设定忽略大小写。
-    Fdog::setIgnoreLU("student", "name");
-    Fdog::setIgnoreLU("student", "age");
+    //Fdog::setIgnoreLU("student", "name"); 单字段设置
+    //Fdog::setIgnoreLU("student", "age");
+
+    Fdog::setIgnoreLUS("student", "name", "age"); //支持多字段设置
     stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
     Fdog::FObject(stu, stu_json);  //将Name对应name，AGE对应age
     cout << "name = " << stu.name << " age = " << stu.age << endl;
 
+    cout << "\n11：针对7，8，9接口增加对应的一次性接口------------------------------------\n";
     //11.针对7，8，9接口增加对应的一次性接口，避免有多个字段需要设置，从而多次调用接口
+    cout << "上面已举例，不再列出" << endl;
     
-    
+    cout << "\n12：默认支持模糊匹配------------------------------------\n";
     //12.默认支持模糊匹配
     //马上支持，当不小心写错字段名时，程序将自动进行模糊匹配，最大可能完成转换。
+    cout << "暂无" << endl;
     
-    
+    cout << "\n13：检测Json格式是否正确------------------------------------\n";
     //13.检测Json格式是否正确
-    //马上支持
+    string json_v = "{\"stus\":[{\"name\":\"jinqi\",\"age\":25},{\"name\":\"ruiming\",\"age\":12}]}";
+    cout << "字符串:" << json_v << endl;
+    auto res = Fdog::JsonValidS(json_v);
+    cout << "字符串是否正确：" << res.code << endl;
+    cout << "字符串错误提示：" << res.message << endl;
     
-    
+    cout << "\n14：查找json中某个字段是否存在------------------------------------\n";
     //14.查找json中某个字段是否存在
-    //马上支持
+    if(Fdog::Exist(json_v, "age")) {
+        cout << "存在" << endl; 
+    } else {
+      cout << "不存在" << endl;
+    }
     
+    cout << "\n15：支持获取某个字段的值------------------------------------\n";
     //15.支持获取某个字段的值(返回类型支持int, double, string, bool)
-    //马上支持
-    
+    //建议配合Exist函数使用
+    if(Fdog::Exist(json_v, "age")) {
+        cout << "age的值:" << Fdog::GetStringValue(json_v, "age") << endl;
+    } else {
+      cout << "不存在" << endl;
+    }
+    //除GetStringValue之外，还提供下面四个用于返回不同类型
+    // GetIntValue
+    // GetDoubleValue
+    // GetLongValue
+    // GetBoolValue
+
+    //json还存在一些问题，并不能100%检验，还需要时间来完善
+
     //16.支持其他类型指针(指针类型将拥有可选字段属性，对于指针变量，在转换时，将先判断指针地址是否为空，若为空，将不进行转换，类似于忽略字段)
     //下个版本
     
     //17.支持xml序列化
     //下下版本～
 
-    // REGISTEREDMEMBER(maptest, name);
-    // maptest mt;
-    // mt.name["zhangxu"] = 22;
-    // mt.name["yujing"] = 23;
-    // string str;
-    // Fdog::FJson(str, mt);
-    // cout << str << endl;
-    // maptest mt2;
-    // string str2 = "{\"name\":{\"lisi\":33,\"angwu\":11}}";
-    // Fdog::FObject(mt2, str2);
-    // for(auto j : mt2.name){
-    //     cout << "first = " << j.first << " second = " << j.second << endl;
-    // }
-    // clock_t start, finish;
-    // double totaltime;
-    // start = clock();
-    // for(int i = 0; i < 10000; i++){
-    //     student stu;
-    //     stu.name = "yujing";
-    //     stu.age = 21;
-    //     string stu_json = ""; 
-    //     //结构体转json
-    //     //Fdog::setAliasName("student", "name", "Zname");
-    //     Fdog::FJson(stu_json, stu);  //结果 stu_json = 
-    //     //cout << stu_json << endl;
-    //     auto res = Fdog::JsonValidS(stu_json);
-    //     //cout << "字符串是否正确：" << res.code << endl;
-    //     if(Fdog::Exist(stu_json, "age")) {
-    //         //cout << "age的值:" << Fdog::GetStringValue(stu_json, "age") << endl; 
-    //     }
-    //     student stu2;
-    //     string stu2_json = "{\"name\":\"zhangxv\",\"age\":21}";
-    //     //json转结构体
-    //     Fdog::FObject(stu2, stu2_json);  //结果  stu2
-    //     //cout << stu2.name << "-" << stu2.age << endl;
-    // }
-    // finish = clock();
-    // totaltime = (double)(finish - start) / CLOCKS_PER_SEC;
-    // cout << "clock " << totaltime << "s" << endl;  
-    //打印      clock 20.7354s 
-    //不打印    clock 5.48499s
     cout << "===============================================================" << endl;
     return 0;
 }

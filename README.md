@@ -10,9 +10,41 @@
 
 > 使用git命令将代码拉取到本地：git clone https://github.com/HuaGouFdog/FdogSerialize.git
 >
-> linux编译：g++ -std=c++11 ../FStruct.cpp main.cpp -o main -w
+> 目前仅保证linux环境正常，代码中有使用到C++11特性，使用到了正则表达式，linux编译，需保证gcc版本在4.9(4.8不支持正则表达式)
 >
-> 代码中有使用到C++11特性，使用到了正则表达式，若是linux编译，需保证gcc版本在4.9(4.8不支持正则表达式)。
+> windows暂未适配
+>
+> 
+>
+> linux编译方式1，使用g++编译：
+>
+> 进入example目录执行
+>
+> g++ -std=c++11 ../FStruct.cpp main.cpp -o main -w
+>
+> 
+>
+> linux编译方式2，使用cmake/make编译：
+>
+> 根目录执行
+>
+> mkdir build
+>
+> cd build
+>
+> cmake ../
+>
+> make -j8
+>
+> 
+>
+> 分支说明：
+>
+> master为不稳定分支，请勿使用
+>
+> dev分支为本人测试分支，请勿使用
+>
+> release分支为稳定分支，版本号越高，支持越多，请使用最新的release分支
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;欢迎体验，如果对您有帮助，不妨给我一个 :star:，同时本人能力有限，若您有更好的解决方案，欢迎给我留言。:blush::blush::blush:
 
@@ -157,31 +189,39 @@ FStructm目前期望提供的接口支持：
 
 已完成：
 
-| 接口支持                                                     | 说明                       |
-| ------------------------------------------------------------ | -------------------------- |
-| FJson(string & json_, T & object_)                           | object转json               |
-| FObject( T & object_, string & json_, string name = "")      | json转object               |
-| setAliasName(string Type, string memberName, string AliasName) | 使用别名（单个变量设置）   |
-| setIgnoreField(string Type, string memberName)               | 忽略字段（单个变量设置）   |
-| setIgnoreLU(string Type, string memberName)                  | 忽略大小写（单个变量设置） |
-| JsonValids()                                                 | json格式是否正确           |
-| Exist()                                                      | 查找字段是否存在           |
-| *GetIntValue*                                                | *获取int类型的值*          |
-| GetDoubleValue                                               | 获取double类型的值         |
-| GetStringValue                                               | 获取string类型的值         |
-| GetBoolValue                                                 | 获取bool类型的值           |
+| 接口支持                                                     | 说明                           |
+| ------------------------------------------------------------ | ------------------------------ |
+| FJson(string & json_, T & object_)                           | object转json                   |
+| FObject( T & object_, string & json_, string name = "")      | json转object                   |
+| setAliasName(string Type, string memberName, string AliasName) | 使用别名（单个变量设置）       |
+| setAliasNameS(string Type, string memberName, string AliasName, Args... args) | 使用别名（支持多个同时设置）   |
+| setIgnoreField(string Type, string memberName)               | 忽略字段（单个变量设置）       |
+| setIgnoreFieldS(string Type, string memberName, Args... args) | 忽略字段（支持多个同时设置）   |
+| setIgnoreLU(string Type, string memberName)                  | 忽略大小写（单个变量设置）     |
+| setIgnoreLUS()(string Type, string memberName, Args... args) | 忽略大小写（支持多个同时设置） |
+| JsonValids()                                                 | json格式是否正确               |
+| Exist()                                                      | 查找字段是否存在               |
+| *GetIntValue*                                                | *获取int类型的值*              |
+| GetDoubleValue                                               | 获取double类型的值             |
+| GetStringValue                                               | 获取string类型的值             |
+| GetBoolValue                                                 | 获取bool类型的值               |
 
 未完成：
 
-| 接口支持                | 说明                                                         |
-| ----------------------- | ------------------------------------------------------------ |
-| FXml()                  | object转xml                                                  |
-| FObjectX()              | xml转object                                                  |
-| setAliasNameAll()       | 使用别名（支持多个同时设置）                                 |
-| setIgnoreFieldAll()     | 忽略字段（支持多个同时设置）                                 |
-| setIgnoreLUAll()        | 忽略大小写（支持多个同时设置）                               |
-| setFuzzy(string Type)() | 模糊转换（设置后，对于字段名设置不正确，将尝试模糊匹配，考虑加入到默认） |
-| XmlValid()              | xml格式是否正确                                              |
+| 接口支持                | 说明                               |
+| ----------------------- | ---------------------------------- |
+| setFuzzy(string Type)() | 模糊转换（接口改为默认，无须调用） |
+| FXml()                  | object转xml                        |
+| FObjectX()              | xml转object                        |
+| XmlValid()              | xml格式是否正确                    |
+
+
+
+考虑对外删除setAliasName，setIgnoreField，setIgnoreLU并保留其S版本。
+
+同时增加对应功能恢复函数，使其更灵活。
+
+
 
 如果您还希望提供什么好的接口，请联系我。
 

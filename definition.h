@@ -26,6 +26,7 @@ Copyright 2021-2022 花狗Fdog(张旭)
         Deserialize(*((TYPE *)((void *)&object_ + metainfoObject->memberOffset)), value);\
     }
 
+
 #define Serialize_arraytype_judgment(TYPE)\
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
         for(int i = 0; i < metainfoObject->memberArraySize; i++){\
@@ -41,6 +42,8 @@ Copyright 2021-2022 花狗Fdog(张旭)
             Deserialize(*(TYPE *)((void *)&object_ + metainfoObject->memberOffset + (i * sizeof(TYPE))), json_array[j++]);\
         }\
     }
+
+
 #define Serialize_vector_type_judgment(TYPE)\
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
         FSerialize(json_s, *(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});\
@@ -49,6 +52,47 @@ Copyright 2021-2022 花狗Fdog(张旭)
 #define Deserialize_vector_type_judgment(TYPE)\
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
         FDeserialize(*(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});\
+    }
+
+
+#define Serialize_list_type_judgment(TYPE)\
+    if(metainfoObject->first == TYPE_NAME(TYPE)){\
+        FSerialize(json_s, *(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});\
+    }
+
+#define Deserialize_list_type_judgment(TYPE)\
+    if(metainfoObject->first == TYPE_NAME(TYPE)){\
+        FDeserialize(*(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});\
+    }
+
+#define Serialize_deque_type_judgment(TYPE)\
+    if(metainfoObject->first == TYPE_NAME(TYPE)){\
+        FSerialize(json_s, *(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});\
+    }
+
+#define Deserialize_deque_type_judgment(TYPE)\
+    if(metainfoObject->first == TYPE_NAME(TYPE)){\
+        FDeserialize(*(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});\
+    }
+
+#define Serialize_set_type_judgment(TYPE)\
+    if(metainfoObject->first == TYPE_NAME(TYPE)){\
+        FSerialize(json_s, *(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});\
+    }
+
+#define Deserialize_set_type_judgment(TYPE)\
+    if(metainfoObject->first == TYPE_NAME(TYPE)){\
+        FDeserialize(*(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});\
+    }
+
+#define Serialize_map_type_judgment(TYPE1, TYPE2)\
+    if(metainfoObject->first == TYPE_NAME(TYPE1) && metainfoObject->second == TYPE_NAME(TYPE2)){\
+        FSerialize(json_s, *(vector<TYPE1,TYPE2> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});\
+    }
+
+#define Deserialize_map_type_judgment(TYPE1, TYPE2)\
+    if(metainfoObject->first == TYPE_NAME(TYPE1) && metainfoObject->second == TYPE_NAME(TYPE2)){\
+        FDeserialize(*(vector<TYPE,TYPE2> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});\
     }
 
 //上面不要动
@@ -89,10 +133,10 @@ Copyright 2021-2022 花狗Fdog(张旭)
     Serialize_deque_type_judgment(student)\
 
 #define Serialize_set_type_judgment_all\
-    Serialize_set_ype_judgment(student)\
+    Serialize_set_type_judgment(student)\
 
 #define Serialize_map_type_judgment_all\
-    Serialize_map_type_judgment(student)\
+    //Serialize_map_type_judgment(string,student)
 
 //用于反序列化
 #define Deserialize_vector_type_judgment_all\
@@ -108,6 +152,6 @@ Copyright 2021-2022 花狗Fdog(张旭)
     Deserialize_set_type_judgment(student)\
 
 #define Deserialize_map_type_judgment_all\
-    Deserialize_map_type_judgment(student)\
+    //Deserialize_map_type_judgment(string,student)
 
 #endif
