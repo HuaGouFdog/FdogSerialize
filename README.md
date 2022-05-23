@@ -10,9 +10,41 @@
 
 > 使用git命令将代码拉取到本地：git clone https://github.com/HuaGouFdog/FdogSerialize.git
 >
-> linux编译：g++ -std=c++11 ../FStruct.cpp main.cpp -o main -w
+> 目前仅保证linux环境正常，代码中有使用到C++11特性，使用到了正则表达式，linux编译，需保证gcc版本在4.9(4.8不支持正则表达式)
 >
-> 代码中有使用到C++11特性，使用到了正则表达式，若是linux编译，需保证gcc版本在4.9(4.8不支持正则表达式)。
+> windows暂未适配
+>
+> 
+>
+> linux编译方式1，使用g++编译：
+>
+> 进入example目录执行
+>
+> g++ -std=c++11 ../FStruct.cpp main.cpp -o main -w
+>
+> 
+>
+> linux编译方式2，使用cmake/make编译：
+>
+> 根目录执行
+>
+> mkdir build
+>
+> cd build
+>
+> cmake ../
+>
+> make -j8
+>
+> 
+>
+> 分支说明：
+>
+> master为不稳定分支，请勿使用
+>
+> dev分支为本人测试分支，请勿使用
+>
+> release分支为稳定分支，版本号越高，支持越多，请使用最新的release分支
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;欢迎体验，如果对您有帮助，不妨给我一个 :star:，同时本人能力有限，若您有更好的解决方案，欢迎给我留言。:blush::blush::blush:
 

@@ -1061,16 +1061,7 @@ class FdogSerializer {
                         if(metainfoObject->first == "long double"){
                             FSerialize(json_s, *(vector<long double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
-                        Serialize_vector_type_judgment_all;
-                        // if(metainfoObject->first == "student"){
-                        //     for(int i = 0; i < 2; i++){
-                        //         cout << "aaaaa" << endl;
-                        //         string json_z = "";
-                        //         FSerialize(json_z, *( *)((void *)&object_ + metainfoObject->memberOffset + (i * sizeof(TYPE))), TagDispatchTrait<TYPE>::Tag{});
-                        //         cout << "aaaaa2" << endl;
-                        //         json_s = json_s + "{" + json_z + "}" + ",";
-                        //     }
-                        // }                                                                                                                                                                                                                                                                                     
+                        Serialize_vector_type_judgment_all;                                                                                                                                                                                                                                                                                
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_LIST && metainfoObject->memberIsIgnore != true){
@@ -1122,7 +1113,8 @@ class FdogSerializer {
                         }
                         if(metainfoObject->first == "long double"){
                             FSerialize(json_s, *(list<long double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
-                        }    
+                        }
+                        Serialize_list_type_judgment_all;
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_DEQUE && metainfoObject->memberIsIgnore != true){
@@ -1173,7 +1165,8 @@ class FdogSerializer {
                         }
                         if(metainfoObject->first == "long double"){
                             FSerialize(json_s, *(deque<long double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
-                        }    
+                        }
+                        Serialize_deque_type_judgment_all;
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_SET && metainfoObject->memberIsIgnore != true){
@@ -1224,7 +1217,8 @@ class FdogSerializer {
                         }
                         if(metainfoObject->first == "long double"){
                             FSerialize(json_s, *(set<long double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
-                        }    
+                        }
+                        Serialize_set_type_judgment_all;
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";                       
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberIsIgnore != true){
@@ -1243,6 +1237,7 @@ class FdogSerializer {
                         if(metainfoObject->first == "int" && metainfoObject->second == "int"){
                             FSerialize(json_s, *(map<int, int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
                         }
+                        Serialize_map_type_judgment_all;
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";
                     }
 
@@ -1637,7 +1632,8 @@ class FdogSerializer {
                         }
                         if(metainfoObject->first == "long double"){
                             FDeserialize(*(list<long double> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
-                        }    
+                        }
+                        Deserialize_list_type_judgment_all;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_DEQUE && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "bool"){
@@ -1687,7 +1683,8 @@ class FdogSerializer {
                         }
                         if(metainfoObject->first == "long double"){
                             FDeserialize(*(deque<long double> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
-                        }    
+                        }
+                        Deserialize_deque_type_judgment_all;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_SET && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "bool"){
@@ -1737,7 +1734,8 @@ class FdogSerializer {
                         }
                         if(metainfoObject->first == "long double"){
                             FDeserialize(*(set<long double> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
-                        }                         
+                        }
+                        Deserialize_set_type_judgment_all;                   
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "char*" && metainfoObject->second == "int"){
@@ -1755,6 +1753,7 @@ class FdogSerializer {
                         if(metainfoObject->first == "int" && metainfoObject->second == "int"){
                             FDeserialize(*(map<int, int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
                         }
+                        Deserialize_map_type_judgment_all;
                     }
                     Deserialize_type_judgment_all;
                 }
