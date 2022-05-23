@@ -760,23 +760,62 @@ class FdogSerializer {
 	//设置进行模糊转换 结构体转json不存在这个问题主要是针对json转结构体的问题，如果存在分歧，可以尝试进行模糊转换
 	void __setFuzzy(string Type);
 
+    void __setAliasNameS(string Type){};//退出
 
-    //一次性设置多个别名
+    //一次性设置多个别名  必须对应  类型  原成员名 别名 一旦使用，最少三个参数
     template<class T, class ...Args>
-    void setAliasNameAll();
+    void __setAliasNameS(T Type, T memberName, T AliasName, Args... args){
+        if (memberName == "" && AliasName == "") {
+            //有问题
+        }
+        //每次获取两个值
+        __setAliasName(Type, memberName, AliasName);
+        if (sizeof...(args) == 0) {
+            return;
+        }else if ((sizeof...(args) % 2) != 0) {
+            //有问题
+        }
+        __setAliasNameS(Type, args...);
+    }
 
+    void __setIgnoreFieldS(string Type){};//退出
+    
     //一次性设置忽略多个字段序列化
     template<class T, class ...Args>
-    void setIgnoreFieldAll();
+    void __setIgnoreFieldS(T Type, T memberName, Args... args){
+        if(memberName == ""){
+            //有问题
+        }
+        //每次获取一个值
+        __setIgnoreField(Type, memberName);
+        if (sizeof...(args) == 0) {
+            return;
+        }
+        __setIgnoreFieldS(Type, args...);
+    }
+
+    void __setIgnoreLUS(string Type){}//退出
+
+    //一次性设置忽略多个字段的大小写
+    template<class T, class ...Args>
+    void __setIgnoreLUS(T Type, T memberName, Args... args){
+        if(memberName == ""){
+            //有问题
+        }
+        //每次获取一个值
+        __setIgnoreLU(Type, memberName);
+        if (sizeof...(args) == 0) {
+            return;
+        }
+        __setIgnoreLUS(Type, args...);
+    }
 
     void removeFirstComma(string & return_);
 
     void removeLastComma(string & return_);
 
     void removeNumbers(string & return_);
-
-    template<class T, class ...Args>
-    void setIgnoreLUAll();
+    
 
     //获取key值
     string getKey(string json);
@@ -1917,13 +1956,32 @@ void FObject(T & object_, string & json_, string name = ""){
   FdogSerializer::Instance()->FDeserialize(object_, json_, typename TagDispatchTrait<T>::Tag{}, name);
 }
 
+//设置别名
 void setAliasName(string Type, string memberName, string AliasName);
+
+//设置多个别名
+template<class T, class ...Args>
+void setAliasNameS(T Type, T memberName, T AliasName, Args... args){
+    FdogSerializer::Instance()->__setAliasNameS(Type, memberName, AliasName, args...);
+}
 
 //设置是否忽略该字段序列化
 void setIgnoreField(string Type, string memberName);
 
+//设置多个忽略字段序列化
+template<class T, class ...Args>
+void setIgnoreFieldS(T Type, T memberName, Args... args){
+    FdogSerializer::Instance()->__setIgnoreFieldS(Type, memberName, args...);
+}
+
 //设置是否忽略大小写
 void setIgnoreLU(string Type, string memberName);
+
+//设置多个忽略大小写
+template<class T, class ...Args>
+void setIgnoreLUS(T Type, T memberName, Args... args){
+    FdogSerializer::Instance()->__setIgnoreLUS(Type, memberName, args...);
+}
 
 //设置进行模糊转换 结构体转json不存在这个问题主要是针对json转结构体的问题，如果存在分歧，可以尝试进行模糊转换
 void setFuzzy(string Type);

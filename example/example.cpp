@@ -158,7 +158,8 @@ int main()
     cout << "\n8：支持别名------------------------------------\n";
 
     //8.支持别名
-    Fdog::setAliasName("student", "name", "Aliasname"); //第一个参数为类型，第二参数为原名，第三个参数为别名
+    //Fdog::setAliasName("student", "name", "Aliasname"); //第一个参数为类型，第二参数为原名，第三个参数为别名 单字段设置
+    Fdog::setAliasNameS("student", "name", "Aliasname", "age", "Aliasage"); //支持多个字段设置
     stu_json = "";
     Fdog::FJson(stu_json, stu);  
     //结果 输出stu_json为： {"Aliasname":"yujing","age":21}
@@ -167,7 +168,8 @@ int main()
     cout << "\n9：支持字段忽略------------------------------------\n";
 
     //9.支持字段忽略
-    Fdog::setIgnoreField("student", "name");  //第一个参数为类型，第二参数为需要忽略的字段
+    //Fdog::setIgnoreField("student", "name");  //第一个参数为类型，第二参数为需要忽略的字段 单字段设置
+    Fdog::setIgnoreFieldS("student", "name", "age"); //支持多个字段
     stu_json = "";
     Fdog::FJson(stu_json, stu);
     //结果 输出stu_json为： {"age":21}  //name字段的数据将被忽略
@@ -176,15 +178,17 @@ int main()
     cout << "\n10：支持忽略字段大小写------------------------------------\n";
 
     //10.支持忽略字段大小写，当将json转为对象时，如json中的键值与对象中的成员名存在大小写不同，可以设定忽略大小写。
-    Fdog::setIgnoreLU("student", "name");
-    Fdog::setIgnoreLU("student", "age");
+    //Fdog::setIgnoreLU("student", "name"); 单字段设置
+    //Fdog::setIgnoreLU("student", "age");
+
+    Fdog::setIgnoreLUS("student", "name", "age"); //支持多字段设置
     stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
     Fdog::FObject(stu, stu_json);  //将Name对应name，AGE对应age
     cout << "name = " << stu.name << " age = " << stu.age << endl;
 
     cout << "\n11：针对7，8，9接口增加对应的一次性接口------------------------------------\n";
     //11.针对7，8，9接口增加对应的一次性接口，避免有多个字段需要设置，从而多次调用接口
-    cout << "暂无" << endl;
+    cout << "上面已举例，不再列出" << endl;
     
     cout << "\n12：默认支持模糊匹配------------------------------------\n";
     //12.默认支持模糊匹配
