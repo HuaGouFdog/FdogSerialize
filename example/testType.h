@@ -27,6 +27,16 @@ struct school{
     teacher tea;
 };
 
+class classtest{
+public:
+    void sum(){
+        cout << "test";
+    }
+public:
+    string name;
+    int age;
+};
+
 struct class_base_array{
     int numbers[5];
 };
@@ -47,20 +57,5 @@ struct class_map
 {
     map<string, int> grade;
 };
-
-// struct zhang {
-//     int age;
-//     vector<char *> a;
-//     map<int,int> b;
-//     list<char *> c;
-//     deque<char *> d;
-//     set<char *> e;
-//     int f[2];
-// };
-
-// struct text {
-//     string a[2];
-//     //string b[2];
-// };
 
 #endif

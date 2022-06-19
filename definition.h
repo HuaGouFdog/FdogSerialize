@@ -8,94 +8,10 @@ Copyright 2021-2022 花狗Fdog(张旭)
 
 #ifndef BEHAVIOR_H
 #define BEHAVIOR_H
-
+#include "define.h"
 /******在此添加结构体所包含的头文件****/
 #include "example/testType.h"
 /*********************************/
-
-#define TYPE_NAME(name) #name
-
-#define Serialize_type_judgment(TYPE)\
-    if(metainfoObject->memberType == TYPE_NAME(TYPE) && metainfoObject->memberIsIgnore != true){\
-        Serialize(json_s, *(TYPE *)((void *)&object_ + metainfoObject->memberOffset));\
-        json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";\
-    }
-
-#define Deserialize_type_judgment(TYPE)\
-    if(metainfoObject->memberType == TYPE_NAME(TYPE) && metainfoObject->memberIsIgnore != true){\
-        Deserialize(*((TYPE *)((void *)&object_ + metainfoObject->memberOffset)), value);\
-    }
-
-
-#define Serialize_arraytype_judgment(TYPE)\
-    if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        for(int i = 0; i < metainfoObject->memberArraySize; i++){\
-            string json_z = "";\
-            Serialize(json_z, *(TYPE *)((void *)&object_ + metainfoObject->memberOffset + (i * sizeof(TYPE))));\
-            json_s = json_s + "{" + json_z + "}" + ",";\
-        }\
-    }
-
-#define Deserialize_arraytype_judgment(TYPE)\
-    if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        for(int i = 0; i < metainfoObject->memberArraySize; i++){\
-            Deserialize(*(TYPE *)((void *)&object_ + metainfoObject->memberOffset + (i * sizeof(TYPE))), json_array[j++]);\
-        }\
-    }
-
-
-#define Serialize_vector_type_judgment(TYPE)\
-    if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FSerialize(json_s, *(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});\
-    }
-
-#define Deserialize_vector_type_judgment(TYPE)\
-    if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FDeserialize(*(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});\
-    }
-
-
-#define Serialize_list_type_judgment(TYPE)\
-    if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FSerialize(json_s, *(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});\
-    }
-
-#define Deserialize_list_type_judgment(TYPE)\
-    if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FDeserialize(*(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});\
-    }
-
-#define Serialize_deque_type_judgment(TYPE)\
-    if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FSerialize(json_s, *(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});\
-    }
-
-#define Deserialize_deque_type_judgment(TYPE)\
-    if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FDeserialize(*(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});\
-    }
-
-#define Serialize_set_type_judgment(TYPE)\
-    if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FSerialize(json_s, *(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});\
-    }
-
-#define Deserialize_set_type_judgment(TYPE)\
-    if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FDeserialize(*(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});\
-    }
-
-#define Serialize_map_type_judgment(TYPE1, TYPE2)\
-    if(metainfoObject->first == TYPE_NAME(TYPE1) && metainfoObject->second == TYPE_NAME(TYPE2)){\
-        FSerialize(json_s, *(vector<TYPE1,TYPE2> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});\
-    }
-
-#define Deserialize_map_type_judgment(TYPE1, TYPE2)\
-    if(metainfoObject->first == TYPE_NAME(TYPE1) && metainfoObject->second == TYPE_NAME(TYPE2)){\
-        FDeserialize(*(vector<TYPE,TYPE2> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});\
-    }
-
-//上面不要动
 
 
 //结构体中包含自定义结构体在此添加
@@ -103,11 +19,12 @@ Copyright 2021-2022 花狗Fdog(张旭)
 #define Serialize_type_judgment_all\
     Serialize_type_judgment(student)\
     Serialize_type_judgment(teacher)\
+    Serialize_type_judgment(classtest)\
 //用于反序列化
 #define Deserialize_type_judgment_all\
     Deserialize_type_judgment(student)\
     Deserialize_type_judgment(teacher)\
-
+    Deserialize_type_judgment(classtest)\
 
 
 //结构体中包含自定义类型的数组在此提添加
@@ -148,10 +65,8 @@ Copyright 2021-2022 花狗Fdog(张旭)
 #define Deserialize_deque_type_judgment_all\
     Deserialize_deque_type_judgment(student)\
 
-#define Deserialize_set_type_judgment_all\
-    Deserialize_set_type_judgment(student)\
+#define Deserialize_set_type_judgment_all Deserialize_set_type_judgment(student)\
 
-#define Deserialize_map_type_judgment_all\
-    //Deserialize_map_type_judgment(string,student)
+#define Deserialize_map_type_judgment_all //Deserialize_map_type_judgment(string,student)
 
 #endif

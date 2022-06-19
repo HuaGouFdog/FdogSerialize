@@ -26,46 +26,6 @@ Copyright 2021-2022 花狗Fdog(张旭)
 #include <regex>
 using namespace std;
 
-
-static vector<string> baseType = {
-        "bool", "bool*"
-        "char", "unsigned char", "unsigned char*",
-        "int", "unsigned int", "int*", "unsigned int*",
-        "short", "unsigned short", "short*", "unsigned short*",
-        "long", "unsigned long int", "long*", "unsigned long*",
-        "long long", "unsigned long long", "long long*", "unsigned long long*",
-        "float", "double", "long double", "float*", "double*", "long double*",
-        "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >",
-        "char*"
-};
-
-//有符号类型应该拥有正负号，正号忽视 ^(-|+)? 匹配负号
-static map<string, string> baseRegex = {
-        {"bool", "(\\d+)"},
-        {"float", "(\\d+.\\d+)"}, 
-        {"double", "(\\d+.\\d+)"},
-        {"long double", "(\\d+.\\d+)"},
-        {"char*", "\"(.*?)\""},
-        {"std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >", "\"(.*?)\""},
-        {"char", "(\\d+)"}, {"unsigned char", "(\\d+)"}, 
-        {"int", "(\\d+)"}, {"unsigned int", "(\\d+)"},
-        {"short", "(\\d+)"}, {"unsigned short", "(\\d+)"}, 
-        {"long", "(\\d+)"}, {"unsigned long", "(\\d+)"},
-        {"long long", "(\\d+)"}, {"unsigned long long", "(\\d+)"}, 
-};
-
-static map<int, string> complexRegex = {
-    {4, "(.*?) (\\[)(\\d+)(\\])"},
-    {5, "std::vector<(.*?),"},     //这里存在问题，如果是string，只会截取不完整类型
-    {6, "std::map<(.*?), (.*?),"}, //string也存在问题
-    {62, "std::map<(.*?), (.*?), (.*?), (.*?),"},
-    {7, "std::__cxx11::list<(.*?),"},
-    {8, "std::set<(.*?),"},
-    {9, "std::deque<(.*?),"},
-    {10,"std::pair<(.*?) const, (.*?)>"} //
-};
-
-
 //用于数组类型整体提取
 const string arrayRegex = "(\\[(.*?)\\])";
 //用于Map类型整体提取
@@ -96,15 +56,15 @@ enum ObjectType{
 *   存储结构体元信息
 ************************************/
 typedef struct MetaInfo{
-    string memberName;          //成员名
-    string memberAliasName;     //成员别名
-    string memberType;          //成员类型
-    size_t memberOffset;        //偏移值
-    size_t memberTypeSize;      //类型大小
-    size_t memberArraySize;     //如果类型是数组，表示数组大小
-    int    memberTypeInt;       //成员类型 数值型
-    string first;               //如果是map类型 first表示key的类型，如果是其他类型，表示value类型
-    string second;              //如果是map类型，second表示value类型
+    string memberName;              //成员名
+    string memberAliasName;         //成员别名
+    string memberType;              //成员类型
+    size_t memberOffset;            //偏移值
+    size_t memberTypeSize;          //类型大小
+    size_t memberArraySize;         //如果类型是数组，表示数组大小
+    int    memberTypeInt;           //成员类型 数值型
+    string first;                   //如果是map类型 first表示key的类型，如果是其他类型，表示value类型
+    string second;                  //如果是map类型，second表示value类型
     bool   memberIsIgnore = false;    //是否忽略字段
     bool   memberIsIgnoreLU = false;  //是否忽略大小写                                                                                                                                                                               
 }MetaInfo;
@@ -731,7 +691,9 @@ class FdogSerializer {
     static FdogSerializer * fdogSerializer;
     vector<ObjectInfo *> objectInfoList;
     vector<MetaInfo *> baseInfoList;
-
+    vector<string> baseType;
+    map<string, string> baseRegex;
+    map<int, string> complexRegex;
     FdogSerializer();
     ~FdogSerializer();
 
@@ -1293,6 +1255,7 @@ class FdogSerializer {
                 }
             }
             break;
+            //后续增加基础STL类型
             //普通map需要在这里定义
             //处理直接是STL类型
         }
@@ -1956,6 +1919,12 @@ void FObject(T & object_, string & json_, string name = ""){
   FdogSerializer::Instance()->FDeserialize(object_, json_, typename TagDispatchTrait<T>::Tag{}, name);
 }
 
+template<typename T>
+std::string FJsonToString(T & object_, string json_ = "", string name = ""){
+    FdogSerializer::Instance()->FSerialize(json_, object_, typename TagDispatchTrait<T>::Tag{}, name);
+    return json_;
+}
+
 //设置别名
 void setAliasName(string Type, string memberName, string AliasName);
 
@@ -2007,80 +1976,6 @@ long GetLongValue(string json_, string key);
 //获取字段的值
 bool GetBoolValue(string json_, string key);
 
-// void setAliasName1(string Type, string memberName, string AliasName){
-//     FdogSerializer::Instance()->setAliasName(Type, memberName, AliasName);
-// }   
-
-// //设置别名
-// void setAliasName1(string Type, string memberName, string AliasName){
-//   FdogSerializer::Instance()->setAliasName(Type, memberName, AliasName);
-// }
-
-// //设置是否忽略该字段序列化
-// void setIgnoreField1(string Type, string memberName){
-//   FdogSerializer::Instance()->setIgnoreField(Type, memberName);
-// }
-
-// //设置是否忽略大小写
-// void setIgnoreLU(string Type, string memberName){
-//   FdogSerializer::Instance()->setIgnoreLU(Type, memberName);
-// }
-
-/*
-{
-    "test1": "wx9fdb8ble7ce3c68f",
-    "test2": "123456789",
-    "testData1": {   
-        "testdatason1": "97895455"
-        "testdatason2":3,
-    }
-}
-
-*/
-
-/*
-    "key" : "dsasadsadsadsa"
-    "key" : 32131
-    "key" : true
-*/
-    //string js = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
-// //json是否正确
-// bool JsonValid(string json_) {
-//     //1. 两个花括号是否存在
-//     string start = json_[0];
-//     string end = json_[json_.length()-1];
-//     if(start + end != "{}"){
-//         return false;
-//     }
-//     //2. 将key:value 转化为 *：*  判断是否有不存在的情况
-//     //3. 判断
-//     return true;
-// }
-
-// //所查找字段是否存在 //如果存在其他成员也存在这个值，应当使用"xxx.xxx"来正确获取
-// bool Exists(string field_) {
-//     return true;
-// }
-
-// //获取int类型的值
-// int GetIntValue(string json_, string field_) {
-//     return 11;
-// }
-
-// //获取double类型的值
-// double GetDoubleValue(string json_, string field_) {
-//     return 11.3;
-// }
-
-// //获取string类型的值
-// string GetStringValue(string json_, string field_) {
-//     return "xxx";
-// }
-
-// //获取bool类型的值
-// bool GetBoolValue(string json_, string field_) {
-//     return true;
-// }
 }
 
 #define NAME(x) #x
