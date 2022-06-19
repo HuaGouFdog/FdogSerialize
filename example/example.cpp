@@ -30,6 +30,17 @@ int main()
     //结果  stu2.name = zhangxv   stu2.age = 21
     cout << "name = " << stu2.name << " age = " << stu2.age << endl;
 
+    cout << "类：" << endl;
+
+    REGISTEREDMEMBER(classtest, name, age);
+    classtest cc;
+    cc.name = "1111";
+    cc.age = 21;
+    stu_json = "";
+    Fdog::FJson(stu_json, cc);  
+    cout << stu_json << endl;
+
+
     cout << "\n2：结构体中除了基础类型，还包括自定义结构体------------------------------------\n";
 
     //2.结构体中除了基础类型，还包括自定义结构体
@@ -227,7 +238,16 @@ int main()
 
     //json还存在一些问题，并不能100%检验，还需要时间来完善
 
-    //16.支持其他类型指针(指针类型将拥有可选字段属性，对于指针变量，在转换时，将先判断指针地址是否为空，若为空，将不进行转换，类似于忽略字段)
+    cout << "\n16：支持直接输出对象------------------------------------\n";
+    //16. 支持输出对象
+    school sch_2;
+    sch_2.stu.name = "liuliu";
+    sch_2.stu.age = 18;
+    sch_2.tea.name = "wufang";
+    sch_2.tea.age = 48;
+    cout << "对象值：" << Fdog::FJsonToString(sch_2) << endl;
+
+    //17.支持其他类型指针(指针类型将拥有可选字段属性，对于指针变量，在转换时，将先判断指针地址是否为空，若为空，将不进行转换，类似于忽略字段)
     //下个版本
     
     //17.支持xml序列化

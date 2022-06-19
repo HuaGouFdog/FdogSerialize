@@ -25,6 +25,47 @@ FdogSerializer * FdogSerializer::fdogSerializer = nullptr;
 mutex * FdogSerializer::mutex_serialize = new(mutex);
 
 FdogSerializer::FdogSerializer(){
+    vector<string> baseTypeTemp = {
+        "bool", "bool*"
+        "char", "unsigned char", "unsigned char*",
+        "int", "unsigned int", "int*", "unsigned int*",
+        "short", "unsigned short", "short*", "unsigned short*",
+        "long", "unsigned long int", "long*", "unsigned long*",
+        "long long", "unsigned long long", "long long*", "unsigned long long*",
+        "float", "double", "long double", "float*", "double*", "long double*",
+        "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >",
+        "char*"
+    };
+    this->baseType = baseTypeTemp;
+
+//有符号类型应该拥有正负号，正号忽视 ^(-|+)? 匹配负号
+    map<string, string> baseRegexTemp = {
+        {"bool", "(\\d+)"},
+        {"float", "(\\d+.\\d+)"}, 
+        {"double", "(\\d+.\\d+)"},
+        {"long double", "(\\d+.\\d+)"},
+        {"char*", "\"(.*?)\""},
+        {"std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >", "\"(.*?)\""},
+        {"char", "(\\d+)"}, {"unsigned char", "(\\d+)"}, 
+        {"int", "(\\d+)"}, {"unsigned int", "(\\d+)"},
+        {"short", "(\\d+)"}, {"unsigned short", "(\\d+)"}, 
+        {"long", "(\\d+)"}, {"unsigned long", "(\\d+)"},
+        {"long long", "(\\d+)"}, {"unsigned long long", "(\\d+)"}, 
+    };
+    this->baseRegex = baseRegexTemp;
+
+    map<int, string> complexRegexTemp = {
+        {4, "(.*?) (\\[)(\\d+)(\\])"},
+        {5, "std::vector<(.*?),"},     //这里存在问题，如果是string，只会截取不完整类型
+        {6, "std::map<(.*?), (.*?),"}, //string也存在问题
+        {62, "std::map<(.*?), (.*?), (.*?), (.*?),"},
+        {7, "std::__cxx11::list<(.*?),"},
+        {8, "std::set<(.*?),"},
+        {9, "std::deque<(.*?),"},
+        {10,"std::pair<(.*?) const, (.*?)>"} //
+    };
+    this->complexRegex = complexRegexTemp;
+
     ObjectInfo * objectinfo = new ObjectInfo();
     objectinfo->objectType = "NULL";
     objectinfo->objectTypeInt = -1;

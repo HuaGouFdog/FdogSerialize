@@ -325,11 +325,15 @@ int main(){
 
     //json还存在一些问题，并不能100%检验，还需要时间来完善
 
-    //16.支持其他类型指针(指针类型将拥有可选字段属性，对于指针变量，在转换时，将先判断指针地址是否为空，若为空，将不进行转换，类似于忽略字段)
-    //下个版本
-    
-    //17.支持xml序列化
-    //下下版本～
+    cout << "\n16：支持直接输出对象------------------------------------\n";
+    //16. 支持输出对象
+    school sch_2;
+    sch_2.stu.name = "liuliu";
+    sch_2.stu.age = 18;
+    sch_2.tea.name = "wufang";
+    sch_2.tea.age = 48;
+    cout << aaaa << endl;
+    cout << "对象值：" << Fdog::FJsonToString(sch_2) << endl;
     
     return 0;
 }
