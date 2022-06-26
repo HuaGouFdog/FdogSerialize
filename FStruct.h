@@ -11,7 +11,9 @@ Copyright 2021-2022 花狗Fdog(张旭)
 
 #include "definition.h"
 #include <algorithm>
+#ifdef __GNUC__
 #include <cxxabi.h>
+#endif
 #include <cstring>
 #include <ctime>
 #include <deque>
@@ -63,10 +65,11 @@ typedef struct MetaInfo{
     size_t memberTypeSize;          //类型大小
     size_t memberArraySize;         //如果类型是数组，表示数组大小
     int    memberTypeInt;           //成员类型 数值型
+    bool   isPointer;               //是否是指针
     string first;                   //如果是map类型 first表示key的类型，如果是其他类型，表示value类型
     string second;                  //如果是map类型，second表示value类型
     bool   memberIsIgnore = false;    //是否忽略字段
-    bool   memberIsIgnoreLU = false;  //是否忽略大小写                                                                                                                                                                               
+    bool   memberIsIgnoreLU = false;  //是否忽略大小写                                                                                                                
 }MetaInfo;
 
 /***********************************
@@ -125,7 +128,7 @@ class FdogSerializerBase {
             string str_value = value;
             return "\"" + str_value  + "\"";
         }
-        if(valueType == "string" || valueType == "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >"){
+        if(valueType == "string"){
             auto value = *((string *)((void *)&object + offsetValue));
             string str_value = value;
             return "\"" + str_value  + "\"";
@@ -200,7 +203,7 @@ class FdogSerializerBase {
             *((char **)((void *)&object + offsetValue)) = new char[strlen(value.c_str())];
             strcpy(*((char **)((void *)&object + offsetValue)), value.c_str());
         }
-        if(valueType == "string" || valueType == "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >"){
+        if(valueType == "string"){
             *((string *)((void *)&object + offsetValue)) = value;
         }
         std::stringstream ss;
@@ -461,7 +464,7 @@ template<typename T>
 void F_init_s(T & object, InitVectorStrTag, string first, string second = "", string key = ""){
     if (first == "char*"){
         object.push_back("");
-    }else if (first == "string" || first == "std::__cxx11::basic_string<char"){
+    }else if (first == "string"){
         object.push_back("");
     }else{
 
@@ -505,7 +508,7 @@ template<typename T>
 void F_init_s(T & object, InitDequeStrTag, string first, string second = "", string key = ""){
     if (first == "char*"){
         object.push_back("");
-    }else if (first == "string" || first == "std::__cxx11::basic_string<char"){
+    }else if (first == "string"){
         object.push_back("");
     }else{
 
@@ -552,7 +555,7 @@ template<typename T>
 void F_init_s(T & object, InitListStrTag, string first, string second = "", string key = ""){
     if (first == "char*"){
         object.push_back("");
-    }else if (first == "string" || first == "std::__cxx11::basic_string<char"){
+    }else if (first == "string"){
         object.push_back("");
     }else{
 
@@ -615,7 +618,7 @@ void F_init_s(T & object, InitSetStrTag, string first, string second = "", strin
         //cout << "cc = " << (void *)cc << "---"<< *cc << "---" << &cc << " sstr 地址：" << &sstr << endl;
         object.insert(cc);
         temp.push_back(cc);
-    }else if (first == "string" || first == "std::__cxx11::basic_string<char"){
+    }else if (first == "string"){
         stringstream sstr;
         sstr << a;
         object.insert((char *)sstr.str().c_str());
@@ -636,7 +639,7 @@ void F_init_s(T & object, InitMapTag, string first, string second = "", string k
 template<typename T>
 void F_init_s(T & object, InitMapStrTag, string first, string second = "", string key = ""){
     int a = rand()%100;
-    if(first == "std::__cxx11::basic_string<char" && second == "int"){
+    if(first == "string" && second == "int"){
         stringstream sstr;
         sstr << a;
         //string value = key;
@@ -694,6 +697,7 @@ class FdogSerializer {
     vector<string> baseType;
     map<string, string> baseRegex;
     map<int, string> complexRegex;
+    map<string, string> TypeName;
     FdogSerializer();
     ~FdogSerializer();
 
@@ -710,14 +714,23 @@ class FdogSerializer {
     //获取对于Info 针对基础类型获取
     MetaInfo * getMetaInfo(string TypeName);
 
+    //针对不同平台获取唯一类型值
+    std::string getTypeName(string TypeName);
+
     //设置别名
     void __setAliasName(string Type, string memberName, string AliasName);
+    //移除别名
+    void __removeAliasName(string Type, string memberName);
 
     //设置是否忽略该字段序列化
     void __setIgnoreField(string Type, string memberName);
-
+    //移除忽略字段
+    void __removeIgnoreField(string Type, string memberName);
+    
 	//设置是否忽略大小写
     void __setIgnoreLU(string Type, string memberName);
+    //移除忽略大小写
+    void __removeIgnoreLU(string Type, string memberName);
 
 	//设置进行模糊转换 结构体转json不存在这个问题主要是针对json转结构体的问题，如果存在分歧，可以尝试进行模糊转换
 	void __setFuzzy(string Type);
@@ -772,13 +785,13 @@ class FdogSerializer {
         __setIgnoreLUS(Type, args...);
     }
 
+    //移除第一个逗号
     void removeFirstComma(string & return_);
-
+    //移除最后一个逗号
     void removeLastComma(string & return_);
-
+    //移除数字
     void removeNumbers(string & return_);
     
-
     //获取key值
     string getKey(string json);
 
@@ -837,16 +850,16 @@ class FdogSerializer {
     vector<string> split(string str, string pattern);
 
     //判断json格式是否正确
-    vector<string> CuttingJson(string json_);
-
+    //vector<string> CuttingJson(string json_);
+    result CuttingJson(vector<string> & array_json, string json_);
     //判断方括号是否匹配
-    bool IsSquareBracket(string json_);
+    result IsSquareBracket(string json_);
 
     //判断花括号是否匹配
-    bool IsCurlyBraces(string json_);
+    result IsCurlyBraces(string json_);
 
     //判断总符号数是否匹配
-    bool isMatch(string json_);
+    result isMatch(string json_);
     
     //判断json正确性
     result __JsonValidS(string json_);
@@ -872,14 +885,15 @@ class FdogSerializer {
     //序列化
     template<typename T>
     void Serialize(string & json_, T & object_, string name = ""){
+        //cout << "Serialize =" << abi::__cxa_demangle(typeid(T).name(),0,0,0) << endl;
         //通过传进来的T判断是什么复合类型，ObjectInfo只保存结构体,如果是NULL可以确定传进来的不是struct类型
-        ObjectInfo objectinfo = FdogSerializer::Instance()->getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        ObjectInfo objectinfo = FdogSerializer::Instance()->getObjectInfo(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
         //获取的只能是结构体的信息，无法知道是什么复合类型，尝试解析类型 objectType其实是一个结构体类型名称
-        int objectType = getObjectTypeInt(objectinfo.objectType, abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        int objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
         if(objectinfo.objectType == "NULL" && objectType != OBJECT_BASE && objectType != OBJECT_STRUCT){
             //说明不是struct类型和base类型尝试，尝试解析类型
-            objectinfo = getObjectInfoByType(abi::__cxa_demangle(typeid(T).name(),0,0,0), objectType);
-            objectType = getObjectTypeInt(objectinfo.objectType, abi::__cxa_demangle(typeid(T).name(),0,0,0));
+            objectinfo = getObjectInfoByType(FdogSerializer::Instance()->getTypeName(typeid(T).name()), objectType);
+            objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
             //这里这个objectinfo应该还是空 所以拿objecttype的数值判断
         }
         int sum = objectinfo.metaInfoObjectList.size();
@@ -892,7 +906,7 @@ class FdogSerializer {
             case OBJECT_BASE:
             {
                 MetaInfo * metainfo1 = nullptr;
-                metainfo1 = getMetaInfo(abi::__cxa_demangle(typeid(object_).name(),0,0,0));
+                metainfo1 = getMetaInfo(FdogSerializer::Instance()->getTypeName(typeid(object_).name()));
                 if (metainfo1 != nullptr){
                     //cout << "==================" << endl;
                     FdogSerializerBase::Instance()->BaseToJsonA(json_, metainfo1, object_);
@@ -905,7 +919,7 @@ class FdogSerializer {
             {
                 for(auto metainfoObject : objectinfo.metaInfoObjectList){
                     string json_s;
-                    //cout <<"成员类型：" << metainfoObject->memberType << "--" << metainfoObject->memberTypeInt << "--" << metainfoObject->first << "--" << metainfoObject->memberOffset << endl;
+                    //cout <<"成员类型：" << metainfoObject->memberType << " -- " << metainfoObject->memberTypeInt << " -- " << metainfoObject->first <<":" << metainfoObject->second << " -- " << metainfoObject->memberOffset << endl;
                     if(metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true){
                         FdogSerializerBase::Instance()->BaseToJson(json_s, metainfoObject, object_);
                         json_ = json_ + json_s;
@@ -935,7 +949,7 @@ class FdogSerializer {
                                 json_s = json_s + value + ",";
                             }
                         }
-                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >"){
+                        if(metainfoObject->first == "string"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
                                 string value = FdogSerializerBase::Instance()->getValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(string)));
                                 json_s = json_s + value + ",";
@@ -1025,7 +1039,7 @@ class FdogSerializer {
                             //cout << "zhaodaoleix1" << endl;
                             FSerialize(json_s, *(vector<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
+                        if(metainfoObject->first == "string"){
                             //cout << "zhaodaoleix1" << endl;
                             FSerialize(json_s, *(vector<string> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
@@ -1079,7 +1093,7 @@ class FdogSerializer {
                         if(metainfoObject->first == "char*"){
                             FSerialize(json_s, *(list<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
+                        if(metainfoObject->first == "string"){
                             FSerialize(json_s, *(list<string> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -1131,7 +1145,7 @@ class FdogSerializer {
                         if(metainfoObject->first == "char*"){
                             FSerialize(json_s, *(deque<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
+                        if(metainfoObject->first == "string"){
                             FSerialize(json_s, *(deque<string> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -1183,7 +1197,7 @@ class FdogSerializer {
                         if(metainfoObject->first == "char*"){
                             FSerialize(json_s, *(set<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
+                        if(metainfoObject->first == "string"){
                             FSerialize(json_s, *(set<string> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -1226,13 +1240,13 @@ class FdogSerializer {
                         if(metainfoObject->first == "char*" && metainfoObject->second == "int"){
                             FSerialize(json_s, *(map<char *, int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
                         }
-                        if(metainfoObject->first == "std::__cxx11::basic_string<char" && metainfoObject->second == "int"){
+                        if(metainfoObject->first == "string" && metainfoObject->second == "int"){
                             FSerialize(json_s, *(map<string, int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
                         }
-                        if(metainfoObject->first == "std::__cxx11::basic_string<char" && metainfoObject->second == "float"){
+                        if(metainfoObject->first == "string" && metainfoObject->second == "float"){
                             FSerialize(json_s, *(map<string, float> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
                         }
-                        if(metainfoObject->first == "std::__cxx11::basic_string<char" && metainfoObject->second == "bool"){
+                        if(metainfoObject->first == "string" && metainfoObject->second == "bool"){
                             FSerialize(json_s, *(map<string, int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
                         }                                                                                                                                                 
                         if(metainfoObject->first == "int" && metainfoObject->second == "int"){
@@ -1289,18 +1303,17 @@ class FdogSerializer {
     //用于解析基础类型，数组(只需要判断有没有[]就能确定是不是数组，结构体和基础类型都不具备[]条件)，结构体
     template<typename T>
     void FSerialize(string & json_, T & object_, BaseTag, string name = ""){
-        //cout << "类型：" << abi::__cxa_demangle(typeid(T).name(),0,0,0) << endl;
-        bool isArray = isArrayType("", abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        bool isArray = isArrayType("", FdogSerializer::Instance()->getTypeName(typeid(T).name()));
         //cout << "是否是数组 ： " << isArray << endl;
         SerializeS_s(json_, object_, isArray, name);
         //Serialize(json_, object_, name);
         //这里需要判断类型 如果是基础类型直接使用name 不是基础类型，可以使用
-        if(isBaseType(abi::__cxa_demangle(typeid(T).name(),0,0,0))) {
+        if(isBaseType(FdogSerializer::Instance()->getTypeName(typeid(T).name()))) {
             removeLastComma(json_);
             json_ = "{\"" + name + "\":" + json_ + "}";
             return ;
         }
-        if(isArrayType("", abi::__cxa_demangle(typeid(T).name(),0,0,0))){
+        if(isArrayType("", FdogSerializer::Instance()->getTypeName(typeid(T).name()))){
             removeLastComma(json_);
             json_ = "{\"" + name + "\":" + "[" + json_ + "]" + "}";
             return ;    
@@ -1313,7 +1326,7 @@ class FdogSerializer {
         //cout << "进入array==========1" << typeid(T).name() << endl;
         for(auto & object_one : object_){
             //ji
-            int objectType = isBaseType(abi::__cxa_demangle(typeid(object_one).name(),0,0,0));
+            int objectType = isBaseType(FdogSerializer::Instance()->getTypeName(typeid(object_one).name()));
             if (!objectType){
                 json_ = json_ + "{";
             }
@@ -1350,15 +1363,15 @@ class FdogSerializer {
     //反序列化
     template<typename T>
     void Deserialize(T & object_, string & json_, string name = ""){
-        ObjectInfo & objectinfo = FdogSerializer::Instance()->getObjectInfo(abi::__cxa_demangle(typeid(T).name(),0,0,0));
-        int objectType = getObjectTypeInt(objectinfo.objectType, abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        ObjectInfo & objectinfo = FdogSerializer::Instance()->getObjectInfo(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
+        int objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
         if(objectinfo.objectType == "NULL" && objectType != OBJECT_BASE && objectType != OBJECT_STRUCT){
             //说明不是struct类型和base类型尝试，尝试解析类型
-            objectinfo = getObjectInfoByType(abi::__cxa_demangle(typeid(T).name(),0,0,0), objectType);
-            objectType = getObjectTypeInt(objectinfo.objectType, abi::__cxa_demangle(typeid(T).name(),0,0,0));
+            objectinfo = getObjectInfoByType(FdogSerializer::Instance()->getTypeName(typeid(T).name()), objectType);
+            objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
         }
         if (OBJECT_BASE == objectType) {
-            MetaInfo * metainfo1 = getMetaInfo(abi::__cxa_demangle(typeid(object_).name(),0,0,0));
+            MetaInfo * metainfo1 = getMetaInfo(FdogSerializer::Instance()->getTypeName(typeid(object_).name()));
             smatch result;
             string regex_key;
             string regex_value = baseRegex[metainfo1->memberType];
@@ -1473,7 +1486,7 @@ class FdogSerializer {
                                 FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(char*)), json_array[j++]);
                             }
                         }
-                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >"){
+                        if(metainfoObject->first == "string"){
                             for(int i = 0; i < metainfoObject->memberArraySize; i++){
                                 FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset+ (i * sizeof(string)), json_array[j++]);
                             }
@@ -1546,7 +1559,7 @@ class FdogSerializer {
                         if(metainfoObject->first == "char*"){
                             FDeserialize(*(vector<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
+                        if(metainfoObject->first == "string"){
                             //cout << "进入string" << endl;
                             FDeserialize(*(vector<string> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
@@ -1598,7 +1611,7 @@ class FdogSerializer {
                         if(metainfoObject->first == "char*"){
                             FDeserialize(*(list<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
+                        if(metainfoObject->first == "string"){
                             FDeserialize(*(list<string> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -1650,7 +1663,7 @@ class FdogSerializer {
                         if(metainfoObject->first == "char*"){
                             FDeserialize(*(deque<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
+                        if(metainfoObject->first == "string"){
                             FDeserialize(*(deque<string> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -1701,7 +1714,7 @@ class FdogSerializer {
                         if(metainfoObject->first == "char*"){
                             FDeserialize(*(set<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
-                        if(metainfoObject->first == "string" || metainfoObject->first == "std::__cxx11::basic_string<char"){
+                        if(metainfoObject->first == "string"){
                             FDeserialize(*(set<string> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
@@ -1743,13 +1756,13 @@ class FdogSerializer {
                         if(metainfoObject->first == "char*" && metainfoObject->second == "int"){
                             FDeserialize(*(map<char *, int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
                         }
-                        if(metainfoObject->first == "std::__cxx11::basic_string<char" && metainfoObject->second == "int"){
+                        if(metainfoObject->first == "string" && metainfoObject->second == "int"){
                             FDeserialize(*(map<string, int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
                         }
-                        if(metainfoObject->first == "std::__cxx11::basic_string<char" && metainfoObject->second == "float"){
+                        if(metainfoObject->first == "string" && metainfoObject->second == "float"){
                             FDeserialize(*(map<string, float> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
                         }
-                        if(metainfoObject->first == "std::__cxx11::basic_string<char" && metainfoObject->second == "bool"){
+                        if(metainfoObject->first == "string" && metainfoObject->second == "bool"){
                             FDeserialize(*(map<string, int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
                         }                                                                                                                                                 
                         if(metainfoObject->first == "int" && metainfoObject->second == "int"){
@@ -1791,7 +1804,7 @@ class FdogSerializer {
     //用于解析基础类型，数组(只需要判断有没有[]就能确定是不是数组，结构体和基础类型都不具备[]条件)，结构体
     template<typename T>
     void FDeserialize(T & object_, string & json_, BaseTag, string name = ""){
-        bool isArray = isArrayType("", abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        bool isArray = isArrayType("", FdogSerializer::Instance()->getTypeName(typeid(T).name()));
         DeserializeS_s(object_, json_, isArray, name);
     }
 
@@ -1803,7 +1816,7 @@ class FdogSerializer {
         int objectType;
         for(auto & object_one : object_){
             //判断内部类型是否为基础类型
-            objectType = isBaseType(abi::__cxa_demangle(typeid(object_one).name(),0,0,0));
+            objectType = isBaseType(FdogSerializer::Instance()->getTypeName(typeid(object_one).name()));
             //cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
             break;
         }
@@ -1824,7 +1837,7 @@ class FdogSerializer {
         //这里需要注意，进来的STL容器长度为0，需要重新指定长度 需要想办法
         //需要知道容易内部类型，然后作为参数传进去,如果长度小于需要转换的，就需要添加长度
         
-        memberAttribute Member = getMemberAttribute(abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        memberAttribute Member = getMemberAttribute(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
         srand((int)time(NULL)); //用于set
         for(int i = 0; i < json_array.size(); i++){
             //cout << "xunhuan :" << i << endl;
@@ -1858,7 +1871,7 @@ class FdogSerializer {
         int objectType;
         for(auto & object_one : object_){
             //判断内部类型是否为基础类型
-            objectType = isBaseTypeByMap(abi::__cxa_demangle(typeid(object_one).name(),0,0,0));
+            objectType = isBaseTypeByMap(FdogSerializer::Instance()->getTypeName(typeid(object_one).name()));
             //cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
             break;
         }
@@ -1880,7 +1893,7 @@ class FdogSerializer {
         int len = json_array.size();
         sort(json_array.begin(), json_array.end());
         //cout << "changdu:" << len << endl;
-        memberAttribute Member = getMemberAttribute(abi::__cxa_demangle(typeid(T).name(),0,0,0));
+        memberAttribute Member = getMemberAttribute(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
         for(int i = 0; i < json_array.size(); i++){
             if(json_array.size() > object_.size()){
                 F_init(object_, Member.valueTypeInt, Member.first, Member.second, getKey(json_array[i]));
@@ -1992,7 +2005,7 @@ bool GetBoolValue(string json_, string key);
 
 #define ARG_N_RESQ() 20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
 
-#define MEMBERTYPE(TYPE, MEMBER) FdogSerializer::Instance()->getMemberAttribute(abi::__cxa_demangle(typeid(((TYPE *)0)->MEMBER).name(),0,0,0))
+#define MEMBERTYPE(TYPE, MEMBER) FdogSerializer::Instance()->getMemberAttribute(FdogSerializer::Instance()->getTypeName(typeid(((TYPE *)0)->MEMBER).name()))
 
 #define PLACEHOLDER(placeholder, ...) placeholder
 
@@ -2000,7 +2013,7 @@ bool GetBoolValue(string json_, string key);
 do{ \
     ObjectInfo * objectinfo_one = new ObjectInfo();\
     objectinfo_one->objectType = NAME(TYPE);\
-    objectinfo_one->objectTypeInt = FdogSerializer::Instance()->getObjectTypeInt(objectinfo_one->objectType, abi::__cxa_demangle(typeid(TYPE).name(),0,0,0));\
+    objectinfo_one->objectTypeInt = FdogSerializer::Instance()->getObjectTypeInt(objectinfo_one->objectType, FdogSerializer::Instance()->getTypeName(typeid(TYPE).name()));\
     objectinfo_one->objectSize = sizeof(TYPE);\
     FdogSerializer::Instance()->addObjectInfo(objectinfo_one);\
     REGISTEREDMEMBER_s_1(TYPE, PLACEHOLDER(__VA_ARGS__), objectinfo_one->metaInfoObjectList, ARG_N(__VA_ARGS__) - 1, ##__VA_ARGS__, PLACEHOLDER(__VA_ARGS__));\
