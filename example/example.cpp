@@ -14,7 +14,10 @@ int main()
     cout << "===============================================================" << endl;
     cout << "\n1：结构体只包含基础类型------------------------------------\n";
     //1.结构体只包含基础类型(int,char,char*,string,以及由基础类型构成的数组,或者是STL容器(map暂不支持全类型))，则只需要注册成员即可。
+    // const char * asd = "7student";
+    // cout << abi::__cxa_demangle(asd,0,0,0) << endl;
     REGISTEREDMEMBER(student, name, age);  //注册student成员
+    // cout << "===";
     student stu;
     stu.name = "yujing";
     stu.age = 21;
@@ -29,16 +32,15 @@ int main()
     Fdog::FObject(stu2, stu2_json);  
     //结果  stu2.name = zhangxv   stu2.age = 21
     cout << "name = " << stu2.name << " age = " << stu2.age << endl;
+    // cout << "类：" << endl;
 
-    cout << "类：" << endl;
-
-    REGISTEREDMEMBER(classtest, name, age);
-    classtest cc;
-    cc.name = "1111";
-    cc.age = 21;
-    stu_json = "";
-    Fdog::FJson(stu_json, cc);  
-    cout << stu_json << endl;
+    // REGISTEREDMEMBER(classtest, name, age);
+    // classtest cc;
+    // cc.name = "1111";
+    // cc.age = 21;
+    // stu_json = "";
+    // Fdog::FJson(stu_json, cc);  
+    // cout << stu_json << endl;
 
 
     cout << "\n2：结构体中除了基础类型，还包括自定义结构体------------------------------------\n";
@@ -97,7 +99,7 @@ int main()
     cout << cba_json << endl;
     //json转结构体
     class_base_array cba2;
-    string cba2_json = "{\"cba2_json\":{\"numbers\":[0,1,2,3,4]}}";
+    string cba2_json = "{\"cba2_json\":{\"numbers\":[11,12,13,14,15]}}";
     Fdog::FObject(cba2, cba2_json);
     cout << "numbers is " << cba2.numbers[0] << " " << cba2.numbers[1] << " " << cba2.numbers[2] << " " << cba2.numbers[3] << " " << cba2.numbers[4] << endl;
 
@@ -117,7 +119,7 @@ int main()
     cout << cbv_json << endl;
     //json转结构体
     class_base_vector cbv2;
-    string cbv2_json = "{\"cbv2_json\":{\"numbers\":[0,1,2,3,4]}}";
+    string cbv2_json = "{\"cbv2_json\":{\"numbers\":[22,32,12,4,55]}}";
     Fdog::FObject(cbv2, cbv2_json);
     cout << "numbers is " << cbv2.numbers[0] << " " << cbv2.numbers[1] << " " << cbv2.numbers[2] << " " << cbv2.numbers[3] << " " << cbv2.numbers[4] << endl;
 
@@ -245,7 +247,12 @@ int main()
     sch_2.stu.age = 18;
     sch_2.tea.name = "wufang";
     sch_2.tea.age = 48;
-    cout << "对象值：" << Fdog::FJsonToString(sch_2) << endl;
+    string stu_json_22;
+    Fdog::FJson(stu_json_22, sch_2);  
+    //结果 输出stu_json为： {"name":"yujing","age":21}
+    cout << stu_json_22 << endl;
+
+    //cout << "对象值：" << Fdog::FJsonToString(sch_2) << endl;
 
     //17.支持其他类型指针(指针类型将拥有可选字段属性，对于指针变量，在转换时，将先判断指针地址是否为空，若为空，将不进行转换，类似于忽略字段)
     //下个版本

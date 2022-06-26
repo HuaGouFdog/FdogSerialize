@@ -8,6 +8,40 @@ Copyright 2021-2022 花狗Fdog(张旭)
 
 #include "FStruct.h"
 
+/*
+
+    "bool":
+    "bool*"
+    "char"
+    "unsigned char"
+    "char*"
+    "unsigned char*"
+    "int"
+    "unsigned int"
+    "int*"
+    "unsigned int*"
+    "short"
+    "unsigned short"
+    "short*"
+    "unsigned short*"
+    "long"
+    "unsigned long int"
+    "long*"
+    "unsigned long*"
+    "long long"
+    "unsigned long long"
+    "long long*"
+    "unsigned long long*"
+    "float"
+    "double"
+    "long double"
+    "float*"
+    "double*"
+    "long double*"
+    "string"
+    "string*"
+*/
+
 FdogSerializerBase * FdogSerializerBase::FdogSerializerbase = nullptr;
 mutex * FdogSerializerBase::mutex_base = new(mutex);
 
@@ -25,16 +59,88 @@ FdogSerializer * FdogSerializer::fdogSerializer = nullptr;
 mutex * FdogSerializer::mutex_serialize = new(mutex);
 
 FdogSerializer::FdogSerializer(){
+//gcc编译环境
+#ifdef __GNUC__
+    TypeName["bool"] = "bool";
+    TypeName["bool*"] = "bool*";
+    TypeName["char"] = "char";
+    TypeName["unsigned char"] = "unsigned char";
+    TypeName["char*"] = "char*";
+    TypeName["unsigned char*"] = "unsigned char*";
+    TypeName["int"] = "int";
+    TypeName["unsigned int"] = "unsigned int";
+    TypeName["int*"] = "int*";
+    TypeName["unsigned int*"] = "unsigned int*";
+    TypeName["short"] = "short";
+    TypeName["unsigned short"] = "unsigned short";
+    TypeName["short*"] = "short*";
+    TypeName["unsigned short*"] = "unsigned short*";
+    TypeName["long"] = "long";
+    TypeName["unsigned long int"] = "unsigned long int";
+    TypeName["long*"] = "long*";
+    TypeName["unsigned long*"] = "unsigned long*";
+    TypeName["long long"] = "long long";
+    TypeName["unsigned long long"] = "unsigned long long";
+    TypeName["long long*"] = "long long*";
+    TypeName["unsigned long long*"] = "unsigned long long*";
+    TypeName["float"] = "float";
+    TypeName["double"] = "double";
+    TypeName["long double"] = "long double";
+    TypeName["float*"] = "float*";
+    TypeName["double*"] = "double*";
+    TypeName["long double*"] = "long double*";
+    TypeName["std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >"] = "string";
+    TypeName["std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*"] = "string*";
+//vc编译环境
+#elif _MSC_VER
+    TypeName["bool"] = "bool";
+    TypeName["bool *"] = "bool*";
+    TypeName["char"] = "char";
+    TypeName["unsigned char"] = "unsigned char";
+    TypeName["unsigned char *"] = "char*";
+    TypeName["unsigned int"] = "unsigned char*";
+    TypeName["int"] = "int";
+    TypeName["unsigned int"] = "unsigned int";
+    TypeName["int *"] = "int*";
+    TypeName["unsigned int *"] = "unsigned int*";
+    TypeName["short"] = "short";
+    TypeName["unsigned short"] = "unsigned short";
+    TypeName["short *"] = "short*";
+    TypeName["unsigned short *"] = "unsigned short*";
+    TypeName["long"] = "long";
+    TypeName["unsigned long"] = "unsigned long int";
+    TypeName["long *"] = "long*";
+    TypeName["unsigned long *"] = "unsigned long*";
+    TypeName["__int64"] = "long long";
+    TypeName["unsigned __int64"] = "unsigned long long";
+    TypeName["__int64 *"] = "long long*";
+    TypeName["unsigned __int64 *"] = "unsigned long long*";
+    TypeName["float"] = "float";
+    TypeName["double"] = "double";
+    TypeName["long double"] = "long double";
+    TypeName["float *"] = "float*";
+    TypeName["double *"] = "double*";
+    TypeName["long double *"] = "long double*";
+    TypeName["class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >"] = "string";
+    TypeName["class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > *"] = "string*";
+#elif clang
+
+#endif
+    //第一种就是基础类型
+    //第二种就是由基础类型演变而来的指针类型
+    //第三种是自定义对象
+    //第四种就是自定义对象指针
+
+    //有没有指针可以从返回值里面看有没有*号
     vector<string> baseTypeTemp = {
-        "bool", "bool*"
+        "bool", "bool*",
         "char", "unsigned char", "unsigned char*",
         "int", "unsigned int", "int*", "unsigned int*",
         "short", "unsigned short", "short*", "unsigned short*",
         "long", "unsigned long int", "long*", "unsigned long*",
         "long long", "unsigned long long", "long long*", "unsigned long long*",
         "float", "double", "long double", "float*", "double*", "long double*",
-        "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >",
-        "char*"
+        "string","string*","char*"
     };
     this->baseType = baseTypeTemp;
 
@@ -45,7 +151,7 @@ FdogSerializer::FdogSerializer(){
         {"double", "(\\d+.\\d+)"},
         {"long double", "(\\d+.\\d+)"},
         {"char*", "\"(.*?)\""},
-        {"std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >", "\"(.*?)\""},
+        {"string", "\"(.*?)\""},
         {"char", "(\\d+)"}, {"unsigned char", "(\\d+)"}, 
         {"int", "(\\d+)"}, {"unsigned int", "(\\d+)"},
         {"short", "(\\d+)"}, {"unsigned short", "(\\d+)"}, 
@@ -144,7 +250,7 @@ FdogSerializer::FdogSerializer(){
     this->baseInfoList.push_back(metainfo);
 
     metainfo = new MetaInfo();
-    metainfo->memberType = "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >";
+    metainfo->memberType = "string";
     metainfo->memberTypeSize = sizeof(string);
     this->baseInfoList.push_back(metainfo);
 
@@ -193,11 +299,33 @@ MetaInfo * FdogSerializer::getMetaInfo(string TypeName){
     return nullptr;
 }
 
-void FdogSerializer::__setAliasName(string type, string memberName, string aliasName){
-    ObjectInfo & objectinfo = this->getObjectInfo(type);
+std::string FdogSerializer::getTypeName(string TypeName){
+#ifdef __GNUC__
+    TypeName = abi::__cxa_demangle(TypeName.c_str(),0,0,0);
+#endif
+    auto iter = this->TypeName.find(TypeName);
+    if (iter != this->TypeName.end()) {
+        //cout << "getTypeName = " << iter->second << endl;
+        return iter->second;
+    }
+    //cout << "getTypeName = " << TypeName << endl;
+    return TypeName;
+}
+
+void FdogSerializer::__setAliasName(string Type, string memberName, string aliasName){
+    ObjectInfo & objectinfo = this->getObjectInfo(Type);
     for(auto metainfoObject : objectinfo.metaInfoObjectList){
         if(metainfoObject->memberName == memberName){
             metainfoObject->memberAliasName = aliasName;
+            break;
+        }
+    }
+}
+void FdogSerializer::__removeAliasName(string Type, string memberName){
+    ObjectInfo & objectinfo = this->getObjectInfo(Type);
+    for(auto metainfoObject : objectinfo.metaInfoObjectList){
+        if(metainfoObject->memberName == memberName){
+            metainfoObject->memberAliasName = "";
             break;
         }
     }
@@ -213,11 +341,31 @@ void FdogSerializer::__setIgnoreField(string Type, string memberName){
     }
 }
 
+void FdogSerializer::__removeIgnoreField(string Type, string memberName){
+    ObjectInfo & objectinfo = this->getObjectInfo(Type);
+    for(auto metainfoObject : objectinfo.metaInfoObjectList){
+        if(metainfoObject->memberName == memberName){
+            metainfoObject->memberIsIgnore = false;
+            break;
+        }
+    }
+}
+
 void FdogSerializer::__setIgnoreLU(string Type, string memberName){
     ObjectInfo & objectinfo = this->getObjectInfo(Type);
     for(auto metainfoObject : objectinfo.metaInfoObjectList){
         if(metainfoObject->memberName == memberName){
             metainfoObject->memberIsIgnoreLU = true;
+            break;
+        }
+    }
+}
+
+void FdogSerializer::__removeIgnoreLU(string Type, string memberName){
+    ObjectInfo & objectinfo = this->getObjectInfo(Type);
+    for(auto metainfoObject : objectinfo.metaInfoObjectList){
+        if(metainfoObject->memberName == memberName){
+            metainfoObject->memberIsIgnoreLU = false;
             break;
         }
     }
@@ -273,7 +421,7 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName){
             string value = result.str(1).c_str();
             //cout << "=========>>1  isVectorType 暂时有问题 ============= = " << value << endl;
             //处理好
-            if (value == "std::__cxx11::basic_string<char"){
+            if (value == "string"){
                 resReturn.first = "string";
             } else{
                 resReturn.first = value;
@@ -286,14 +434,14 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName){
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
             if(value == "std::__cxx11::basic_string<char"){
+                resReturn.first = "string";
                 string value2 = result.str(4).c_str();
                 resReturn.second = value2;
             } else {
                 string value2 = result.str(2).c_str();
                 resReturn.second = value2;                
             }
-            //cout << "=========>>2  isMapType " << value2 << endl;
-            resReturn.first = value;
+            cout << "=========>>2  isMapType " << resReturn.first << endl;
         } else {
             regex pattern2(complexRegex[6]);
             if(regex_search(typeName, result, pattern)){
@@ -353,11 +501,12 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName){
         resReturn.ArraySize = 0;
         resReturn.valueTypeInt = OBJECT_STRUCT;
     }
+
     return resReturn;
 }
 
 int FdogSerializer::getObjectTypeInt(string objectName, string typeName){
-    //cout << "进入getObjectTypeInt" << endl;
+    //cout << "进入getObjectTypeInt typeName = " <<objectName << " -- " << typeName << endl;
     if(FdogSerializer::Instance()->isBaseType(typeName)){
         return OBJECT_BASE;
     }
@@ -580,8 +729,8 @@ vector<string> FdogSerializer::split(string str, string pattern){
 }
 
 //判断json格式是否正确
-vector<string> FdogSerializer::CuttingJson(string json_){
-    vector<string> json_array;
+result FdogSerializer::CuttingJson(vector<string> & json_array, string json_){
+    result res;
     //这个函数可以完成对json消息的分割，只分割第一层，如果其他消息体有多层，依次分析
     int status = -1; //0 表示下一个类型任意  1 表示基本类型(不包含嵌套) 2 表示对象  3 表示数组
     int first = 0;  //字符串初始位置
@@ -788,34 +937,44 @@ vector<string> FdogSerializer::CuttingJson(string json_){
             cout << "加逗号还原，不匹配" << json_a << endl;
         }
     }
-    return json_array;
+    res.code = 0;
+    return res;
 }
 
 //判断方括号是否匹配
-bool FdogSerializer::IsSquareBracket(string json_){
+result FdogSerializer::IsSquareBracket(string json_){
+    result res;
     char start = json_[0];
     char end = json_[json_.length()-1];
     if(start != '[' || end != ']'){
-        return false;
+        res.code = -1;
+        res.message = "开头或结尾缺少方括号";
+        return res;
     }  
-    return true;
+    return res;
 }
 
 //判断花括号是否匹配
-bool FdogSerializer::IsCurlyBraces(string json_){
+result FdogSerializer::IsCurlyBraces(string json_){
+    result res;
     char start = json_[0];
     char end = json_[json_.length()-1];
     if(start != '{' || end != '}'){
-        return false;
+        res.code = -1;
+        res.message = "开头或结尾缺少花括号";
+        return res;
     }
-    return true;
+    res.code = 0;
+    return res;
 }
 
 //判断总符号数是否匹配
-bool FdogSerializer::isMatch(string json_){
+result FdogSerializer::isMatch(string json_){
+    result res;
     int h_sum = 0;
     int f_sum = 0;
-    for(int i = 0; i < json_.length(); i++){
+    int i;
+    for(i = 0; i < json_.length(); i++){
 		if (json_[i] == '{'){
 			h_sum++;
 		}
@@ -830,34 +989,41 @@ bool FdogSerializer::isMatch(string json_){
 		}
     }
     if( h_sum == f_sum && f_sum == 0){
-        return true;
-    }else{
-        return false;
+        res.code = 0;
+        return res;
     }
-    return false;
+    res.code = -1;
+    if (h_sum > 0) {
+        res.message = "缺少花括号";
+    } else if (f_sum > 0) {
+        res.message = "缺少方括号";
+    }
+    return res;
 }
 
 //判断json正确性
 result FdogSerializer::__JsonValidS(string json_){
     result res;
-    res.code = 1;
-    //检查左右括号
-    if(!IsCurlyBraces(json_)){
-        res.code = 0;
-        res.message = "缺少花括号";
+    //检查左右花括号是否匹配
+    res = IsCurlyBraces(json_);
+    if(res.code != 0){
         return res;
     }
     //检查总符号数是否匹配([]{})
-    if(!isMatch(json_)){
-        res.code = 0;
-        res.message = "括号不匹配";
+    res = isMatch(json_);
+    if(res.code != 0){
         return res;
     }
-    vector<string> array_json = CuttingJson(json_);
-    if(array_json.size() == 0){
-        res.code = 0;
-        return res;
-    }
+    vector<string> array_json;
+    res = CuttingJson(array_json, json_);
+    // if(res.code != 0){
+    //     return res;
+    // }
+
+    // if(array_json.size() == 0){
+    //     res.code = 0;
+    //     return res;
+    // }
     return res;
 }
 
