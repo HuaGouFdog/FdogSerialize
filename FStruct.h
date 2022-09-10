@@ -124,12 +124,12 @@ class FdogSerializerBase {
     template<class T>
     string getValueByAddress(string valueType, T & object, int offsetValue){
         if(valueType == "char*"){
-            auto value = *((const char **)((void *)&object + offsetValue));
+            auto value = *((const char **)((char *)&object + offsetValue));
             string str_value = value;
             return "\"" + str_value  + "\"";
         }
         if(valueType == "string"){
-            auto value = *((string *)((void *)&object + offsetValue));
+            auto value = *((string *)((char *)&object + offsetValue));
             string str_value = value;
             return "\"" + str_value  + "\"";
         }
@@ -142,11 +142,11 @@ class FdogSerializerBase {
             }
         }
         if(valueType == "char"){
-            auto value = *((char *)((void *)&object + offsetValue));
+            auto value = *((char *)((char *)&object + offsetValue));
             return to_string((int)value);
         }
         if(valueType == "unsigned char"){
-            auto value = *((char *)((void *)&object + offsetValue));
+            auto value = *((char *)((char *)&object + offsetValue));
             return to_string((unsigned int)value);
         }
         if(valueType == "int"){
@@ -200,22 +200,22 @@ class FdogSerializerBase {
     template<class T>
     void setValueByAddress(string valueType, T &object, int offsetValue, string value){
         if(valueType == "char*"){
-            *((char **)((void *)&object + offsetValue)) = new char[strlen(value.c_str())];
-            strcpy(*((char **)((void *)&object + offsetValue)), value.c_str());
+            *((char **)((char *)&object + offsetValue)) = new char[strlen(value.c_str())];
+            strcpy(*((char **)((char *)&object + offsetValue)), value.c_str());
         }
         if(valueType == "string"){
-            *((string *)((void *)&object + offsetValue)) = value;
+            *((string *)((char *)&object + offsetValue)) = value;
         }
         std::stringstream ss;
         ss.str(value);
         if(valueType == "bool"){
-            ss >> *((bool *)((void *)&object + offsetValue));
+            ss >> *((bool *)((char *)&object + offsetValue));
         }
         if(valueType == "char"){
-            ss >> *((char *)((void *)&object + offsetValue));
+            ss >> *((char *)((char *)&object + offsetValue));
         }
         if(valueType == "unsigned char"){
-            ss >> *((unsigned char *)((void *)&object + offsetValue));
+            ss >> *((unsigned char *)((char *)&object + offsetValue));
         }
         if(valueType == "int"){
             ss >> *((int *)((char *)&object + offsetValue));
@@ -613,9 +613,9 @@ void F_init_s(T & object, InitSetStrTag, string first, string second = "", strin
         stringstream sstr;
         sstr << a;
         char * cc = new char[4];
-        //cout << "cc = " << (void *)cc << "---"<< *cc << "---" << &cc << " sstr 地址：" << &sstr << endl;
+        //cout << "cc = " << (char *)cc << "---"<< *cc << "---" << &cc << " sstr 地址：" << &sstr << endl;
         strcpy(cc, (char *)sstr.str().data());
-        //cout << "cc = " << (void *)cc << "---"<< *cc << "---" << &cc << " sstr 地址：" << &sstr << endl;
+        //cout << "cc = " << (char *)cc << "---"<< *cc << "---" << &cc << " sstr 地址：" << &sstr << endl;
         object.insert(cc);
         temp.push_back(cc);
     }else if (first == "string"){
@@ -1030,51 +1030,51 @@ class FdogSerializer {
                     if(metainfoObject->memberTypeInt == OBJECT_VECTOR && metainfoObject->memberIsIgnore != true){
                         //cout << "====获取的值：" << metainfoObject->first << endl;
                         if(metainfoObject->first == "char"){
-                            FSerialize(json_s, *(vector<char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<char> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned char"){
-                            FSerialize(json_s, *(vector<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<unsigned char> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
                             //cout << "zhaodaoleix1" << endl;
-                            FSerialize(json_s, *(vector<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<char *> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "string"){
                             //cout << "zhaodaoleix1" << endl;
-                            FSerialize(json_s, *(vector<string> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<string> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
-                            FSerialize(json_s, *(vector<short> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<short> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned short"){
-                            FSerialize(json_s, *(vector<unsigned short> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<unsigned short> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "int"){
-                            FSerialize(json_s, *(vector<int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned int"){
-                            FSerialize(json_s, *(vector<unsigned int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<unsigned int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long"){
-                            FSerialize(json_s, *(vector<long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long"){
-                            FSerialize(json_s, *(vector<unsigned long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<unsigned long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long long"){
-                            FSerialize(json_s, *(vector<long long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<long long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long long"){
-                            FSerialize(json_s, *(vector<unsigned long long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<unsigned long long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "float"){
-                            FSerialize(json_s, *(vector<float> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<float> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "double"){
-                            FSerialize(json_s, *(vector<double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long double"){
-                            FSerialize(json_s, *(vector<long double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
+                            FSerialize(json_s, *(vector<long double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
                         }
                         Serialize_vector_type_judgment_all;                                                                                                                                                                                                                                                                                
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
@@ -1082,175 +1082,175 @@ class FdogSerializer {
                     if(metainfoObject->memberTypeInt == OBJECT_LIST && metainfoObject->memberIsIgnore != true){
                         //cout << "====获取的值：" << metainfoObject->first << endl;
                         if(metainfoObject->first == "bool"){
-                            FSerialize(json_s, *(list<bool> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<bool>>::Tag{});
+                            FSerialize(json_s, *(list<bool> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<bool>>::Tag{});
                         } 
                         if(metainfoObject->first == "char"){
-                            FSerialize(json_s, *(list<char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<char> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned char"){
-                            FSerialize(json_s, *(list<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<unsigned char> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FSerialize(json_s, *(list<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<char *> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "string"){
-                            FSerialize(json_s, *(list<string> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<string> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
-                            FSerialize(json_s, *(list<short> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<short> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned short"){
-                            FSerialize(json_s, *(list<unsigned short> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<unsigned short> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "int"){                    
-                            FSerialize(json_s, *(list<int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned int"){
-                            FSerialize(json_s, *(list<unsigned int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<unsigned int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long"){
-                            FSerialize(json_s, *(list<long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long"){
-                            FSerialize(json_s, *(list<unsigned long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<unsigned long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long long"){
-                            FSerialize(json_s, *(list<long long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<long long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long long"){
-                            FSerialize(json_s, *(list<unsigned long long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<unsigned long long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "float"){
-                            FSerialize(json_s, *(list<float> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<float> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "double"){
-                            FSerialize(json_s, *(list<double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long double"){
-                            FSerialize(json_s, *(list<long double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
+                            FSerialize(json_s, *(list<long double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
                         }
                         Serialize_list_type_judgment_all;
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_DEQUE && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "bool"){
-                            FSerialize(json_s, *(deque<bool> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<bool>>::Tag{});
+                            FSerialize(json_s, *(deque<bool> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<bool>>::Tag{});
                         } 
                         if(metainfoObject->first == "char"){
-                            FSerialize(json_s, *(deque<char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<char> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned char"){
-                            FSerialize(json_s, *(deque<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<unsigned char> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FSerialize(json_s, *(deque<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<char *> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "string"){
-                            FSerialize(json_s, *(deque<string> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<string> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
-                            FSerialize(json_s, *(deque<short> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<short> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned short"){
-                            FSerialize(json_s, *(deque<unsigned short> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<unsigned short> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "int"){                        
-                            FSerialize(json_s, *(deque<int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned int"){
-                            FSerialize(json_s, *(deque<unsigned int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<unsigned int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long"){
-                            FSerialize(json_s, *(deque<long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long"){
-                            FSerialize(json_s, *(deque<unsigned long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<unsigned long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long long"){
-                            FSerialize(json_s, *(deque<long long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<long long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long long"){
-                            FSerialize(json_s, *(deque<unsigned long long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<unsigned long long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "float"){
-                            FSerialize(json_s, *(deque<float> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<float> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "double"){
-                            FSerialize(json_s, *(deque<double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long double"){
-                            FSerialize(json_s, *(deque<long double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
+                            FSerialize(json_s, *(deque<long double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
                         }
                         Serialize_deque_type_judgment_all;
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_SET && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "bool"){
-                            FSerialize(json_s, *(set<bool> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<bool>>::Tag{});
+                            FSerialize(json_s, *(set<bool> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<bool>>::Tag{});
                         } 
                         if(metainfoObject->first == "char"){
-                            FSerialize(json_s, *(set<char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<char> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned char"){
-                            FSerialize(json_s, *(set<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<unsigned char> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FSerialize(json_s, *(set<char *> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<char *> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "string"){
-                            FSerialize(json_s, *(set<string> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<string> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
-                            FSerialize(json_s, *(set<short> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<short> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned short"){
-                            FSerialize(json_s, *(set<unsigned short> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<unsigned short> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "int"){                        
-                            FSerialize(json_s, *(set<int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned int"){
-                            FSerialize(json_s, *(set<unsigned int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<unsigned int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long"){
-                            FSerialize(json_s, *(set<long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long"){
-                            FSerialize(json_s, *(set<unsigned long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<unsigned long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long long"){
-                            FSerialize(json_s, *(set<long long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<long long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long long"){
-                            FSerialize(json_s, *(set<unsigned long long> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<unsigned long long> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "float"){
-                            FSerialize(json_s, *(set<float> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<float> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "double"){
-                            FSerialize(json_s, *(set<double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long double"){
-                            FSerialize(json_s, *(set<long double> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
+                            FSerialize(json_s, *(set<long double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
                         }
                         Serialize_set_type_judgment_all;
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";                       
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "char*" && metainfoObject->second == "int"){
-                            FSerialize(json_s, *(map<char *, int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
+                            FSerialize(json_s, *(map<char *, int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
                         }
                         if(metainfoObject->first == "string" && metainfoObject->second == "int"){
-                            FSerialize(json_s, *(map<string, int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
+                            FSerialize(json_s, *(map<string, int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
                         }
                         if(metainfoObject->first == "string" && metainfoObject->second == "float"){
-                            FSerialize(json_s, *(map<string, float> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
+                            FSerialize(json_s, *(map<string, float> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
                         }
                         if(metainfoObject->first == "string" && metainfoObject->second == "bool"){
-                            FSerialize(json_s, *(map<string, int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
+                            FSerialize(json_s, *(map<string, int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
                         }                                                                                                                                                 
                         if(metainfoObject->first == "int" && metainfoObject->second == "int"){
-                            FSerialize(json_s, *(map<int, int> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
+                            FSerialize(json_s, *(map<int, int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});
                         }
                         Serialize_map_type_judgment_all;
                         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";
@@ -1551,222 +1551,222 @@ class FdogSerializer {
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_VECTOR && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "char"){
-                            FDeserialize(*(vector<char> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<char> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned char"){
-                            FDeserialize(*(vector<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<unsigned char> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FDeserialize(*(vector<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<char *> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "string"){
                             //cout << "进入string" << endl;
-                            FDeserialize(*(vector<string> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<string> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
-                            FDeserialize(*(vector<short> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<short> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned short"){
-                            FDeserialize(*(vector<unsigned short> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<unsigned short> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "int"){
-                            FDeserialize(*(vector<int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned int"){
-                            FDeserialize(*(vector<unsigned int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<unsigned int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long"){
-                            FDeserialize(*(vector<long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long"){
-                            FDeserialize(*(vector<unsigned long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<unsigned long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long long"){
-                            FDeserialize(*(vector<long long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<long long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long long"){
-                            FDeserialize(*(vector<unsigned long long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<unsigned long long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "float"){
-                            FDeserialize(*(vector<float> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<float> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "double"){
-                            FDeserialize(*(vector<double> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<double> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long double"){
-                            FDeserialize(*(vector<long double> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
+                            FDeserialize(*(vector<long double> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
                         }
                         Deserialize_vector_type_judgment_all;                                                                                                                                                                                                                                                                                       
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_LIST && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "bool"){
-                            FDeserialize(*(list<bool> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<bool>>::Tag{});
+                            FDeserialize(*(list<bool> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<bool>>::Tag{});
                         } 
                         if(metainfoObject->first == "char"){
-                            FDeserialize(*(list<char> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<char> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned char"){
-                            FDeserialize(*(list<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<unsigned char> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FDeserialize(*(list<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<char *> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "string"){
-                            FDeserialize(*(list<string> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<string> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
-                            FDeserialize(*(list<short> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<short> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned short"){
-                            FDeserialize(*(list<unsigned short> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<unsigned short> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "int"){
                             //cout << "dasdsa======进入list" << endl;                        
-                            FDeserialize(*(list<int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned int"){
-                            FDeserialize(*(list<unsigned int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<unsigned int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long"){
-                            FDeserialize(*(list<long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long"){
-                            FDeserialize(*(list<unsigned long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<unsigned long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long long"){
-                            FDeserialize(*(list<long long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<long long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long long"){
-                            FDeserialize(*(list<unsigned long long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<unsigned long long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "float"){
-                            FDeserialize(*(list<float> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<float> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "double"){
-                            FDeserialize(*(list<double> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<double> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long double"){
-                            FDeserialize(*(list<long double> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
+                            FDeserialize(*(list<long double> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
                         }
                         Deserialize_list_type_judgment_all;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_DEQUE && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "bool"){
-                            FDeserialize(*(deque<bool> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<bool>>::Tag{});
+                            FDeserialize(*(deque<bool> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<bool>>::Tag{});
                         } 
                         if(metainfoObject->first == "char"){
-                            FDeserialize(*(deque<char> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<char> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned char"){
-                            FDeserialize(*(deque<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<unsigned char> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FDeserialize(*(deque<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<char *> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "string"){
-                            FDeserialize(*(deque<string> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<string> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
-                            FDeserialize(*(deque<short> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<short> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned short"){
-                            FDeserialize(*(deque<unsigned short> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<unsigned short> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "int"){                        
-                            FDeserialize(*(deque<int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned int"){
-                            FDeserialize(*(deque<unsigned int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<unsigned int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long"){
-                            FDeserialize(*(deque<long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long"){
-                            FDeserialize(*(deque<unsigned long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<unsigned long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long long"){
-                            FDeserialize(*(deque<long long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<long long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long long"){
-                            FDeserialize(*(deque<unsigned long long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<unsigned long long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "float"){
-                            FDeserialize(*(deque<float> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<float> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "double"){
-                            FDeserialize(*(deque<double> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<double> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long double"){
-                            FDeserialize(*(deque<long double> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
+                            FDeserialize(*(deque<long double> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
                         }
                         Deserialize_deque_type_judgment_all;
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_SET && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "bool"){
-                            FDeserialize(*(set<bool> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<bool>>::Tag{});
+                            FDeserialize(*(set<bool> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<bool>>::Tag{});
                         } 
                         if(metainfoObject->first == "char"){
-                            FDeserialize(*(set<char> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<char> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned char"){
-                            FDeserialize(*(set<unsigned char> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<unsigned char> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "char*"){
-                            FDeserialize(*(set<char *> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<char *> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "string"){
-                            FDeserialize(*(set<string> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<string> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "short"){
-                            FDeserialize(*(set<short> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<short> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned short"){
-                            FDeserialize(*(set<unsigned short> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<unsigned short> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "int"){                        
-                            FDeserialize(*(set<int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned int"){
-                            FDeserialize(*(set<unsigned int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<unsigned int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long"){
-                            FDeserialize(*(set<long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long"){
-                            FDeserialize(*(set<unsigned long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<unsigned long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long long"){
-                            FDeserialize(*(set<long long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<long long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "unsigned long long"){
-                            FDeserialize(*(set<unsigned long long> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<unsigned long long> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "float"){
-                            FDeserialize(*(set<float> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<float> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "double"){
-                            FDeserialize(*(set<double> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<double> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         if(metainfoObject->first == "long double"){
-                            FDeserialize(*(set<long double> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
+                            FDeserialize(*(set<long double> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
                         }
                         Deserialize_set_type_judgment_all;                   
                     }
                     if(metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberIsIgnore != true){
                         if(metainfoObject->first == "char*" && metainfoObject->second == "int"){
-                            FDeserialize(*(map<char *, int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
+                            FDeserialize(*(map<char *, int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
                         }
                         if(metainfoObject->first == "string" && metainfoObject->second == "int"){
-                            FDeserialize(*(map<string, int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
+                            FDeserialize(*(map<string, int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
                         }
                         if(metainfoObject->first == "string" && metainfoObject->second == "float"){
-                            FDeserialize(*(map<string, float> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
+                            FDeserialize(*(map<string, float> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
                         }
                         if(metainfoObject->first == "string" && metainfoObject->second == "bool"){
-                            FDeserialize(*(map<string, int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
+                            FDeserialize(*(map<string, int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
                         }                                                                                                                                                 
                         if(metainfoObject->first == "int" && metainfoObject->second == "int"){
-                            FDeserialize(*(map<int, int> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
+                            FDeserialize(*(map<int, int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});
                         }
                         Deserialize_map_type_judgment_all;
                     }
@@ -1991,6 +1991,8 @@ bool GetBoolValue(string json_, string key);
 
 }
 
+#define EXPAND(...) __VA_ARGS__
+
 #define NAME(x) #x
 
 #define EXTAND_ARGS(args) args //__VA_ARGS__ 在vs中会被认为是一个实参，所以需要定义该宏过渡
@@ -2009,18 +2011,22 @@ bool GetBoolValue(string json_, string key);
 
 #define PLACEHOLDER(placeholder, ...) placeholder
 
-#define REGISTEREDMEMBER(TYPE, ...) \
+#define REGISTERED_FUCK_MSVC(TYPE, ...) \
 do{ \
     ObjectInfo * objectinfo_one = new ObjectInfo();\
     objectinfo_one->objectType = NAME(TYPE);\
     objectinfo_one->objectTypeInt = FdogSerializer::Instance()->getObjectTypeInt(objectinfo_one->objectType, FdogSerializer::Instance()->getTypeName(typeid(TYPE).name()));\
     objectinfo_one->objectSize = sizeof(TYPE);\
     FdogSerializer::Instance()->addObjectInfo(objectinfo_one);\
-    REGISTEREDMEMBER_s_1(TYPE, PLACEHOLDER(__VA_ARGS__), objectinfo_one->metaInfoObjectList, ARG_N(__VA_ARGS__) - 1, ##__VA_ARGS__, PLACEHOLDER(__VA_ARGS__));\
+    REGISTEREDMEMBER_s_1_MSVC(TYPE, PLACEHOLDER(__VA_ARGS__), objectinfo_one->metaInfoObjectList, ARG_N(__VA_ARGS__) - 1, ##__VA_ARGS__, PLACEHOLDER(__VA_ARGS__));\
 }while(0);
+
+#define REGISTEREDMEMBER(...) EXPAND(REGISTERED_FUCK_MSVC(##__VA_ARGS__))
 
 #define REGISTEREDMEMBER_s_1(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
 REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_2(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
+
+#define REGISTEREDMEMBER_s_1_MSVC(...) EXPAND(REGISTEREDMEMBER_s_1(##__VA_ARGS__))
 
 #define REGISTEREDMEMBER_s_2(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
 REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMBER_s_3(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE);
@@ -2079,13 +2085,17 @@ REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) REGISTEREDMEMB
 #define REGISTEREDMEMBER_s_20(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
 REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
 
+#define offsetof_MSVC(...) EXPAND(offsetof(##__VA_ARGS__));
+
+#define MEMBERTYPE_MSVC(...) EXPAND(MEMBERTYPE(##__VA_ARGS__));
+
 #define REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg) \
     do{\
         MetaInfo * metainfo_one = new MetaInfo();\
         metainfo_one->memberName = NAME(arg);\
         metainfo_one->memberAliasName = "";\
-        metainfo_one->memberOffset = offsetof(TYPE, arg);\
-        memberAttribute resReturn = MEMBERTYPE(TYPE, arg);\
+        metainfo_one->memberOffset = offsetof_MSVC(TYPE, arg);\
+        memberAttribute resReturn = MEMBERTYPE_MSVC(TYPE, arg);\
         metainfo_one->memberType = resReturn.valueType;\
         metainfo_one->memberTypeSize = sizeof(TYPE);\
         metainfo_one->memberArraySize = resReturn.ArraySize;\

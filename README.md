@@ -645,7 +645,7 @@ REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
 >
 > 进入example目录执行
 >
-> g++ -std=c++11 ../FStruct.cpp main.cpp -o main -w
+> g++ -std=c++11 ../FStruct.cpp example.cpp -o main -w
 >
 > 
 >

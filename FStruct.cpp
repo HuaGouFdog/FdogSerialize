@@ -302,6 +302,11 @@ MetaInfo * FdogSerializer::getMetaInfo(string TypeName){
 std::string FdogSerializer::getTypeName(string TypeName){
 #ifdef __GNUC__
     TypeName = abi::__cxa_demangle(TypeName.c_str(),0,0,0);
+#elif _MSC_VER
+	if (TypeName.find("struct ") != string::npos && TypeName.find("class std::basic_string<char,struct ") == string::npos) {
+		//只是针对string，暂不确定MSVC上面其他类型是否和gcc有出入
+		TypeName = TypeName.substr(7);
+	}
 #endif
     auto iter = this->TypeName.find(TypeName);
     if (iter != this->TypeName.end()) {
