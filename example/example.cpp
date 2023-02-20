@@ -16,6 +16,7 @@ using namespace std;
 int main()
 {
     cout << "===============================================================" << endl;
+    cout << "\n1：结构体包含unordered_map------------------------------------\n";
     //std::wcout << L"用户首选区域设置为" << std::locale("").name().c_str() << std::endl;
 	  //std::wcout << L"用户首选区域设置为" << std::locale("").name().c_str() << std::endl;
 	// 以用户偏好的本地环境替换 C++ 本地环境和 C 本地环境
@@ -23,23 +24,37 @@ int main()
     // 将来的宽字符输出使用新的全局本地环境
     //setlocale(LC_ALL, "");
     //std::wcout << L"中文" << std::endl;
+    REGISTEREDMEMBER(class_unordered_map, grade);
+    class_unordered_map ucm;
+    ucm.grade["zhangxu"] = 88;
+    ucm.grade["yujing"] = 99;
+    string ucm_json;
+    Fdog::FJson(ucm_json, ucm);
+    cout << "ucm_json =" << ucm_json << endl;
+    class_unordered_map ucm2;
+    string ucm2_json = "{\"grade\":{\"lisi\":33,\"angwu\":33}}";
+    Fdog::FObject(ucm2, ucm2_json);
+    for(auto j : ucm2.grade){
+        cout << "name = " << j.first << " age = " << j.second << endl;
+    }
+    // REGISTEREDMEMBER(test_map, grade1);
+    // test_map tm;
+    // tm.grade1[11] = 88;
+    // tm.grade1[22] = 99;
+    // string tm_json;
+    // Fdog::FJson(tm_json, tm);
+    // cout << "tm =" << tm_json << endl;
 
-    REGISTEREDMEMBER(test_map, grade1);
-    test_map tm;
-    tm.grade1[11] = 88;
-    tm.grade1[22] = 99;
-    string tm_json;
-    Fdog::FJson(tm_json, tm);
-    cout << "tm =" << tm_json << endl;
-
-    map<string,int> a;
-    unordered_map<string,int> b;
-    unordered_map<string,string> c;
+    // map<string,int> a;
+    // unordered_map<string,int> b;
+    // unordered_map<string,string> c;
     //std::map<int, int, std::less<int>, std::allocator<std::pair<int const, int> > >
     //std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, int> > >
-    cout << "a = " << abi::__cxa_demangle(typeid(a).name(),0,0,0) << endl;
-    cout << "b = " << abi::__cxa_demangle(typeid(b).name(),0,0,0) << endl;
-    cout << "c = " << abi::__cxa_demangle(typeid(c).name(),0,0,0) << endl;
+    //cout << "a = " << abi::__cxa_demangle(typeid(a).name(),0,0,0) << endl;
+    //cout << "b = " << abi::__cxa_demangle(typeid(b).name(),0,0,0) << endl;
+    //cout << "c = " << abi::__cxa_demangle(typeid(c).name(),0,0,0) << endl;
+    cout << "===============================================================" << endl;
+    cout << "\n1：结构体只包含基础类型 uint8_t，uint16_t，uint32_t，uint64_t，int，float，double，wstring------------------------------------\n";
     REGISTEREDMEMBER(TestType, age1, age2, age3, age4, age5, age6, age7, age8);
     TestType tt;
     tt.age1 = 1;
@@ -54,6 +69,13 @@ int main()
     Fdog::FJson(tt_json, tt);  
     //结果 输出stu_json为： {"name":"yujing","age":21}
     cout << tt_json << endl;
+    string tt2_json = "{\"age1\":1,\"age2\":2,\"age3\":3,\"age4\":123456,\"age5\":123456,\"age6\":123.456,\"age7\":1234.57,\"age8\":\"123456\"}";
+    TestType tt2;
+    Fdog::FObject(tt2, tt2_json);
+    cout << "age1" << tt2.age1 << "  age2"<< tt2.age2 << "  age3"<< tt2.age3
+          << "  age4"<< tt2.age4 << "  age5"<< tt2.age5 << "  age6"<< tt2.age6 << "  age7"<< tt2.age7 << endl;
+    wcout << "age8 = " << tt2.age8 << endl;
+
 
     cout << "===============================================================" << endl;
     cout << "\n1：结构体只包含基础类型------------------------------------\n";
@@ -165,7 +187,7 @@ int main()
     class_base_vector cbv2;
     string cbv2_json = "{\"cbv2_json\":{\"numbers\":[22,32,12,4,55]}}";
     Fdog::FObject(cbv2, cbv2_json);
-    cout << "numbers is " << cbv2.numbers[0] << " " << cbv2.numbers[1] << " " << cbv2.numbers[2] << " " << cbv2.numbers[3] << " " << cbv2.numbers[4] << endl;
+    //cout << "numbers is " << cbv2.numbers[0] << " " << cbv2.numbers[1] << " " << cbv2.numbers[2] << " " << cbv2.numbers[3] << " " << cbv2.numbers[4] << endl;
 
     cout << "\n6：结构体成员存在自定义类型的数组------------------------------------\n";
 

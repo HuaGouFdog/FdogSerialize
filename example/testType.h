@@ -9,6 +9,7 @@
 #include <list>
 #include <set>
 #include <deque>
+#include <unordered_map>
 //#include <stdint.h>
 using namespace std;
 
@@ -71,6 +72,12 @@ struct class_map
 {
     map<string, int> grade;
 };
+
+struct class_unordered_map
+{
+    unordered_map<string, int> grade;
+};
+
 
 struct test_map{
     map<int, int> grade1;

@@ -158,7 +158,8 @@ FdogSerializer::FdogSerializer(){
         {"int", "(\\d+)"}, {"unsigned int", "(\\d+)"},
         {"short", "(\\d+)"}, {"unsigned short", "(\\d+)"}, 
         {"long", "(\\d+)"}, {"unsigned long", "(\\d+)"},
-        {"long long", "(\\d+)"}, {"unsigned long long", "(\\d+)"}, 
+        {"long long", "(\\d+)"}, {"unsigned long long", "(\\d+)"},
+        {"wstring", "\"(.*?)\""},
     };
     this->baseRegex = baseRegexTemp;
 
@@ -174,7 +175,7 @@ FdogSerializer::FdogSerializer(){
         {8, "std::set<(.*?),"},
         {9, "std::deque<(.*?),"},
         {10,"std::pair<(.*?) const, (.*?)>"},
-        {63, "std::unordered_map<(.*?), (.*?), (.*?), (.*?), (.*?)"},
+        {63, "std::unordered_map<(.*?), (.*?), (.*?), (.*?),"},
     };
     this->complexRegex = complexRegexTemp;
 
@@ -417,7 +418,7 @@ string FdogSerializer::getKey(string json){
 /***********************************
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
 ************************************/
-memberAttribute FdogSerializer::getMemberAttribute(string typeName){
+memberAttribute FdogSerializer:: getMemberAttribute(string typeName){
     //cout << "getMemberAttribute = " <<typeName << endl;
     memberAttribute resReturn;
     smatch result;
@@ -443,34 +444,9 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName){
     }else if(FdogSerializer::isMapType("", typeName)){
         resReturn.valueType = typeName;
         regex pattern(complexRegex[62]);
-        cout << "值=" << typeName << endl;
-        if (1) {
-            
-            try{
-                string a = "std::unordered_map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::hash<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::equal_to<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >";
-                regex pattern2(complexRegex[63]);
-                smatch result2;
-                //unordered_map<std::__cxx11::basic_string<char
-                cout << "找到了！！！" << regex_search(a, result2, pattern2) <<endl;
-            } catch(regex_error e) {
-                cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
-            }
-        }
-        //if (regex_search(typeName, result, pattern2)) {
-            //cout << "找到了！！！" << endl;
-            // string value = result.str(1).c_str();
-            // if(value == "std::__cxx11::basic_string<char"){
-            //     resReturn.first = "string";
-            //     string value2 = result.str(4).c_str();
-            //     resReturn.second = value2;
-            // } else {
-            //     resReturn.first = value;
-            //     string value2 = result.str(2).c_str();
-            //     resReturn.second = value2;                
-            // }
-            //cout << "=========>>3  isMapType " << resReturn.first << endl;
-        //} else 
-        if(regex_search(typeName, result, pattern)){
+        regex pattern2(complexRegex[63]);
+        //cout << "值=" << typeName << endl;
+         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
             if(value == "std::__cxx11::basic_string<char"){
                 resReturn.first = "string";
@@ -481,9 +457,9 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName){
                 string value2 = result.str(2).c_str();
                 resReturn.second = value2;                
             }
-            cout << "=========>>2  isMapType " << resReturn.first << endl;
-        }  else {
-            regex pattern2(complexRegex[6]);
+            //cout << "=========>>2  isMapType " << resReturn.first << endl;
+        } else {
+            regex pattern2(complexRegex[63]);
             if(regex_search(typeName, result, pattern)){
                 string value = result.str(1).c_str();
                 string value2 = result.str(2).c_str();               
@@ -492,6 +468,26 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName){
             }
         }
         resReturn.valueTypeInt = OBJECT_MAP;
+    }else if (FdogSerializer::isUnorderedMapType("", typeName)){
+        resReturn.valueType = typeName;
+        regex pattern2(complexRegex[63]);
+        if (regex_search(typeName, result, pattern2)) {
+            string value = result.str(1).c_str();
+            //cout << "&&&&&&& = " << result.str(0).c_str() << endl;
+            if(value == "std::__cxx11::basic_string<char"){
+                resReturn.first = "string";
+                string value2 = result.str(4).c_str();
+                resReturn.second = value2;
+            } else {
+                resReturn.first = value;
+                string value2 = result.str(2).c_str();
+                resReturn.second = value2;                
+            }
+            //cout << "=========>>3  isMapType " << resReturn.first << endl; 
+        } else {
+
+        }
+        resReturn.valueTypeInt = OBJECT_UNORDERED_MAP;
     }else if(FdogSerializer::isListType("", typeName)){
         resReturn.valueType = typeName;
         regex pattern(complexRegex[7]);
@@ -651,8 +647,12 @@ bool FdogSerializer::isMapType(string objectName, string typeName){
     if(x != string::npos && x == 0){
         return true;
     }
-    auto y = typeName.find("std::unordered_map<");
-    if(y != string::npos && y == 0){
+    return false;
+}
+
+bool FdogSerializer::isUnorderedMapType(string objectName, string typeName){
+    auto x = typeName.find("std::unordered_map<");
+    if(x != string::npos && x == 0){
         return true;
     }
     return false;
