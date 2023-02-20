@@ -174,7 +174,7 @@ FdogSerializer::FdogSerializer(){
         {8, "std::set<(.*?),"},
         {9, "std::deque<(.*?),"},
         {10,"std::pair<(.*?) const, (.*?)>"},
-        {63, "std::unordered_map<(.*?), (.*?), (.*?), .*?,"}, //(.*?), (.*?), (.*?), (.*?), 会导致段错误，目前还不知道为什么
+        {63, "std::unordered_map<(.*?), (.*?), (.*?), (.*?), (.*?)"},
     };
     this->complexRegex = complexRegexTemp;
 

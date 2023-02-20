@@ -135,7 +135,7 @@ class FdogSerializerBase {
             return "\"" + str_value  + "\"";
         }
         if(valueType == "wstring"){
-            std::wcout.imbue(std::locale("", LC_CTYPE));//只对字符集本地化
+            //std::wcout.imbue(std::locale("", LC_CTYPE));//只对字符集本地化
             //std::wcout.imbue(std::locale("")); //本地化
             auto value = *((wstring *)((wchar_t *)&object + offsetValue));
             wcout << "value = " << value << endl;
@@ -1821,15 +1821,18 @@ class FdogSerializer {
     //用于解析STL（map除外）
     template<typename T>
     void FDeserialize(T & object_, string & json_, ArrayTag, string name = ""){
-        //cout << "反序列化进入~array：" << json_  << endl;
-        //cout << "类型" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
+        cout << "反序列化进入~array：" << json_  << endl;
+        cout << "类型" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
+        cout << "长度 = " << object_.size() << endl;
         int objectType;
+        //这个循环进不去
         for(auto & object_one : object_){
             //判断内部类型是否为基础类型
             objectType = isBaseType(FdogSerializer::Instance()->getTypeName(typeid(object_one).name()));
-            //cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
+            cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
             break;
         }
+        cout << "走到这里1"<<endl;
         vector<string> json_array;
         if (objectType){
                 smatch result;
@@ -1843,26 +1846,34 @@ class FdogSerializer {
             removeLastComma(json_);
             json_array = FdogSerializer::Instance()->CuttingArray(json_);
         }
+        cout << "走到这里2"<<endl;
         int i = 0;
         //这里需要注意，进来的STL容器长度为0，需要重新指定长度 需要想办法
         //需要知道容易内部类型，然后作为参数传进去,如果长度小于需要转换的，就需要添加长度
-        
+        int len = json_array.size();
+        int len2 = object_.size();
+        cout << "changdu:" << len  << "----" << len2 << endl;
         memberAttribute Member = getMemberAttribute(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
         srand((int)time(NULL)); //用于set
         for(int i = 0; i < json_array.size(); i++){
-            //cout << "xunhuan :" << i << endl;
+            cout << "xunhuan1 :" << i << " & object_.size() = " << object_.size() << endl;
             if(json_array.size() > object_.size()){
                 F_init(object_, Member.valueTypeInt, Member.first);
             }
+            cout << "xunhuan2 :" << i << " & object_.size() = " << object_.size() << endl;
         }
-        // int len = json_array.size();
-        // int len2 = object_.size();
-        //cout << "changdu:" << len  << "----" << len2 << endl;
+        cout << "走到这里3 size = " << object_.size() <<endl;
         for(auto & object_one : object_){
-            //cout << "json_array[i] = " << json_array[i] << endl;
+            if (i == json_array.size()) {
+                break;
+            }
+            cout << "start " << endl;
+            cout << "json_array[i] = " << json_array[i] << endl;
+            cout << "end " << endl;
             Deserialize(object_one, json_array[i]);
             i++;
         }
+        cout << "走到这里4"<<endl;
         //这里释放init里面申请的内存
         if(1){
             vector<char *>::iterator it = temp.begin();
@@ -1871,13 +1882,15 @@ class FdogSerializer {
                 ++it;
             }
         }
-        temp.clear();    
+        cout << "走到这里5"<<endl;
+        temp.clear();
+        cout << "走到这里6"<<endl;
     }
     //用于map
     template<typename T>
     void FDeserialize(T & object_, string & json_, MapTag){
         //cout << "反序列化进入~map：" << json_ << endl;
-        //cout << "类型" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
+        cout << "类型" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
         int objectType;
         for(auto & object_one : object_){
             //判断内部类型是否为基础类型
