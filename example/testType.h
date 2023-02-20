@@ -9,7 +9,21 @@
 #include <list>
 #include <set>
 #include <deque>
+//#include <stdint.h>
 using namespace std;
+
+struct TestType
+{
+    uint8_t age1;
+    uint16_t age2;
+    uint32_t age3;
+    uint64_t age4;
+    int      age5;
+    float    age6;
+    double   age7;
+    std::wstring age8;
+};
+
 
 struct student{
     string name;
@@ -56,6 +70,10 @@ struct class_object_vector{
 struct class_map
 {
     map<string, int> grade;
+};
+
+struct test_map{
+    map<int, int> grade1;
 };
 
 #endif

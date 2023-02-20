@@ -59,8 +59,8 @@ FdogSerializer * FdogSerializer::fdogSerializer = nullptr;
 mutex * FdogSerializer::mutex_serialize = new(mutex);
 
 FdogSerializer::FdogSerializer(){
-//gcc编译环境
 #ifdef __GNUC__
+    //gcc编译环境
     TypeName["bool"] = "bool";
     TypeName["bool*"] = "bool*";
     TypeName["char"] = "char";
@@ -91,8 +91,9 @@ FdogSerializer::FdogSerializer(){
     TypeName["long double*"] = "long double*";
     TypeName["std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >"] = "string";
     TypeName["std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*"] = "string*";
-//vc编译环境
+    TypeName["std::__cxx11::basic_string<wchar_t, std::char_traits<wchar_t>, std::allocator<wchar_t> >"] = "wstring";
 #elif _MSC_VER
+    //vc编译环境
     TypeName["bool"] = "bool";
     TypeName["bool *"] = "bool*";
     TypeName["char"] = "char";
@@ -123,8 +124,9 @@ FdogSerializer::FdogSerializer(){
     TypeName["long double *"] = "long double*";
     TypeName["class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >"] = "string";
     TypeName["class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > *"] = "string*";
+    TypeName["class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> >"] = "wstring";
 #elif clang
-
+    //clang编译环境
 #endif
     //第一种就是基础类型
     //第二种就是由基础类型演变而来的指针类型
@@ -137,10 +139,10 @@ FdogSerializer::FdogSerializer(){
         "char", "unsigned char", "unsigned char*",
         "int", "unsigned int", "int*", "unsigned int*",
         "short", "unsigned short", "short*", "unsigned short*",
-        "long", "unsigned long int", "long*", "unsigned long*",
+        "long", "unsigned long", "long*", "unsigned long*",
         "long long", "unsigned long long", "long long*", "unsigned long long*",
         "float", "double", "long double", "float*", "double*", "long double*",
-        "string","string*","char*"
+        "string","string*","char*", "wstring", "wstring*"
     };
     this->baseType = baseTypeTemp;
 
@@ -160,6 +162,9 @@ FdogSerializer::FdogSerializer(){
     };
     this->baseRegex = baseRegexTemp;
 
+    //std::map<int, int, std::less<int>, std::allocator<std::pair<int const, int> > >
+    //std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, int> > >
+
     map<int, string> complexRegexTemp = {
         {4, "(.*?) (\\[)(\\d+)(\\])"},
         {5, "std::vector<(.*?),"},     //这里存在问题，如果是string，只会截取不完整类型
@@ -168,7 +173,8 @@ FdogSerializer::FdogSerializer(){
         {7, "std::__cxx11::list<(.*?),"},
         {8, "std::set<(.*?),"},
         {9, "std::deque<(.*?),"},
-        {10,"std::pair<(.*?) const, (.*?)>"} //
+        {10,"std::pair<(.*?) const, (.*?)>"},
+        {63, "std::unordered_map<(.*?), (.*?), (.*?), .*?,"}, //(.*?), (.*?), (.*?), (.*?), 会导致段错误，目前还不知道为什么
     };
     this->complexRegex = complexRegexTemp;
 
@@ -307,6 +313,7 @@ std::string FdogSerializer::getTypeName(string TypeName){
 		//只是针对string，暂不确定MSVC上面其他类型是否和gcc有出入
 		TypeName = TypeName.substr(7);
 	}
+    //针对msvc应该做系统接口 过滤struct
 #endif
     auto iter = this->TypeName.find(TypeName);
     if (iter != this->TypeName.end()) {
@@ -436,6 +443,33 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName){
     }else if(FdogSerializer::isMapType("", typeName)){
         resReturn.valueType = typeName;
         regex pattern(complexRegex[62]);
+        cout << "值=" << typeName << endl;
+        if (1) {
+            
+            try{
+                string a = "std::unordered_map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::hash<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::equal_to<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >";
+                regex pattern2(complexRegex[63]);
+                smatch result2;
+                //unordered_map<std::__cxx11::basic_string<char
+                cout << "找到了！！！" << regex_search(a, result2, pattern2) <<endl;
+            } catch(regex_error e) {
+                cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
+            }
+        }
+        //if (regex_search(typeName, result, pattern2)) {
+            //cout << "找到了！！！" << endl;
+            // string value = result.str(1).c_str();
+            // if(value == "std::__cxx11::basic_string<char"){
+            //     resReturn.first = "string";
+            //     string value2 = result.str(4).c_str();
+            //     resReturn.second = value2;
+            // } else {
+            //     resReturn.first = value;
+            //     string value2 = result.str(2).c_str();
+            //     resReturn.second = value2;                
+            // }
+            //cout << "=========>>3  isMapType " << resReturn.first << endl;
+        //} else 
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
             if(value == "std::__cxx11::basic_string<char"){
@@ -443,11 +477,12 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName){
                 string value2 = result.str(4).c_str();
                 resReturn.second = value2;
             } else {
+                resReturn.first = value;
                 string value2 = result.str(2).c_str();
                 resReturn.second = value2;                
             }
             cout << "=========>>2  isMapType " << resReturn.first << endl;
-        } else {
+        }  else {
             regex pattern2(complexRegex[6]);
             if(regex_search(typeName, result, pattern)){
                 string value = result.str(1).c_str();
@@ -614,6 +649,10 @@ bool FdogSerializer::isVectorType(string objectName, string typeName){
 bool FdogSerializer::isMapType(string objectName, string typeName){
     auto x = typeName.find("std::map<");
     if(x != string::npos && x == 0){
+        return true;
+    }
+    auto y = typeName.find("std::unordered_map<");
+    if(y != string::npos && y == 0){
         return true;
     }
     return false;

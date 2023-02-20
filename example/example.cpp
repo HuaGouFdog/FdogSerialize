@@ -8,12 +8,53 @@
 #include <list>
 #include <functional>
 #include <time.h>//clock()需要的头文件
+#include <unordered_map>
 using namespace std;
 
 //g++ -std=c++11 ../FStruct.cpp example.cpp -o main -w
 
 int main()
 {
+    cout << "===============================================================" << endl;
+    //std::wcout << L"用户首选区域设置为" << std::locale("").name().c_str() << std::endl;
+	  //std::wcout << L"用户首选区域设置为" << std::locale("").name().c_str() << std::endl;
+	// 以用户偏好的本地环境替换 C++ 本地环境和 C 本地环境
+    //std::locale::global(std::locale(""));
+    // 将来的宽字符输出使用新的全局本地环境
+    //setlocale(LC_ALL, "");
+    //std::wcout << L"中文" << std::endl;
+
+    REGISTEREDMEMBER(test_map, grade1);
+    test_map tm;
+    tm.grade1[11] = 88;
+    tm.grade1[22] = 99;
+    string tm_json;
+    Fdog::FJson(tm_json, tm);
+    cout << "tm =" << tm_json << endl;
+
+    map<string,int> a;
+    unordered_map<string,int> b;
+    unordered_map<string,string> c;
+    //std::map<int, int, std::less<int>, std::allocator<std::pair<int const, int> > >
+    //std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, int> > >
+    cout << "a = " << abi::__cxa_demangle(typeid(a).name(),0,0,0) << endl;
+    cout << "b = " << abi::__cxa_demangle(typeid(b).name(),0,0,0) << endl;
+    cout << "c = " << abi::__cxa_demangle(typeid(c).name(),0,0,0) << endl;
+    REGISTEREDMEMBER(TestType, age1, age2, age3, age4, age5, age6, age7, age8);
+    TestType tt;
+    tt.age1 = 1;
+    tt.age2 = 2;
+    tt.age3 = 3;
+    tt.age4 = 123456;
+    tt.age5 = 123456;
+    tt.age6 = 123.456f;
+    tt.age7 = 1234.5678;
+    tt.age8 = L"张旭";
+    string tt_json = "";
+    Fdog::FJson(tt_json, tt);  
+    //结果 输出stu_json为： {"name":"yujing","age":21}
+    cout << tt_json << endl;
+
     cout << "===============================================================" << endl;
     cout << "\n1：结构体只包含基础类型------------------------------------\n";
     //1.结构体只包含基础类型(int,char,char*,string,以及由基础类型构成的数组,或者是STL容器(map暂不支持全类型))，则只需要注册成员即可。
