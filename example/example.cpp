@@ -16,6 +16,13 @@ using namespace std;
 int main()
 {
     cout << "===============================================================" << endl;
+    wstring aaa = L"你好";
+    wcout << "aaa = " << aaa << endl;
+
+    std::wstring_convert<std::codecvt_utf8<wchar_t> > strCnv;
+    cout << "aaa2 = " << strCnv.to_bytes(aaa) << endl;
+
+    cout << "===============================================================" << endl;
     cout << "\n1：结构体包含unordered_map------------------------------------\n";
     //std::wcout << L"用户首选区域设置为" << std::locale("").name().c_str() << std::endl;
 	  //std::wcout << L"用户首选区域设置为" << std::locale("").name().c_str() << std::endl;
@@ -64,18 +71,19 @@ int main()
     tt.age5 = 123456;
     tt.age6 = 123.456f;
     tt.age7 = 1234.5678;
-    tt.age8 = L"张旭";
+    tt.age8 = L"你好";
     string tt_json = "";
     Fdog::FJson(tt_json, tt);  
     //结果 输出stu_json为： {"name":"yujing","age":21}
     cout << tt_json << endl;
-    string tt2_json = "{\"age1\":1,\"age2\":2,\"age3\":3,\"age4\":123456,\"age5\":123456,\"age6\":123.456,\"age7\":1234.57,\"age8\":\"123456\"}";
+    string tt2_json = "{\"age1\":1,\"age2\":2,\"age3\":3,\"age4\":123456,\"age5\":123456,\"age6\":123.456,\"age7\":1234.57,\"age8\":\"哈哈\"}";
     TestType tt2;
     Fdog::FObject(tt2, tt2_json);
     cout << "age1" << tt2.age1 << "  age2"<< tt2.age2 << "  age3"<< tt2.age3
           << "  age4"<< tt2.age4 << "  age5"<< tt2.age5 << "  age6"<< tt2.age6 << "  age7"<< tt2.age7 << endl;
     wcout << "age8 = " << tt2.age8 << endl;
-
+    std::wstring_convert<std::codecvt_utf8<wchar_t> > strCnv1;
+    cout << "age8_8 = " << strCnv1.to_bytes(tt2.age8) << endl;
 
     cout << "===============================================================" << endl;
     cout << "\n1：结构体只包含基础类型------------------------------------\n";

@@ -138,8 +138,8 @@ class FdogSerializerBase {
         if(valueType == "wstring"){
             //std::wcout.imbue(std::locale("", LC_CTYPE));//只对字符集本地化
             //std::wcout.imbue(std::locale("")); //本地化
-            auto value = *((wstring *)((wchar_t *)&object + offsetValue));
-            //wcout << "value = " << value << endl;
+            auto value = *((wstring *)((char *)&object + offsetValue));
+            wcout << "value = " << value << endl;
             std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
             string str_value = converter.to_bytes(value);;
             return "\"" + str_value  + "\"";
@@ -220,7 +220,8 @@ class FdogSerializerBase {
         }
         if(valueType == "wstring"){
             cout << "检测到wstring" << endl;
-            //ss >> *((long double *)((char *)&object + offsetValue));
+            std::wstring_convert< std::codecvt_utf8<wchar_t> > strCnv;
+            *((wstring *)((char *)&object + offsetValue)) = strCnv.from_bytes(value);
         }
         std::stringstream ss;
         ss.str(value);

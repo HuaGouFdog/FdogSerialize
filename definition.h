@@ -9,8 +9,9 @@ Copyright 2021-2022 花狗Fdog(张旭)
 #ifndef BEHAVIOR_H
 #define BEHAVIOR_H
 #include "define.h"
+#include "./example/testType.h"
 /******在此添加结构体所包含的头文件****/
-#include "example/testType.h"
+//#include "example/testType.h"
 /*********************************/
 
 
