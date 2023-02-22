@@ -1,9 +1,9 @@
 /*
-è¯¥é¡¹ç›®ç­¾ç½²äº†Apache-2.0 Licenseï¼Œè¯¦æƒ…è¯·å‚è§LICENSE
-æ ¹æ® Apache è®¸å¯ï¼Œç‰ˆæœ¬ 2.0ï¼ˆâ€œè®¸å¯â€ï¼‰èŽ·å¾—è®¸å¯
-é™¤éžéµå®ˆè®¸å¯ï¼Œå¦åˆ™æ‚¨ä¸å¾—ä½¿ç”¨æ­¤æ–‡ä»¶ã€‚
+¸ÃÏîÄ¿Ç©ÊðÁËApache-2.0 License£¬ÏêÇéÇë²Î¼ûLICENSE
+¸ù¾Ý Apache Ðí¿É£¬°æ±¾ 2.0£¨¡°Ðí¿É¡±£©»ñµÃÐí¿É
+³ý·Ç×ñÊØÐí¿É£¬·ñÔòÄú²»µÃÊ¹ÓÃ´ËÎÄ¼þ¡£
 
-Copyright 2021-2022 èŠ±ç‹—Fdog(å¼ æ—­)
+Copyright 2021-2022 »¨¹·Fdog(ÕÅÐñ)
 */
 #ifndef DEFINE_H
 #define DEFINE_H
@@ -90,5 +90,5 @@ Copyright 2021-2022 èŠ±ç‹—Fdog(å¼ æ—­)
         FDeserialize(*(vector<TYPE,TYPE2> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});\
     }
 
-//ä¸Šé¢ä¸è¦åŠ¨
+//ÉÏÃæ²»Òª¶¯
 #endif
