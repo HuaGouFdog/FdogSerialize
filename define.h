@@ -1,9 +1,9 @@
 /*
-ËØ•È°πÁõÆÁ≠æÁΩ≤‰∫ÜApache-2.0 LicenseÔºåËØ¶ÊÉÖËØ∑ÂèÇËßÅLICENSE
-Ê†πÊçÆ Apache ËÆ∏ÂèØÔºåÁâàÊú¨ 2.0Ôºà‚ÄúËÆ∏ÂèØ‚ÄùÔºâËé∑ÂæóËÆ∏ÂèØ
-Èô§ÈùûÈÅµÂÆàËÆ∏ÂèØÔºåÂê¶ÂàôÊÇ®‰∏çÂæó‰ΩøÁî®Ê≠§Êñá‰ª∂„ÄÇ
+∏√œÓƒø«© ¡ÀApache-2.0 License£¨œÍ«È«Î≤Œº˚LICENSE
+∏˘æ› Apache –Ìø…£¨∞Ê±æ 2.0£®°∞–Ìø…°±£©ªÒµ√–Ìø…
+≥˝∑«◊Ò ÿ–Ìø…£¨∑Ò‘Úƒ˙≤ªµ√ π”√¥ÀŒƒº˛°£
 
-Copyright 2021-2022 Ëä±ÁãóFdog(Âº†Êó≠)
+Copyright 2021-2022 ª®π∑Fdog(’≈–Ò)
 */
 #ifndef DEFINE_H
 #define DEFINE_H
@@ -12,13 +12,13 @@ Copyright 2021-2022 Ëä±ÁãóFdog(Âº†Êó≠)
 
 #define Serialize_type_judgment(TYPE)\
     if(metainfoObject->memberType == TYPE_NAME(TYPE) && metainfoObject->memberIsIgnore != true){\
-        Serialize(json_s, *(TYPE *)((void *)&object_ + metainfoObject->memberOffset));\
+        Serialize(json_s, *(TYPE *)((char *)&object_ + metainfoObject->memberOffset));\
         json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";\
     }
 
 #define Deserialize_type_judgment(TYPE)\
     if(metainfoObject->memberType == TYPE_NAME(TYPE) && metainfoObject->memberIsIgnore != true){\
-        Deserialize(*((TYPE *)((void *)&object_ + metainfoObject->memberOffset)), value);\
+        Deserialize(*((TYPE *)((char *)&object_ + metainfoObject->memberOffset)), value);\
     }
 
 
@@ -26,7 +26,7 @@ Copyright 2021-2022 Ëä±ÁãóFdog(Âº†Êó≠)
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
         for(int i = 0; i < metainfoObject->memberArraySize; i++){\
             string json_z = "";\
-            Serialize(json_z, *(TYPE *)((void *)&object_ + metainfoObject->memberOffset + (i * sizeof(TYPE))));\
+            Serialize(json_z, *(TYPE *)((char *)&object_ + metainfoObject->memberOffset + (i * sizeof(TYPE))));\
             json_s = json_s + "{" + json_z + "}" + ",";\
         }\
     }
@@ -34,61 +34,61 @@ Copyright 2021-2022 Ëä±ÁãóFdog(Âº†Êó≠)
 #define Deserialize_arraytype_judgment(TYPE)\
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
         for(int i = 0; i < metainfoObject->memberArraySize; i++){\
-            Deserialize(*(TYPE *)((void *)&object_ + metainfoObject->memberOffset + (i * sizeof(TYPE))), json_array[j++]);\
+            Deserialize(*(TYPE *)((char *)&object_ + metainfoObject->memberOffset + (i * sizeof(TYPE))), json_array[j++]);\
         }\
     }
 
 
 #define Serialize_vector_type_judgment(TYPE)\
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FSerialize(json_s, *(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});\
+        FSerialize(json_s, *(vector<TYPE> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});\
     }
 
 #define Deserialize_vector_type_judgment(TYPE)\
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FDeserialize(*(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});\
+        FDeserialize(*(vector<TYPE> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});\
     }
 
 
 #define Serialize_list_type_judgment(TYPE)\
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FSerialize(json_s, *(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});\
+        FSerialize(json_s, *(vector<TYPE> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});\
     }
 
 #define Deserialize_list_type_judgment(TYPE)\
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FDeserialize(*(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});\
+        FDeserialize(*(vector<TYPE> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});\
     }
 
 #define Serialize_deque_type_judgment(TYPE)\
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FSerialize(json_s, *(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});\
+        FSerialize(json_s, *(vector<TYPE> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});\
     }
 
 #define Deserialize_deque_type_judgment(TYPE)\
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FDeserialize(*(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});\
+        FDeserialize(*(vector<TYPE> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});\
     }
 
 #define Serialize_set_type_judgment(TYPE)\
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FSerialize(json_s, *(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});\
+        FSerialize(json_s, *(vector<TYPE> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});\
     }
 
 #define Deserialize_set_type_judgment(TYPE)\
     if(metainfoObject->first == TYPE_NAME(TYPE)){\
-        FDeserialize(*(vector<TYPE> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});\
+        FDeserialize(*(vector<TYPE> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});\
     }
 
 #define Serialize_map_type_judgment(TYPE1, TYPE2)\
     if(metainfoObject->first == TYPE_NAME(TYPE1) && metainfoObject->second == TYPE_NAME(TYPE2)){\
-        FSerialize(json_s, *(vector<TYPE1,TYPE2> *)((void *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});\
+        FSerialize(json_s, *(vector<TYPE1,TYPE2> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int,int>>::Tag{});\
     }
 
 #define Deserialize_map_type_judgment(TYPE1, TYPE2)\
     if(metainfoObject->first == TYPE_NAME(TYPE1) && metainfoObject->second == TYPE_NAME(TYPE2)){\
-        FDeserialize(*(vector<TYPE,TYPE2> *)((void *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});\
+        FDeserialize(*(vector<TYPE,TYPE2> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int,int>>::Tag{});\
     }
 
-//‰∏äÈù¢‰∏çË¶ÅÂä®
+//…œ√Ê≤ª“™∂Ø
 #endif

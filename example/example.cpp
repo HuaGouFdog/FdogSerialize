@@ -1,266 +1,380 @@
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 #include <iostream>
-#include "../FStruct.h"
+#include "FStruct.h"
 #include <typeinfo>
 #include <iostream>
 #include <list>
 #include <functional>
-#include <time.h>//clock()ÈúÄË¶ÅÁöÑÂ§¥Êñá‰ª∂
+#include <time.h>//clock()–Ë“™µƒÕ∑Œƒº˛
+#include <unordered_map>
+#include <locale.h>
 using namespace std;
 
 //g++ -std=c++11 ../FStruct.cpp example.cpp -o main -w
 
+
+string to_string(const wstring& str, const locale& loc = locale("chs"))
+{
+	vector<char>buf(str.size());
+	use_facet<ctype<wchar_t>>(loc).narrow(str.data(), str.data() + str.size(), '*', buf.data());
+	return string(buf.data(), buf.size());
+}
+
+wstring to_wstring(const string& str, const locale& loc = locale("chs"))
+{
+	vector<wchar_t>buf(str.size());
+	use_facet<ctype<wchar_t>>(loc).widen(str.data(), str.data() + str.size(), buf.data());
+	return wstring(buf.data(), buf.size());
+}
+
+//wstring strToStdWString3(const string& s)
+//{
+//	std::string curLocale = setlocale(LC_ALL, NULL);
+//	setlocale(LC_ALL, "chs");
+//	const char* _Source = s.c_str();
+//	size_t _Dsize = s.size() + 1;
+//	wchar_t* _Dest = new wchar_t[_Dsize];
+//	wmemset(_Dest, 0, _Dsize);
+//	size_t convertedChars = 0;
+//	mbstowcs_s(&convertedChars, _Dest, _Dsize, _Source, _TRUNCATE);
+//	std::wstring ws = _Dest;
+//	delete[] _Dest;
+//	setlocale(LC_ALL, curLocale.c_str());
+//	return ws;
+//}
+
 int main()
 {
-    cout << "===============================================================" << endl;
-    cout << "\n1ÔºöÁªìÊûÑ‰ΩìÂè™ÂåÖÂê´Âü∫Á°ÄÁ±ªÂûã------------------------------------\n";
-    //1.ÁªìÊûÑ‰ΩìÂè™ÂåÖÂê´Âü∫Á°ÄÁ±ªÂûã(int,char,char*,string,‰ª•ÂèäÁî±Âü∫Á°ÄÁ±ªÂûãÊûÑÊàêÁöÑÊï∞ÁªÑ,ÊàñËÄÖÊòØSTLÂÆπÂô®(mapÊöÇ‰∏çÊîØÊåÅÂÖ®Á±ªÂûã))ÔºåÂàôÂè™ÈúÄË¶ÅÊ≥®ÂÜåÊàêÂëòÂç≥ÂèØ„ÄÇ
-    // const char * asd = "7student";
-    // cout << abi::__cxa_demangle(asd,0,0,0) << endl;
-    REGISTEREDMEMBER(student, name, age);  //Ê≥®ÂÜåstudentÊàêÂëò
-    // cout << "===";
-    student stu;
-    stu.name = "yujing";
-    stu.age = 21;
-    string stu_json = "";
-    //ÁªìÊûÑ‰ΩìËΩ¨json
-    Fdog::FJson(stu_json, stu);  
-    //ÁªìÊûú ËæìÂá∫stu_json‰∏∫Ôºö {"name":"yujing","age":21}
-    cout << stu_json << endl;
-    student stu2;
-    string stu2_json = "{\"name\":\"zhangxv\",\"age\":21}"; //ÂºïÂè∑Ë¶ÅÂÅöÂ§ÑÁêÜ
-    //jsonËΩ¨ÁªìÊûÑ‰Ωì
-    Fdog::FObject(stu2, stu2_json);  
-    //ÁªìÊûú  stu2.name = zhangxv   stu2.age = 21
-    cout << "name = " << stu2.name << " age = " << stu2.age << endl;
-    // cout << "Á±ªÔºö" << endl;
+	cout << "===============================================================" << endl;
+	//setlocale(LC_ALL, "chs");
+	wstring aaa = L"ƒ„∫√";
+	wcout.imbue(locale("chs"));
+	wcout << aaa << endl;
 
-    // REGISTEREDMEMBER(classtest, name, age);
-    // classtest cc;
-    // cc.name = "1111";
-    // cc.age = 21;
-    // stu_json = "";
-    // Fdog::FJson(stu_json, cc);  
-    // cout << stu_json << endl;
+	cout << FdogSerializer::Instance()->wstring2string(aaa) << endl;
+	//wcout << aaa << endl;
 
+	//std::string strLocale = setlocale(LC_ALL, "");
+	//const wchar_t* wchSrc = aaa.c_str();
+	//size_t nDestSize = wcstombs(NULL, wchSrc, 0) + 1;
+	//char *chDest = new char[nDestSize];
+	//memset(chDest, 0, nDestSize);
+	//wcstombs(chDest, wchSrc, nDestSize);
+	//std::string strResult = chDest;
+	//delete[]chDest;
+	//setlocale(LC_ALL, strLocale.c_str());
+	//cout << strResult << endl;
 
-    cout << "\n2ÔºöÁªìÊûÑ‰Ωì‰∏≠Èô§‰∫ÜÂü∫Á°ÄÁ±ªÂûãÔºåËøòÂåÖÊã¨Ëá™ÂÆö‰πâÁªìÊûÑ‰Ωì------------------------------------\n";
+	//wcout << L"aaa = " << aaa << endl;
 
-    //2.ÁªìÊûÑ‰Ωì‰∏≠Èô§‰∫ÜÂü∫Á°ÄÁ±ªÂûãÔºåËøòÂåÖÊã¨Ëá™ÂÆö‰πâÁªìÊûÑ‰Ωì
-    REGISTEREDMEMBER(teacher, name, age);  //Ê≥®ÂÜåteacherÊàêÂëò
-    REGISTEREDMEMBER(school, stu, tea);     //Ê≥®ÂÜåschoolÊàêÂëò
-    school sch;
-    sch.stu.name = "liuliu";
-    sch.stu.age = 18;
-    sch.tea.name = "wufang";
-    sch.tea.age = 48;
-    string sch_json = "";
-    //ÁªìÊûÑ‰ΩìËΩ¨json
-    Fdog::FJson(sch_json, sch); 
-    //ÁªìÊûú ËæìÂá∫sch_json‰∏∫Ôºö{"stu":{"name":"liuliu","age":18},"tea":{"name":"wufang","age":48}}
-  	cout << sch_json << endl;
-    //jsonËΩ¨ÁªìÊûÑ‰Ωì
-    school sch2;
-    string sch2_json = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
-    Fdog::FObject(sch2, sch2_json);
-    //ÁªìÊûú  
-    cout << "name = " << sch.stu.name << " age = " << sch.stu.age << endl;
-    cout << "name = " << sch.tea.name << " age = " << sch.tea.age << endl;
+	std::wstring_convert<std::codecvt_utf8<wchar_t> > strCnv;
 
-    cout << "\n3ÔºöÁªìÊûÑ‰Ωì‰∏≠‰ΩøÁî®STLÂÆπÂô®map------------------------------------\n";
+	cout << "aaa2 = " << strCnv.to_bytes(aaa) << endl;
+	//std::locale::global(std::locale(""));
+	//std::wcout << L"÷–Œƒ" << std::endl;
+	cout << "===============================================================" << endl;
+	cout << "\n1£∫Ω·ππÃÂ∞¸∫¨unordered_map------------------------------------\n";
+	//std::wcout << L"”√ªß ◊—°«¯”Ú…Ë÷√Œ™" << std::locale("").name().c_str() << std::endl;
+	//std::wcout << L"”√ªß ◊—°«¯”Ú…Ë÷√Œ™" << std::locale("").name().c_str() << std::endl;
+	// “‘”√ªß∆´∫√µƒ±æµÿª∑æ≥ÃÊªª C++ ±æµÿª∑æ≥∫Õ C ±æµÿª∑æ≥
+	//std::locale::global(std::locale(""));
+	// Ω´¿¥µƒøÌ◊÷∑˚ ‰≥ˆ π”√–¬µƒ»´æ÷±æµÿª∑æ≥
+	//setlocale(LC_ALL, "");
+	//std::wcout << L"÷–Œƒ" << std::endl;
 
-    //3.ÁªìÊûÑ‰Ωì‰∏≠‰ΩøÁî®STLÂÆπÂô®map
-    REGISTEREDMEMBER(class_map, grade);
-    class_map cm;
-    cm.grade["zhangxu"] = 88;
-    cm.grade["yujing"] = 99;
-    string cm_json;
-    Fdog::FJson(cm_json, cm);
-    cout << cm_json << endl;
-    class_map cm2;
-    string cm2_json = "{\"grade\":{\"lisi\":33,\"angwu\":11}}";
-    Fdog::FObject(cm2, cm2_json);
-    for(auto j : cm2.grade){
-        cout << "name = " << j.first << " age = " << j.second << endl;
-    }
+	// REGISTEREDMEMBER(test_map, grade1);
+	// test_map tm;
+	// tm.grade1[11] = 88;
+	// tm.grade1[22] = 99;
+	// string tm_json;
+	// Fdog::FJson(tm_json, tm);
+	// cout << "tm =" << tm_json << endl;
 
-    cout << "\n4ÔºöÁªìÊûÑ‰ΩìÊàêÂëòÂ≠òÂú®Êï∞ÁªÑÔºå‰∏îÊï∞ÁªÑÂ≠òÂÇ®ÁöÑÂü∫Á°ÄÁ±ªÂûãÊï∞ÊçÆ------------------------------------\n";
+	// map<string,int> a;
+	// unordered_map<string,int> b;
+	// unordered_map<string,string> c;
+	//std::map<int, int, std::less<int>, std::allocator<std::pair<int const, int> > >
+	//std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, int> > >
+	//cout << "a = " << abi::__cxa_demangle(typeid(a).name(),0,0,0) << endl;
+	//cout << "b = " << abi::__cxa_demangle(typeid(b).name(),0,0,0) << endl;
+	//cout << "c = " << abi::__cxa_demangle(typeid(c).name(),0,0,0) << endl;
+	cout << "===============================================================" << endl;
+	cout << "\n1£∫Ω·ππÃÂ÷ª∞¸∫¨ª˘¥°¿‡–Õ uint8_t£¨uint16_t£¨uint32_t£¨uint64_t£¨int£¨float£¨double£¨wstring------------------------------------\n";
+	REGISTEREDMEMBER(TestType, age1, age2, age3, age4, age5, age6, age7, age8);
+	TestType tt;
+	tt.age1 = 1;
+	tt.age2 = 2;
+	tt.age3 = 3;
+	tt.age4 = 123456;
+	tt.age5 = 123456;
+	tt.age6 = 123.456f;
+	tt.age7 = 1234.5678;
+	tt.age8 = L"ƒ„∫√";
+	string tt_json = "";
+	Fdog::FJson(tt_json, tt);
+	//Ω·π˚  ‰≥ˆstu_jsonŒ™£∫ {"name":"yujing","age":21}
+	cout << tt_json << endl;
 
-    //4.ÁªìÊûÑ‰ΩìÊàêÂëòÂ≠òÂú®Êï∞ÁªÑÔºå‰∏îÊï∞ÁªÑÂ≠òÂÇ®ÁöÑÂü∫Á°ÄÁ±ªÂûãÊï∞ÊçÆ
-    REGISTEREDMEMBER(class_base_array, numbers)
-    class_base_array cba;
-    cba.numbers[0] = 0;
-    cba.numbers[1] = 1;
-    cba.numbers[2] = 2;
-    cba.numbers[3] = 3;
-    cba.numbers[4] = 4;
-    string cba_json = "";
-    //ÁªìÊûÑ‰ΩìËΩ¨json
-    Fdog::FJson(cba_json, cba);
-    cout << cba_json << endl;
-    //jsonËΩ¨ÁªìÊûÑ‰Ωì
-    class_base_array cba2;
-    string cba2_json = "{\"cba2_json\":{\"numbers\":[11,12,13,14,15]}}";
-    Fdog::FObject(cba2, cba2_json);
-    cout << "numbers is " << cba2.numbers[0] << " " << cba2.numbers[1] << " " << cba2.numbers[2] << " " << cba2.numbers[3] << " " << cba2.numbers[4] << endl;
+	string tt2_json = "{\"age1\":1,\"age2\":2,\"age3\":3,\"age4\":123456,\"age5\":123456,\"age6\":123.456,\"age7\":1234.57,\"age8\":\"π˛π˛\"}";
+	TestType tt2;
+	Fdog::FObject(tt2, tt2_json);
+	cout << "age1" << tt2.age1 << "  age2" << tt2.age2 << "  age3" << tt2.age3
+		<< "  age4" << tt2.age4 << "  age5" << tt2.age5 << "  age6" << tt2.age6 << "  age7" << tt2.age7 << endl;
+	wcout << "age8 = " << tt2.age8 << endl;
 
-    cout << "\n5ÔºöÁªìÊûÑ‰ΩìÊàêÂëòÂ≠òÂú®STLÂÆπÂô®Ôºå‰∏îÂÆπÂô®‰∏∫Âü∫Á°ÄÁ±ªÂûã------------------------------------\n";
+	cout << "===============================================================" << endl;
+	cout << "\n1£∫Ω·ππÃÂ÷ª∞¸∫¨ª˘¥°¿‡–Õ------------------------------------\n";
+	//1.Ω·ππÃÂ÷ª∞¸∫¨ª˘¥°¿‡–Õ(int,char,char*,string,“‘º∞”…ª˘¥°¿‡–Õππ≥…µƒ ˝◊È,ªÚ’ﬂ «STL»›∆˜(map‘›≤ª÷ß≥÷»´¿‡–Õ))£¨‘Ú÷ª–Ë“™◊¢≤·≥…‘±º¥ø…°£
+	// const char * asd = "7student";
+	// cout << abi::__cxa_demangle(asd,0,0,0) << endl;
+	REGISTEREDMEMBER(student, name, age);  //◊¢≤·student≥…‘±
+										   // cout << "===";
+	student stu;
+	stu.name = "yujing";
+	stu.age = 21;
+	string stu_json = "";
+	//Ω·ππÃÂ◊™json
+	Fdog::FJson(stu_json, stu);
+	//Ω·π˚  ‰≥ˆstu_jsonŒ™£∫ {"name":"yujing","age":21}
+	cout << stu_json << endl;
+	student stu2;
+	string stu2_json = "{\"name\":\"zhangxv\",\"age\":21}"; //“˝∫≈“™◊ˆ¥¶¿Ì
+															//json◊™Ω·ππÃÂ
+	Fdog::FObject(stu2, stu2_json);
+	//Ω·π˚  stu2.name = zhangxv   stu2.age = 21
+	cout << "name = " << stu2.name << " age = " << stu2.age << endl;
+	// cout << "¿‡£∫" << endl;
 
-    //5.ÁªìÊûÑ‰ΩìÊàêÂëòÂ≠òÂú®STLÂÆπÂô®Ôºå‰∏îÂÆπÂô®‰∏∫Âü∫Á°ÄÁ±ªÂûã
-    REGISTEREDMEMBER(class_base_vector, numbers)
-    class_base_vector cbv; //Ë¶ÅÊ≥®ÊÑèÂàöÂ£∞ÊòéÁöÑÂèòÈáè vectorÈïøÂ∫¶‰∏∫0Ôºå‰ΩøÁî®‰∏ãËßíÊ†áËµãÂÄº‰ºöÂá∫Èîô
-    cbv.numbers.push_back(0);
-    cbv.numbers.push_back(1);
-    cbv.numbers.push_back(2);
-    cbv.numbers.push_back(3);
-    cbv.numbers.push_back(4);
-    string cbv_json = "";
-    //ÁªìÊûÑ‰ΩìËΩ¨json
-    Fdog::FJson(cbv_json, cbv);
-    cout << cbv_json << endl;
-    //jsonËΩ¨ÁªìÊûÑ‰Ωì
-    class_base_vector cbv2;
-    string cbv2_json = "{\"cbv2_json\":{\"numbers\":[22,32,12,4,55]}}";
-    Fdog::FObject(cbv2, cbv2_json);
-    cout << "numbers is " << cbv2.numbers[0] << " " << cbv2.numbers[1] << " " << cbv2.numbers[2] << " " << cbv2.numbers[3] << " " << cbv2.numbers[4] << endl;
+	// REGISTEREDMEMBER(classtest, name, age);
+	// classtest cc;
+	// cc.name = "1111";
+	// cc.age = 21;
+	// stu_json = "";
+	// Fdog::FJson(stu_json, cc);  
+	// cout << stu_json << endl;
 
-    cout << "\n6ÔºöÁªìÊûÑ‰ΩìÊàêÂëòÂ≠òÂú®Ëá™ÂÆö‰πâÁ±ªÂûãÁöÑÊï∞ÁªÑ------------------------------------\n";
+	cout << "\n2£∫Ω·ππÃÂ÷–≥˝¡Àª˘¥°¿‡–Õ£¨ªπ∞¸¿®◊‘∂®“ÂΩ·ππÃÂ------------------------------------\n";
 
-    //6.ÁªìÊûÑ‰ΩìÊàêÂëòÂ≠òÂú®Ëá™ÂÆö‰πâÁ±ªÂûãÁöÑÊï∞ÁªÑ
-    REGISTEREDMEMBER(class_object_array, stus)
-    class_object_array coa;
-    coa.stus[0].name = "zhangxu";
-    coa.stus[0].age = 21;
-    coa.stus[1].name = "yujing";
-    coa.stus[1].age = 22;
-    string coa_json = "";
-    //ÁªìÊûÑ‰ΩìËΩ¨json
-    Fdog::FJson(coa_json, coa);
-    cout << coa_json << endl;
-    //jsonËΩ¨ÁªìÊûÑ‰Ωì
-    class_object_array coa2;
-    string coa2_json = "{\"stus\":[{\"name\":\"jinqi\",\"age\":25},{\"name\":\"ruiming\",\"age\":12}]}";
-    Fdog::FObject(coa2, coa2_json);
-    cout << " name = " << coa2.stus[0].name << " age = " << coa2.stus[0].age << endl;
-    cout << " name = " << coa2.stus[1].name << " age = " << coa2.stus[1].age << endl;
+	//2.Ω·ππÃÂ÷–≥˝¡Àª˘¥°¿‡–Õ£¨ªπ∞¸¿®◊‘∂®“ÂΩ·ππÃÂ
+	REGISTEREDMEMBER(teacher, name, age);  //◊¢≤·teacher≥…‘±
+	REGISTEREDMEMBER(school, stu, tea);     //◊¢≤·school≥…‘±
+	school sch;
+	sch.stu.name = "liuliu";
+	sch.stu.age = 18;
+	sch.tea.name = "wufang";
+	sch.tea.age = 48;
+	string sch_json = "";
+	//Ω·ππÃÂ◊™json
+	Fdog::FJson(sch_json, sch);
+	//Ω·π˚  ‰≥ˆsch_jsonŒ™£∫{"stu":{"name":"liuliu","age":18},"tea":{"name":"wufang","age":48}}
+	cout << sch_json << endl;
+	//json◊™Ω·ππÃÂ
+	school sch2;
+	string sch2_json = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48}}";
+	Fdog::FObject(sch2, sch2_json);
+	//Ω·π˚  
+	cout << "name = " << sch.stu.name << " age = " << sch.stu.age << endl;
+	cout << "name = " << sch.tea.name << " age = " << sch.tea.age << endl;
 
-    cout << "\n7ÔºöÁªìÊûÑ‰ΩìÊàêÂëòÂ≠òÂú®Ëá™ÂÆö‰πâÁ±ªÂûãSTLÂÆπÂô®------------------------------------\n";
+	cout << "\n3£∫Ω·ππÃÂ÷– π”√STL»›∆˜map------------------------------------\n";
 
-    //7.ÁªìÊûÑ‰ΩìÊàêÂëòÂ≠òÂú®Ëá™ÂÆö‰πâÁ±ªÂûãSTLÂÆπÂô®
-    REGISTEREDMEMBER(class_object_vector, stus)
-    class_object_vector cov;
-    student stu3;
-    stu3.name = "zhangxu";
-    stu3.age = 21;
-    student stu4;
-    stu4.name = "yujing";
-    stu4.age = 21;
-    cov.stus.push_back(stu3);
-    cov.stus.push_back(stu4);
-    string cov_json = "";
-    //ÁªìÊûÑ‰ΩìËΩ¨json
-    Fdog::FJson(cov_json, cov);
-    cout << cov_json << endl;
-    //jsonËΩ¨ÁªìÊûÑ‰Ωì
-    class_object_vector cov2; //ËÆ∞ÂæóÂàùÂßãÂåñÈïøÂ∫¶ Ëøô‰∏™ÂêéÊúüË¶ÅÊîπÊàêËá™Âä®
-    cov2.stus.resize(2);
-    string cov2_json = "{\"stus\":[{\"name\":\"jinqi\",\"age\":25},{\"name\":\"ruiming\",\"age\":12}]}";
-    Fdog::FObject(cov2, cov2_json);
-    cout << " name = " << cov2.stus[0].name << " age = " << cov2.stus[0].age << endl;
-    cout << " name = " << cov2.stus[1].name << " age = " << cov2.stus[1].age << endl;
+	//3.Ω·ππÃÂ÷– π”√STL»›∆˜map
+	REGISTEREDMEMBER(class_map, grade);
+	class_map cm;
+	cm.grade["zhangxu"] = 88;
+	cm.grade["yujing"] = 99;
+	string cm_json;
+	Fdog::FJson(cm_json, cm);
+	cout << cm_json << endl;
+	class_map cm2;
+	string cm2_json = "{\"grade\":{\"lisi\":33,\"angwu\":11}}";
+	Fdog::FObject(cm2, cm2_json);
+	for (auto j : cm2.grade) {
+		cout << "name = " << j.first << " age = " << j.second << endl;
+	}
 
-    cout << "\n8ÔºöÊîØÊåÅÂà´Âêç------------------------------------\n";
+	cout << "\n4£∫Ω·ππÃÂ≥…‘±¥Ê‘⁄ ˝◊È£¨«“ ˝◊È¥Ê¥¢µƒª˘¥°¿‡–Õ ˝æ›------------------------------------\n";
 
-    //8.ÊîØÊåÅÂà´Âêç
-    //Fdog::setAliasName("student", "name", "Aliasname"); //Á¨¨‰∏Ä‰∏™ÂèÇÊï∞‰∏∫Á±ªÂûãÔºåÁ¨¨‰∫åÂèÇÊï∞‰∏∫ÂéüÂêçÔºåÁ¨¨‰∏â‰∏™ÂèÇÊï∞‰∏∫Âà´Âêç ÂçïÂ≠óÊÆµËÆæÁΩÆ
-    Fdog::setAliasNameS("student", "name", "Aliasname", "age", "Aliasage"); //ÊîØÊåÅÂ§ö‰∏™Â≠óÊÆµËÆæÁΩÆ
-    stu_json = "";
-    Fdog::FJson(stu_json, stu);  
-    //ÁªìÊûú ËæìÂá∫stu_json‰∏∫Ôºö {"Aliasname":"yujing","age":21}
-    cout << stu_json << endl;
+	//4.Ω·ππÃÂ≥…‘±¥Ê‘⁄ ˝◊È£¨«“ ˝◊È¥Ê¥¢µƒª˘¥°¿‡–Õ ˝æ›
+	REGISTEREDMEMBER(class_base_array, numbers)
+		class_base_array cba;
+	cba.numbers[0] = 0;
+	cba.numbers[1] = 1;
+	cba.numbers[2] = 2;
+	cba.numbers[3] = 3;
+	cba.numbers[4] = 4;
+	string cba_json = "";
+	//Ω·ππÃÂ◊™json
+	Fdog::FJson(cba_json, cba);
+	cout << cba_json << endl;
+	//json◊™Ω·ππÃÂ
+	class_base_array cba2;
+	string cba2_json = "{\"cba2_json\":{\"numbers\":[11,12,13,14,15]}}";
+	Fdog::FObject(cba2, cba2_json);
+	cout << "numbers is " << cba2.numbers[0] << " " << cba2.numbers[1] << " " << cba2.numbers[2] << " " << cba2.numbers[3] << " " << cba2.numbers[4] << endl;
 
-    cout << "\n9ÔºöÊîØÊåÅÂ≠óÊÆµÂøΩÁï•------------------------------------\n";
+	cout << "\n5£∫Ω·ππÃÂ≥…‘±¥Ê‘⁄STL»›∆˜£¨«“»›∆˜Œ™ª˘¥°¿‡–Õ------------------------------------\n";
 
-    //9.ÊîØÊåÅÂ≠óÊÆµÂøΩÁï•
-    //Fdog::setIgnoreField("student", "name");  //Á¨¨‰∏Ä‰∏™ÂèÇÊï∞‰∏∫Á±ªÂûãÔºåÁ¨¨‰∫åÂèÇÊï∞‰∏∫ÈúÄË¶ÅÂøΩÁï•ÁöÑÂ≠óÊÆµ ÂçïÂ≠óÊÆµËÆæÁΩÆ
-    Fdog::setIgnoreFieldS("student", "name", "age"); //ÊîØÊåÅÂ§ö‰∏™Â≠óÊÆµ
-    stu_json = "";
-    Fdog::FJson(stu_json, stu);
-    //ÁªìÊûú ËæìÂá∫stu_json‰∏∫Ôºö {"age":21}  //nameÂ≠óÊÆµÁöÑÊï∞ÊçÆÂ∞ÜË¢´ÂøΩÁï•
-    cout <<  stu_json << endl;
+	//5.Ω·ππÃÂ≥…‘±¥Ê‘⁄STL»›∆˜£¨«“»›∆˜Œ™ª˘¥°¿‡–Õ
+	REGISTEREDMEMBER(class_base_vector, numbers)
+		class_base_vector cbv; //“™◊¢“‚∏’…˘√˜µƒ±‰¡ø vector≥§∂»Œ™0£¨ π”√œ¬Ω«±Í∏≥÷µª·≥ˆ¥Ì
+	cbv.numbers.push_back(0);
+	cbv.numbers.push_back(1);
+	cbv.numbers.push_back(2);
+	cbv.numbers.push_back(3);
+	cbv.numbers.push_back(4);
+	string cbv_json = "";
+	//Ω·ππÃÂ◊™json
+	Fdog::FJson(cbv_json, cbv);
+	cout << cbv_json << endl;
+	//json◊™Ω·ππÃÂ
+	class_base_vector cbv2;
+	string cbv2_json = "{\"cbv2_json\":{\"numbers\":[22,32,12,4,55]}}";
+	Fdog::FObject(cbv2, cbv2_json);
+	//cout << "numbers is " << cbv2.numbers[0] << " " << cbv2.numbers[1] << " " << cbv2.numbers[2] << " " << cbv2.numbers[3] << " " << cbv2.numbers[4] << endl;
 
-    cout << "\n10ÔºöÊîØÊåÅÂøΩÁï•Â≠óÊÆµÂ§ßÂ∞èÂÜô------------------------------------\n";
+	cout << "\n6£∫Ω·ππÃÂ≥…‘±¥Ê‘⁄◊‘∂®“Â¿‡–Õµƒ ˝◊È------------------------------------\n";
 
-    //10.ÊîØÊåÅÂøΩÁï•Â≠óÊÆµÂ§ßÂ∞èÂÜôÔºåÂΩìÂ∞ÜjsonËΩ¨‰∏∫ÂØπË±°Êó∂ÔºåÂ¶Çjson‰∏≠ÁöÑÈîÆÂÄº‰∏éÂØπË±°‰∏≠ÁöÑÊàêÂëòÂêçÂ≠òÂú®Â§ßÂ∞èÂÜô‰∏çÂêåÔºåÂèØ‰ª•ËÆæÂÆöÂøΩÁï•Â§ßÂ∞èÂÜô„ÄÇ
-    //Fdog::setIgnoreLU("student", "name"); ÂçïÂ≠óÊÆµËÆæÁΩÆ
-    //Fdog::setIgnoreLU("student", "age");
+	//6.Ω·ππÃÂ≥…‘±¥Ê‘⁄◊‘∂®“Â¿‡–Õµƒ ˝◊È
+	REGISTEREDMEMBER(class_object_array, stus)
+		class_object_array coa;
+	coa.stus[0].name = "zhangxu";
+	coa.stus[0].age = 21;
+	coa.stus[1].name = "yujing";
+	coa.stus[1].age = 22;
+	string coa_json = "";
+	//Ω·ππÃÂ◊™json
+	Fdog::FJson(coa_json, coa);
+	cout << coa_json << endl;
+	//json◊™Ω·ππÃÂ
+	class_object_array coa2;
+	string coa2_json = "{\"stus\":[{\"name\":\"jinqi\",\"age\":25},{\"name\":\"ruiming\",\"age\":12}]}";
+	Fdog::FObject(coa2, coa2_json);
+	cout << " name = " << coa2.stus[0].name << " age = " << coa2.stus[0].age << endl;
+	cout << " name = " << coa2.stus[1].name << " age = " << coa2.stus[1].age << endl;
 
-    Fdog::setIgnoreLUS("student", "name", "age"); //ÊîØÊåÅÂ§öÂ≠óÊÆµËÆæÁΩÆ
-    stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
-    Fdog::FObject(stu, stu_json);  //Â∞ÜNameÂØπÂ∫înameÔºåAGEÂØπÂ∫îage
-    cout << "name = " << stu.name << " age = " << stu.age << endl;
+	cout << "\n7£∫Ω·ππÃÂ≥…‘±¥Ê‘⁄◊‘∂®“Â¿‡–ÕSTL»›∆˜------------------------------------\n";
 
-    cout << "\n11ÔºöÈíàÂØπ7Ôºå8Ôºå9Êé•Âè£Â¢ûÂä†ÂØπÂ∫îÁöÑ‰∏ÄÊ¨°ÊÄßÊé•Âè£------------------------------------\n";
-    //11.ÈíàÂØπ7Ôºå8Ôºå9Êé•Âè£Â¢ûÂä†ÂØπÂ∫îÁöÑ‰∏ÄÊ¨°ÊÄßÊé•Âè£ÔºåÈÅøÂÖçÊúâÂ§ö‰∏™Â≠óÊÆµÈúÄË¶ÅËÆæÁΩÆÔºå‰ªéËÄåÂ§öÊ¨°Ë∞ÉÁî®Êé•Âè£
-    cout << "‰∏äÈù¢Â∑≤‰∏æ‰æãÔºå‰∏çÂÜçÂàóÂá∫" << endl;
-    
-    cout << "\n12ÔºöÈªòËÆ§ÊîØÊåÅÊ®°Á≥äÂåπÈÖç------------------------------------\n";
-    //12.ÈªòËÆ§ÊîØÊåÅÊ®°Á≥äÂåπÈÖç
-    //È©¨‰∏äÊîØÊåÅÔºåÂΩì‰∏çÂ∞èÂøÉÂÜôÈîôÂ≠óÊÆµÂêçÊó∂ÔºåÁ®ãÂ∫èÂ∞ÜËá™Âä®ËøõË°åÊ®°Á≥äÂåπÈÖçÔºåÊúÄÂ§ßÂèØËÉΩÂÆåÊàêËΩ¨Êç¢„ÄÇ
-    cout << "ÊöÇÊó†" << endl;
-    
-    cout << "\n13ÔºöÊ£ÄÊµãJsonÊ†ºÂºèÊòØÂê¶Ê≠£Á°Æ------------------------------------\n";
-    //13.Ê£ÄÊµãJsonÊ†ºÂºèÊòØÂê¶Ê≠£Á°Æ
-    string json_v = "{\"stus\":[{\"name\":\"jinqi\",\"age\":25},{\"name\":\"ruiming\",\"age\":12}]}";
-    cout << "Â≠óÁ¨¶‰∏≤:" << json_v << endl;
-    auto res = Fdog::JsonValidS(json_v);
-    cout << "Â≠óÁ¨¶‰∏≤ÊòØÂê¶Ê≠£Á°ÆÔºö" << res.code << endl;
-    cout << "Â≠óÁ¨¶‰∏≤ÈîôËØØÊèêÁ§∫Ôºö" << res.message << endl;
-    
-    cout << "\n14ÔºöÊü•Êâæjson‰∏≠Êüê‰∏™Â≠óÊÆµÊòØÂê¶Â≠òÂú®------------------------------------\n";
-    //14.Êü•Êâæjson‰∏≠Êüê‰∏™Â≠óÊÆµÊòØÂê¶Â≠òÂú®
-    if(Fdog::Exist(json_v, "age")) {
-        cout << "Â≠òÂú®" << endl; 
-    } else {
-      cout << "‰∏çÂ≠òÂú®" << endl;
-    }
-    
-    cout << "\n15ÔºöÊîØÊåÅËé∑ÂèñÊüê‰∏™Â≠óÊÆµÁöÑÂÄº------------------------------------\n";
-    //15.ÊîØÊåÅËé∑ÂèñÊüê‰∏™Â≠óÊÆµÁöÑÂÄº(ËøîÂõûÁ±ªÂûãÊîØÊåÅint, double, string, bool)
-    //Âª∫ËÆÆÈÖçÂêàExistÂáΩÊï∞‰ΩøÁî®
-    if(Fdog::Exist(json_v, "age")) {
-        cout << "ageÁöÑÂÄº:" << Fdog::GetStringValue(json_v, "age") << endl;
-    } else {
-      cout << "‰∏çÂ≠òÂú®" << endl;
-    }
-    //Èô§GetStringValue‰πãÂ§ñÔºåËøòÊèê‰æõ‰∏ãÈù¢Âõõ‰∏™Áî®‰∫éËøîÂõû‰∏çÂêåÁ±ªÂûã
-    // GetIntValue
-    // GetDoubleValue
-    // GetLongValue
-    // GetBoolValue
+	//7.Ω·ππÃÂ≥…‘±¥Ê‘⁄◊‘∂®“Â¿‡–ÕSTL»›∆˜
+	REGISTEREDMEMBER(class_object_vector, stus)
+		class_object_vector cov;
+	student stu3;
+	stu3.name = "zhangxu";
+	stu3.age = 21;
+	student stu4;
+	stu4.name = "yujing";
+	stu4.age = 21;
+	cov.stus.push_back(stu3);
+	cov.stus.push_back(stu4);
+	string cov_json = "";
+	//Ω·ππÃÂ◊™json
+	Fdog::FJson(cov_json, cov);
+	cout << cov_json << endl;
+	//json◊™Ω·ππÃÂ
+	class_object_vector cov2; //º«µ√≥ı ºªØ≥§∂» ’‚∏ˆ∫Û∆⁄“™∏ƒ≥…◊‘∂Ø
+	cov2.stus.resize(2);
+	string cov2_json = "{\"stus\":[{\"name\":\"jinqi\",\"age\":25},{\"name\":\"ruiming\",\"age\":12}]}";
+	Fdog::FObject(cov2, cov2_json);
+	cout << " name = " << cov2.stus[0].name << " age = " << cov2.stus[0].age << endl;
+	cout << " name = " << cov2.stus[1].name << " age = " << cov2.stus[1].age << endl;
 
-    //jsonËøòÂ≠òÂú®‰∏Ä‰∫õÈóÆÈ¢òÔºåÂπ∂‰∏çËÉΩ100%Ê£ÄÈ™åÔºåËøòÈúÄË¶ÅÊó∂Èó¥Êù•ÂÆåÂñÑ
+	cout << "\n8£∫÷ß≥÷±√˚------------------------------------\n";
 
-    cout << "\n16ÔºöÊîØÊåÅÁõ¥Êé•ËæìÂá∫ÂØπË±°------------------------------------\n";
-    //16. ÊîØÊåÅËæìÂá∫ÂØπË±°
-    school sch_2;
-    sch_2.stu.name = "liuliu";
-    sch_2.stu.age = 18;
-    sch_2.tea.name = "wufang";
-    sch_2.tea.age = 48;
-    string stu_json_22;
-    Fdog::FJson(stu_json_22, sch_2);  
-    //ÁªìÊûú ËæìÂá∫stu_json‰∏∫Ôºö {"name":"yujing","age":21}
-    cout << stu_json_22 << endl;
+	//8.÷ß≥÷±√˚
+	//Fdog::setAliasName("student", "name", "Aliasname"); //µ⁄“ª∏ˆ≤Œ ˝Œ™¿‡–Õ£¨µ⁄∂˛≤Œ ˝Œ™‘≠√˚£¨µ⁄»˝∏ˆ≤Œ ˝Œ™±√˚ µ•◊÷∂Œ…Ë÷√
+	Fdog::setAliasNameS("student", "name", "Aliasname", "age", "Aliasage"); //÷ß≥÷∂‡∏ˆ◊÷∂Œ…Ë÷√
+	stu_json = "";
+	Fdog::FJson(stu_json, stu);
+	//Ω·π˚  ‰≥ˆstu_jsonŒ™£∫ {"Aliasname":"yujing","age":21}
+	cout << stu_json << endl;
 
-    //cout << "ÂØπË±°ÂÄºÔºö" << Fdog::FJsonToString(sch_2) << endl;
+	cout << "\n9£∫÷ß≥÷◊÷∂Œ∫ˆ¬‘------------------------------------\n";
 
-    //17.ÊîØÊåÅÂÖ∂‰ªñÁ±ªÂûãÊåáÈíà(ÊåáÈíàÁ±ªÂûãÂ∞ÜÊã•ÊúâÂèØÈÄâÂ≠óÊÆµÂ±ûÊÄßÔºåÂØπ‰∫éÊåáÈíàÂèòÈáèÔºåÂú®ËΩ¨Êç¢Êó∂ÔºåÂ∞ÜÂÖàÂà§Êñ≠ÊåáÈíàÂú∞ÂùÄÊòØÂê¶‰∏∫Á©∫ÔºåËã•‰∏∫Á©∫ÔºåÂ∞Ü‰∏çËøõË°åËΩ¨Êç¢ÔºåÁ±ª‰ºº‰∫éÂøΩÁï•Â≠óÊÆµ)
-    //‰∏ã‰∏™ÁâàÊú¨
-    
-    //17.ÊîØÊåÅxmlÂ∫èÂàóÂåñ
-    //‰∏ã‰∏ãÁâàÊú¨ÔΩû
+	//9.÷ß≥÷◊÷∂Œ∫ˆ¬‘
+	//Fdog::setIgnoreField("student", "name");  //µ⁄“ª∏ˆ≤Œ ˝Œ™¿‡–Õ£¨µ⁄∂˛≤Œ ˝Œ™–Ë“™∫ˆ¬‘µƒ◊÷∂Œ µ•◊÷∂Œ…Ë÷√
+	Fdog::setIgnoreFieldS("student", "name", "age"); //÷ß≥÷∂‡∏ˆ◊÷∂Œ
+	stu_json = "";
+	Fdog::FJson(stu_json, stu);
+	//Ω·π˚  ‰≥ˆstu_jsonŒ™£∫ {"age":21}  //name◊÷∂Œµƒ ˝æ›Ω´±ª∫ˆ¬‘
+	cout << stu_json << endl;
 
-    cout << "===============================================================" << endl;
-    return 0;
+	cout << "\n10£∫÷ß≥÷∫ˆ¬‘◊÷∂Œ¥Û–°–¥------------------------------------\n";
+
+	//10.÷ß≥÷∫ˆ¬‘◊÷∂Œ¥Û–°–¥£¨µ±Ω´json◊™Œ™∂‘œÛ ±£¨»Ájson÷–µƒº¸÷µ”Î∂‘œÛ÷–µƒ≥…‘±√˚¥Ê‘⁄¥Û–°–¥≤ªÕ¨£¨ø…“‘…Ë∂®∫ˆ¬‘¥Û–°–¥°£
+	//Fdog::setIgnoreLU("student", "name"); µ•◊÷∂Œ…Ë÷√
+	//Fdog::setIgnoreLU("student", "age");
+
+	Fdog::setIgnoreLUS("student", "name", "age"); //÷ß≥÷∂‡◊÷∂Œ…Ë÷√
+	stu_json = "{\"Name\":\"yujing\", \"AGE\":21}";
+	Fdog::FObject(stu, stu_json);  //Ω´Name∂‘”¶name£¨AGE∂‘”¶age
+	cout << "name = " << stu.name << " age = " << stu.age << endl;
+
+	cout << "\n11£∫’Î∂‘7£¨8£¨9Ω”ø⁄‘ˆº”∂‘”¶µƒ“ª¥Œ–‘Ω”ø⁄------------------------------------\n";
+	//11.’Î∂‘7£¨8£¨9Ω”ø⁄‘ˆº”∂‘”¶µƒ“ª¥Œ–‘Ω”ø⁄£¨±‹√‚”–∂‡∏ˆ◊÷∂Œ–Ë“™…Ë÷√£¨¥”∂¯∂‡¥Œµ˜”√Ω”ø⁄
+	cout << "…œ√Ê“—æŸ¿˝£¨≤ª‘Ÿ¡–≥ˆ" << endl;
+
+	cout << "\n12£∫ƒ¨»œ÷ß≥÷ƒ£∫˝∆•≈‰------------------------------------\n";
+	//12.ƒ¨»œ÷ß≥÷ƒ£∫˝∆•≈‰
+	//¬Ì…œ÷ß≥÷£¨µ±≤ª–°–ƒ–¥¥Ì◊÷∂Œ√˚ ±£¨≥Ã–ÚΩ´◊‘∂ØΩ¯––ƒ£∫˝∆•≈‰£¨◊Ó¥Ûø…ƒ‹ÕÍ≥…◊™ªª°£
+	cout << "‘›Œﬁ" << endl;
+
+	cout << "\n13£∫ºÏ≤‚Json∏Ò Ω «∑Ò’˝»∑------------------------------------\n";
+	//13.ºÏ≤‚Json∏Ò Ω «∑Ò’˝»∑
+	string json_v = "{\"stus\":[{\"name\":\"jinqi\",\"age\":25},{\"name\":\"ruiming\",\"age\":12}]}";
+	cout << "◊÷∑˚¥Æ:" << json_v << endl;
+	auto res = Fdog::JsonValidS(json_v);
+	cout << "◊÷∑˚¥Æ «∑Ò’˝»∑£∫" << res.code << endl;
+	cout << "◊÷∑˚¥Æ¥ÌŒÛÃ· æ£∫" << res.message << endl;
+
+	cout << "\n14£∫≤È’“json÷–ƒ≥∏ˆ◊÷∂Œ «∑Ò¥Ê‘⁄------------------------------------\n";
+	//14.≤È’“json÷–ƒ≥∏ˆ◊÷∂Œ «∑Ò¥Ê‘⁄
+	if (Fdog::Exist(json_v, "age")) {
+		cout << "¥Ê‘⁄" << endl;
+	}
+	else {
+		cout << "≤ª¥Ê‘⁄" << endl;
+	}
+
+	cout << "\n15£∫÷ß≥÷ªÒ»°ƒ≥∏ˆ◊÷∂Œµƒ÷µ------------------------------------\n";
+	//15.÷ß≥÷ªÒ»°ƒ≥∏ˆ◊÷∂Œµƒ÷µ(∑µªÿ¿‡–Õ÷ß≥÷int, double, string, bool)
+	//Ω®“È≈‰∫œExist∫Ø ˝ π”√
+	if (Fdog::Exist(json_v, "age")) {
+		cout << "ageµƒ÷µ:" << Fdog::GetStringValue(json_v, "age") << endl;
+	}
+	else {
+		cout << "≤ª¥Ê‘⁄" << endl;
+	}
+	//≥˝GetStringValue÷ÆÕ‚£¨ªπÃ·π©œ¬√ÊÀƒ∏ˆ”√”⁄∑µªÿ≤ªÕ¨¿‡–Õ
+	// GetIntValue
+	// GetDoubleValue
+	// GetLongValue
+	// GetBoolValue
+
+	//jsonªπ¥Ê‘⁄“ª–©Œ Ã‚£¨≤¢≤ªƒ‹100%ºÏ—È£¨ªπ–Ë“™ ±º‰¿¥ÕÍ…∆
+
+	cout << "\n16£∫÷ß≥÷÷±Ω” ‰≥ˆ∂‘œÛ------------------------------------\n";
+	//16. ÷ß≥÷ ‰≥ˆ∂‘œÛ
+	school sch_2;
+	sch_2.stu.name = "liuliu";
+	sch_2.stu.age = 18;
+	sch_2.tea.name = "wufang";
+	sch_2.tea.age = 48;
+	string stu_json_22;
+	Fdog::FJson(stu_json_22, sch_2);
+	//Ω·π˚  ‰≥ˆstu_jsonŒ™£∫ {"name":"yujing","age":21}
+	cout << stu_json_22 << endl;
+
+	//cout << "∂‘œÛ÷µ£∫" << Fdog::FJsonToString(sch_2) << endl;
+
+	//17.÷ß≥÷∆‰À˚¿‡–Õ÷∏’Î(÷∏’Î¿‡–ÕΩ´”µ”–ø…—°◊÷∂Œ Ù–‘£¨∂‘”⁄÷∏’Î±‰¡ø£¨‘⁄◊™ªª ±£¨Ω´œ»≈–∂œ÷∏’Îµÿ÷∑ «∑ÒŒ™ø’£¨»ÙŒ™ø’£¨Ω´≤ªΩ¯––◊™ªª£¨¿‡À∆”⁄∫ˆ¬‘◊÷∂Œ)
+	//œ¬∏ˆ∞Ê±æ
+
+	//17.÷ß≥÷xml–Ú¡–ªØ
+	//œ¬œ¬∞Ê±æ°´
+
+	cout << "===============================================================" << endl;
+	return 0;
 }
 
