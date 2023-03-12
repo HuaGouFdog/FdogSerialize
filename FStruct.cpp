@@ -430,7 +430,7 @@ string FdogSerializer::getKey(string json) {
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
 ************************************/
 memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
-	cout << "getMemberAttribute = " <<typeName << endl;
+	//cout << "getMemberAttribute = " <<typeName << endl;
 	memberAttribute resReturn;
 	smatch result;
 	if (FdogSerializer::isBaseType(typeName)) {
@@ -439,7 +439,7 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 		resReturn.valueTypeInt = OBJECT_BASE;
 	}
 	else if (FdogSerializer::isVectorType("", typeName)) {
-		cout << "=========>>1  typeName ============= = " << typeName << endl;
+		//cout << "=========>>1  typeName ============= = " << typeName << endl;
 		resReturn.valueType = typeName;
 		regex pattern(complexRegex[5]);
 		regex pattern2(complexRegex[53]);
@@ -637,6 +637,9 @@ ObjectInfo FdogSerializer::getObjectInfoByType(string typeName, int objectTypeIn
 	}
 }
 
+#ifdef __GNUC__
+#elif _MSC_VER
+
 wstring FdogSerializer::string2wstring(string str)
 {
 	wstring result;
@@ -666,6 +669,7 @@ string FdogSerializer::wstring2string(wstring wstr)
 	delete[] buffer;
 	return result;
 }
+#endif
 
 int FdogSerializer::getObjectTypeByObjectInfo(string objectName) {
 	return getObjectInfo(objectName).objectTypeInt;
