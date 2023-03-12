@@ -432,7 +432,7 @@ memberAttribute FdogSerializer:: getMemberAttribute(string typeName){
         regex pattern(complexRegex[5]);
         if(regex_search(typeName, result, pattern)){
             string value = result.str(1).c_str();
-            //cout << "=========>>1  isVectorType 暂时有问题 ============= = " << value << endl;
+            // "=========>>1  isVectorType 暂时有问题 ============= = " << value << endl;
             //处理好
             if (value == "string"){
                 resReturn.first = "string";
@@ -533,6 +533,7 @@ memberAttribute FdogSerializer:: getMemberAttribute(string typeName){
         }
         resReturn.valueTypeInt = OBJECT_ARRAY;
     }else{
+        // "是结构体" << endl;
         resReturn.valueType = typeName;
         resReturn.ArraySize = 0;
         resReturn.valueTypeInt = OBJECT_STRUCT;

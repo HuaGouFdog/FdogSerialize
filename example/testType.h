@@ -25,22 +25,36 @@ struct TestType
     std::wstring age8;
 };
 
-
-struct student{
+class student{
+    public:
     string name;
     int age;
+    REGISTEREDMEMBER(student, name, age);
+    //REGISTEREDMEMBER_ARRAY(student, name, age);
 };
+// student::init();
+// teacher::init();
+// school::init();
 
-struct teacher{
+class teacher{
+    public:
     string name;
     int age;
+    REGISTEREDMEMBER(teacher, name, age);
+    //REGISTEREDMEMBER_ARRAY(teacher, name, age);
 };
 
 //假设学校只有两个人
-struct school{
+class school{
+    public:
     student stu;
     teacher tea;
-};
+    vector<student> stuList;
+    //list<teacher> teaList;
+    REGISTEREDMEMBER(school, stu, tea, stuList);
+    //REGISTEREDMEMBER_ARRAY(school, stu, tea);
+};TAGDISPATCH_LIST(student)
+
 
 class classtest{
 public:
@@ -76,11 +90,51 @@ struct class_map
 struct class_unordered_map
 {
     unordered_map<string, int> grade;
+    REGISTEREDMEMBER(class_unordered_map, grade);
 };
 
 
 struct test_map{
     map<int, int> grade1;
 };
+
+// template<> struct TagDispatchTrait_zx<student> {
+//     using Tag = BaseTag_zx;
+// };
+
+// template<> struct TagDispatchTrait_zx<vector<student>> {
+//     using Tag = BaseTag_zx;
+// };
+
+
+// template<> struct TagDispatchTrait_zx<vector<student>> {
+//     using Tag = ArrayTag;
+// };
+// template<> struct TagDispatchTrait_zx<map<student>> {
+//     using Tag = MapTag;
+// };
+// template<> struct TagDispatchTrait_zx<unordered_map<student>> {
+//     using Tag = MapTag;
+// };
+
+// template<> struct TagDispatchTrait_zx<vector<teacher>> {
+//     using Tag = ArrayTag;
+// };
+// template<> struct TagDispatchTrait_zx<map<teacher>> {
+//     using Tag = MapTag;
+// };
+// template<> struct TagDispatchTrait_zx<unordered_map<teacher>> {
+//     using Tag = MapTag;
+// };
+
+// template<> struct TagDispatchTrait_zx<vector<school>> {
+//     using Tag = ArrayTag;
+// };
+// template<> struct TagDispatchTrait_zx<map<school>> {
+//     using Tag = MapTag;
+// };
+// template<> struct TagDispatchTrait_zx<unordered_map<school>> {
+//     using Tag = MapTag;
+// };
 
 #endif
