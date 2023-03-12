@@ -1,15 +1,13 @@
 /*
-¸ÃÏîÄ¿Ç©ÊğÁËApache-2.0 License£¬ÏêÇéÇë²Î¼ûLICENSE
-¸ù¾İ Apache Ğí¿É£¬°æ±¾ 2.0£¨¡°Ğí¿É¡±£©»ñµÃĞí¿É
-³ı·Ç×ñÊØĞí¿É£¬·ñÔòÄú²»µÃÊ¹ÓÃ´ËÎÄ¼ş¡£
-
-Copyright 2021-2022 »¨¹·Fdog(ÕÅĞñ)
+è¯¥é¡¹ç›®ç­¾ç½²äº†Apache-2.0 Licenseï¼Œè¯¦æƒ…è¯·å‚è§LICENSE
+æ ¹æ® Apache è®¸å¯ï¼Œç‰ˆæœ¬ 2.0ï¼ˆâ€œè®¸å¯â€ï¼‰è·å¾—è®¸å¯
+é™¤ééµå®ˆè®¸å¯ï¼Œå¦åˆ™æ‚¨ä¸å¾—ä½¿ç”¨æ­¤æ–‡ä»¶ã€‚
+Copyright 2021-2022 èŠ±ç‹—Fdog(å¼ æ—­)
 */
 
 #include "FStruct.h"
 
 /*
-
 "bool":
 "bool*"
 "char"
@@ -60,7 +58,7 @@ mutex * FdogSerializer::mutex_serialize = new(mutex);
 
 FdogSerializer::FdogSerializer() {
 #ifdef __GNUC__
-	//gcc±àÒë»·¾³
+	//gccç¼–è¯‘ç¯å¢ƒ
 	TypeName["bool"] = "bool";
 	TypeName["bool*"] = "bool*";
 	TypeName["char"] = "char";
@@ -93,7 +91,7 @@ FdogSerializer::FdogSerializer() {
 	TypeName["std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*"] = "string*";
 	TypeName["std::__cxx11::basic_string<wchar_t, std::char_traits<wchar_t>, std::allocator<wchar_t> >"] = "wstring";
 #elif _MSC_VER
-	//vc±àÒë»·¾³
+	//vcç¼–è¯‘ç¯å¢ƒ
 	TypeName["bool"] = "bool";
 	TypeName["bool *"] = "bool*";
 	TypeName["char"] = "char";
@@ -126,14 +124,14 @@ FdogSerializer::FdogSerializer() {
 	TypeName["class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > *"] = "string*";
 	TypeName["td::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> >"] = "wstring";
 #elif clang
-	//clang±àÒë»·¾³
+	//clangç¼–è¯‘ç¯å¢ƒ
 #endif
-	//µÚÒ»ÖÖ¾ÍÊÇ»ù´¡ÀàĞÍ
-	//µÚ¶şÖÖ¾ÍÊÇÓÉ»ù´¡ÀàĞÍÑİ±ä¶øÀ´µÄÖ¸ÕëÀàĞÍ
-	//µÚÈıÖÖÊÇ×Ô¶¨Òå¶ÔÏó
-	//µÚËÄÖÖ¾ÍÊÇ×Ô¶¨Òå¶ÔÏóÖ¸Õë
+	//ç¬¬ä¸€ç§å°±æ˜¯åŸºç¡€ç±»å‹
+	//ç¬¬äºŒç§å°±æ˜¯ç”±åŸºç¡€ç±»å‹æ¼”å˜è€Œæ¥çš„æŒ‡é’ˆç±»å‹
+	//ç¬¬ä¸‰ç§æ˜¯è‡ªå®šä¹‰å¯¹è±¡
+	//ç¬¬å››ç§å°±æ˜¯è‡ªå®šä¹‰å¯¹è±¡æŒ‡é’ˆ
 
-	//ÓĞÃ»ÓĞÖ¸Õë¿ÉÒÔ´Ó·µ»ØÖµÀïÃæ¿´ÓĞÃ»ÓĞ*ºÅ
+	//æœ‰æ²¡æœ‰æŒ‡é’ˆå¯ä»¥ä»è¿”å›å€¼é‡Œé¢çœ‹æœ‰æ²¡æœ‰*å·
 	vector<string> baseTypeTemp = {
 		"bool", "bool*",
 		"char", "unsigned char", "unsigned char*",
@@ -146,7 +144,7 @@ FdogSerializer::FdogSerializer() {
 	};
 	this->baseType = baseTypeTemp;
 
-	//ÓĞ·ûºÅÀàĞÍÓ¦¸ÃÓµÓĞÕı¸ººÅ£¬ÕıºÅºöÊÓ ^(-|+)? Æ¥Åä¸ººÅ
+	//æœ‰ç¬¦å·ç±»å‹åº”è¯¥æ‹¥æœ‰æ­£è´Ÿå·ï¼Œæ­£å·å¿½è§† ^(-|+)? åŒ¹é…è´Ÿå·
 	map<string, string> baseRegexTemp = {
 		{ "bool", "(\\d+)" },
 		{ "float", "(\\d+.\\d+)" },
@@ -169,8 +167,8 @@ FdogSerializer::FdogSerializer() {
 	map<int, string> complexRegexTemp = {
 #ifdef __GNUC__
 		{ 4, "(.*?) (\\[)(\\d+)(\\])" },
-		{ 5, "std::vector<(.*?)," },     //ÕâÀï´æÔÚÎÊÌâ£¬Èç¹ûÊÇstring£¬Ö»»á½ØÈ¡²»ÍêÕûÀàĞÍ
-		{ 6, "std::map<(.*?), (.*?)," }, //stringÒ²´æÔÚÎÊÌâ
+		{ 5, "std::vector<(.*?)," },     //è¿™é‡Œå­˜åœ¨é—®é¢˜ï¼Œå¦‚æœæ˜¯stringï¼Œåªä¼šæˆªå–ä¸å®Œæ•´ç±»å‹
+		{ 6, "std::map<(.*?), (.*?)," }, //stringä¹Ÿå­˜åœ¨é—®é¢˜
 		{ 62, "std::map<(.*?), (.*?), (.*?), (.*?)," },
 		{ 7, "std::__cxx11::list<(.*?)," },
 		{ 8, "std::set<(.*?)," },
@@ -179,9 +177,9 @@ FdogSerializer::FdogSerializer() {
 		{ 63, "std::unordered_map<(.*?), (.*?), (.*?), (.*?)," },
 #elif _MSC_VER
 		{ 4, "(.*?) (\\[)(\\d+)(\\])" },
-		{ 5, "class std::vector<(.*?)," },     //ÕâÀï´æÔÚÎÊÌâ£¬Èç¹ûÊÇstring£¬Ö»»á½ØÈ¡²»ÍêÕûÀàĞÍ
+		{ 5, "class std::vector<(.*?)," },     //è¿™é‡Œå­˜åœ¨é—®é¢˜ï¼Œå¦‚æœæ˜¯stringï¼Œåªä¼šæˆªå–ä¸å®Œæ•´ç±»å‹
 		{ 53, "td::vector<struct (.*?)," },
-		{ 6, "class std::map<(.*?),(.*?)," }, //stringÒ²´æÔÚÎÊÌâ
+		{ 6, "class std::map<(.*?),(.*?)," }, //stringä¹Ÿå­˜åœ¨é—®é¢˜
 		{ 62, "class std::map<(.*?),(.*?),(.*?),(.*?)," },
 		{ 7, "class std::__cxx11::list<(.*?)," },
 		{ 8, "class std::set<(.*?)," },
@@ -197,7 +195,7 @@ FdogSerializer::FdogSerializer() {
 	objectinfo->objectTypeInt = -1;
 	this->objectInfoList.push_back(objectinfo);
 
-	//¶Ô»ù´¡ÀàĞÍ×ö³õÊ¼»¯
+	//å¯¹åŸºç¡€ç±»å‹åšåˆå§‹åŒ–
 	MetaInfo * metainfo = nullptr;
 	metainfo = new MetaInfo();
 	metainfo->memberType = "bool";
@@ -282,7 +280,7 @@ FdogSerializer::FdogSerializer() {
 }
 
 FdogSerializer::~FdogSerializer() {
-	//ÊÍ·ÅÄÚ´æ
+	//é‡Šæ”¾å†…å­˜
 	delete(FdogSerializer::mutex_serialize);
 	delete(FdogSerializer::fdogSerializer);
 }
@@ -324,10 +322,10 @@ std::string FdogSerializer::getTypeName(string TypeName) {
 	TypeName = abi::__cxa_demangle(TypeName.c_str(), 0, 0, 0);
 #elif _MSC_VER
 	if (TypeName.find("struct ") != string::npos && TypeName.find("class std::basic_string<char,struct ") == string::npos) {
-		//Ö»ÊÇÕë¶Ôstring£¬Ôİ²»È·¶¨MSVCÉÏÃæÆäËûÀàĞÍÊÇ·ñºÍgccÓĞ³öÈë
+		//åªæ˜¯é’ˆå¯¹stringï¼Œæš‚ä¸ç¡®å®šMSVCä¸Šé¢å…¶ä»–ç±»å‹æ˜¯å¦å’Œgccæœ‰å‡ºå…¥
 		TypeName = TypeName.substr(7);
 	}
-	//Õë¶ÔmsvcÓ¦¸Ã×öÏµÍ³½Ó¿Ú ¹ıÂËstruct
+	//é’ˆå¯¹msvcåº”è¯¥åšç³»ç»Ÿæ¥å£ è¿‡æ»¤struct
 #endif
 	auto iter = this->TypeName.find(TypeName);
 	if (iter != this->TypeName.end()) {
@@ -417,7 +415,7 @@ void Fdog::setFuzzy(string Type) {
 	FdogSerializer::Instance()->__setFuzzy(Type);
 }
 
-//»ñÈ¡keyÖµ
+//è·å–keyå€¼
 string FdogSerializer::getKey(string json) {
 	smatch result;
 	regex pattern("\"(.*)\":(.*)");
@@ -429,7 +427,7 @@ string FdogSerializer::getKey(string json) {
 }
 
 /***********************************
-*   ·µ»Ø¶ÔÓ¦µÄ³ÉÔ±ÀàĞÍ(°üÀ¨»ù±¾ÀàĞÍºÍ×Ô¶¨ÒåÀàĞÍ)£¬Êı×é´óĞ¡
+*   è¿”å›å¯¹åº”çš„æˆå‘˜ç±»å‹(åŒ…æ‹¬åŸºæœ¬ç±»å‹å’Œè‡ªå®šä¹‰ç±»å‹)ï¼Œæ•°ç»„å¤§å°
 ************************************/
 memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 	cout << "getMemberAttribute = " <<typeName << endl;
@@ -447,8 +445,8 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 		regex pattern2(complexRegex[53]);
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
-			//cout << "=========>>1  isVectorType ÔİÊ±ÓĞÎÊÌâ ============= = " << value << endl;
-			//´¦ÀíºÃ
+			//cout << "=========>>1  isVectorType æš‚æ—¶æœ‰é—®é¢˜ ============= = " << value << endl;
+			//å¤„ç†å¥½
 			if (value == "string") {
 				resReturn.first = "string";
 			}
@@ -457,7 +455,7 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 			}
 		} else if (regex_search(typeName, result, pattern2)) {
 			string value = result.str(1).c_str();
-			cout << "=========>>2  isVectorType ÔİÊ±ÓĞÎÊÌâ ============= = " << value << endl;
+			cout << "=========>>2  isVectorType æš‚æ—¶æœ‰é—®é¢˜ ============= = " << value << endl;
 			if (value == "string") {
 				resReturn.first = "string";
 			}
@@ -471,7 +469,7 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 		resReturn.valueType = typeName;
 		regex pattern(complexRegex[62]);
 		regex pattern2(complexRegex[63]);
-		cout << "Öµ=" << typeName << endl;
+		cout << "å€¼=" << typeName << endl;
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
 			if (value == "std::__cxx11::basic_string<char" || value == "class std::basic_string<char") {
@@ -560,9 +558,9 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 		regex pattern(complexRegex[4]);
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
-			//cout << "Êı×éÀàĞÍ:" << value << " ";
+			//cout << "æ•°ç»„ç±»å‹:" << value << " ";
 			string value2 = result.str(3).c_str();
-			//cout << "Êı×é´óĞ¡:" << value2;
+			//cout << "æ•°ç»„å¤§å°:" << value2;
 			resReturn.first = value;
 			resReturn.ArraySize = atoi(value2.data());
 		}
@@ -578,7 +576,7 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 }
 
 int FdogSerializer::getObjectTypeInt(string objectName, string typeName) {
-	//cout << "½øÈëgetObjectTypeInt typeName = " <<objectName << " -- " << typeName << endl;
+	//cout << "è¿›å…¥getObjectTypeInt typeName = " <<objectName << " -- " << typeName << endl;
 	if (FdogSerializer::Instance()->isBaseType(typeName)) {
 		return OBJECT_BASE;
 	}
@@ -592,7 +590,7 @@ int FdogSerializer::getObjectTypeInt(string objectName, string typeName) {
 		return OBJECT_LIST;
 	}
 	if (FdogSerializer::Instance()->isStructType(objectName, typeName)) {
-		//ÕâÀïÒ²´æÔÚÎÊÌâ ÅĞ¶Ï
+		//è¿™é‡Œä¹Ÿå­˜åœ¨é—®é¢˜ åˆ¤æ–­
 		return OBJECT_STRUCT;
 	}
 	if (FdogSerializer::Instance()->isArrayType(objectName, typeName)) {
@@ -606,12 +604,12 @@ ObjectInfo FdogSerializer::getObjectInfoByType(string typeName, int objectTypeIn
 	switch (objectTypeInt)
 	{
 	case OBJECT_VECTOR:
-		//½ØÈ¡Öµ
+		//æˆªå–å€¼
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
 			//cout << "-----" << value << endl;
 			return getObjectInfo(value);
-			//³ıÁË¸´ÔÓÀàĞÍ£¬»¹Ó¦¸ÃÓĞ»ù´¡ÀàĞÍ
+			//é™¤äº†å¤æ‚ç±»å‹ï¼Œè¿˜åº”è¯¥æœ‰åŸºç¡€ç±»å‹
 		}
 		break;
 	case OBJECT_LIST:
@@ -642,13 +640,13 @@ ObjectInfo FdogSerializer::getObjectInfoByType(string typeName, int objectTypeIn
 wstring FdogSerializer::string2wstring(string str)
 {
 	wstring result;
-	//»ñÈ¡»º³åÇø´óĞ¡£¬²¢ÉêÇë¿Õ¼ä£¬»º³åÇø´óĞ¡°´×Ö·û¼ÆËã  
+	//è·å–ç¼“å†²åŒºå¤§å°ï¼Œå¹¶ç”³è¯·ç©ºé—´ï¼Œç¼“å†²åŒºå¤§å°æŒ‰å­—ç¬¦è®¡ç®—  
 	int len = MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.size(), NULL, 0);
 	TCHAR* buffer = new TCHAR[len + 1];
-	//¶à×Ö½Ú±àÂë×ª»»³É¿í×Ö½Ú±àÂë  
+	//å¤šå­—èŠ‚ç¼–ç è½¬æ¢æˆå®½å­—èŠ‚ç¼–ç   
 	MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.size(), buffer, len);
-	buffer[len] = '\0';             //Ìí¼Ó×Ö·û´®½áÎ²  
-									//É¾³ı»º³åÇø²¢·µ»ØÖµ  
+	buffer[len] = '\0';             //æ·»åŠ å­—ç¬¦ä¸²ç»“å°¾  
+									//åˆ é™¤ç¼“å†²åŒºå¹¶è¿”å›å€¼  
 	result.append(buffer);
 	delete[] buffer;
 	return result;
@@ -657,13 +655,13 @@ wstring FdogSerializer::string2wstring(string str)
 string FdogSerializer::wstring2string(wstring wstr)
 {
 	string result;
-	//»ñÈ¡»º³åÇø´óĞ¡£¬²¢ÉêÇë¿Õ¼ä£¬»º³åÇø´óĞ¡ÊÂ°´×Ö½Ú¼ÆËãµÄ  
+	//è·å–ç¼“å†²åŒºå¤§å°ï¼Œå¹¶ç”³è¯·ç©ºé—´ï¼Œç¼“å†²åŒºå¤§å°äº‹æŒ‰å­—èŠ‚è®¡ç®—çš„  
 	int len = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), wstr.size(), NULL, 0, NULL, NULL);
 	char* buffer = new char[len + 1];
-	//¿í×Ö½Ú±àÂë×ª»»³É¶à×Ö½Ú±àÂë  
+	//å®½å­—èŠ‚ç¼–ç è½¬æ¢æˆå¤šå­—èŠ‚ç¼–ç   
 	WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), wstr.size(), buffer, len, NULL, NULL);
 	buffer[len] = '\0';
-	//É¾³ı»º³åÇø²¢·µ»ØÖµ  
+	//åˆ é™¤ç¼“å†²åŒºå¹¶è¿”å›å€¼  
 	result.append(buffer);
 	delete[] buffer;
 	return result;
@@ -681,7 +679,7 @@ bool FdogSerializer::isBaseType(string typeName) {
 	}
 	return false;
 }
-//ÕâÀï´æÔÚÎÊÌâ£¬µ±ÀàĞÍÊÇ»ù±¾ÀàĞÍÊÇ²»»á´í£¬µ«ÊÇµ±stl°üº¬char* string£¬¾Í»á³öÎÊÌâ
+//è¿™é‡Œå­˜åœ¨é—®é¢˜ï¼Œå½“ç±»å‹æ˜¯åŸºæœ¬ç±»å‹æ˜¯ä¸ä¼šé”™ï¼Œä½†æ˜¯å½“stlåŒ…å«char* stringï¼Œå°±ä¼šå‡ºé—®é¢˜
 
 bool FdogSerializer::isBaseTypeByMap(string typeName) {
 	smatch result;
@@ -698,7 +696,7 @@ bool FdogSerializer::isBaseTypeByMap(string typeName) {
 	return false;
 }
 
-//ÅĞ¶ÏÊÇ·ñÎªvectorÀàĞÍ
+//åˆ¤æ–­æ˜¯å¦ä¸ºvectorç±»å‹
 bool FdogSerializer::isVectorType(string objectName, string typeName) {
 #ifdef __GNUC__
 	auto x = typeName.find("std::vector<");
@@ -718,7 +716,7 @@ bool FdogSerializer::isVectorType(string objectName, string typeName) {
 	return false;
 }
 
-//ÅĞ¶ÏÊÇ·ñÎªmapÀàĞÍ
+//åˆ¤æ–­æ˜¯å¦ä¸ºmapç±»å‹
 bool FdogSerializer::isMapType(string objectName, string typeName) {
 #ifdef __GNUC__
 	auto x = typeName.find("std::map<");
@@ -745,7 +743,7 @@ bool FdogSerializer::isUnorderedMapType(string objectName, string typeName) {
 	return false;
 }
 
-//ÅĞ¶ÏÊÇ·ñÊÇlistÀàĞÍ
+//åˆ¤æ–­æ˜¯å¦æ˜¯listç±»å‹
 bool FdogSerializer::isListType(string objectName, string typeName) {
 	auto x = typeName.find("std::__cxx11::list");
 	if (x != string::npos && x == 0) {
@@ -778,7 +776,7 @@ bool FdogSerializer::isStructType(string objectName, string typeName) {
 	return false;
 }
 
-//ÊÇÊı×é·µ»Ø¶ÔÓÚÖµ£¬²»ÊÇÊı×é·µ»Ø0 
+//æ˜¯æ•°ç»„è¿”å›å¯¹äºå€¼ï¼Œä¸æ˜¯æ•°ç»„è¿”å›0 
 bool FdogSerializer::isArrayType(string objectName, string typeName) {
 	memberAttribute resReturn;
 	smatch result;
@@ -860,16 +858,16 @@ vector<string> FdogSerializer::split(string str, string pattern) {
 	return result;
 }
 
-//ÅĞ¶Ïjson¸ñÊ½ÊÇ·ñÕıÈ·
+//åˆ¤æ–­jsonæ ¼å¼æ˜¯å¦æ­£ç¡®
 result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 	result res;
-	//Õâ¸öº¯Êı¿ÉÒÔÍê³É¶ÔjsonÏûÏ¢µÄ·Ö¸î£¬Ö»·Ö¸îµÚÒ»²ã£¬Èç¹ûÆäËûÏûÏ¢ÌåÓĞ¶à²ã£¬ÒÀ´Î·ÖÎö
-	int status = -1; //0 ±íÊ¾ÏÂÒ»¸öÀàĞÍÈÎÒâ  1 ±íÊ¾»ù±¾ÀàĞÍ(²»°üº¬Ç¶Ì×) 2 ±íÊ¾¶ÔÏó  3 ±íÊ¾Êı×é
-	int first = 0;  //×Ö·û´®³õÊ¼Î»ÖÃ
-	int end = 0;    //×Ö·û´®½áÊøÎ»ÖÃ
+	//è¿™ä¸ªå‡½æ•°å¯ä»¥å®Œæˆå¯¹jsonæ¶ˆæ¯çš„åˆ†å‰²ï¼Œåªåˆ†å‰²ç¬¬ä¸€å±‚ï¼Œå¦‚æœå…¶ä»–æ¶ˆæ¯ä½“æœ‰å¤šå±‚ï¼Œä¾æ¬¡åˆ†æ
+	int status = -1; //0 è¡¨ç¤ºä¸‹ä¸€ä¸ªç±»å‹ä»»æ„  1 è¡¨ç¤ºåŸºæœ¬ç±»å‹(ä¸åŒ…å«åµŒå¥—) 2 è¡¨ç¤ºå¯¹è±¡  3 è¡¨ç¤ºæ•°ç»„
+	int first = 0;  //å­—ç¬¦ä¸²åˆå§‹ä½ç½®
+	int end = 0;    //å­—ç¬¦ä¸²ç»“æŸä½ç½®
 	int len = json_.length();
 	int sum = 0;
-	int xiabiao = 0; //¼ÇÂ¼Æ¥ÅäÏÂ±ê
+	int xiabiao = 0; //è®°å½•åŒ¹é…ä¸‹æ ‡
 	bool isadd = false;
 	for (int i = 0; i < len; i++) {
 		//cout << "i = " << i << endl;
@@ -889,7 +887,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 		}
 
 		if (json_[i] == ',' && json_[i - 1] == '"' && status == 2) {
-			cout << ",ºóÃæÊÇ\" ÇÒ status = 2 ³ö´í" << endl;
+			cout << ",åé¢æ˜¯\" ä¸” status = 2 å‡ºé”™" << endl;
 		}
 
 		if (json_[i] == '"' && json_[i + 1] == ':' && json_[i + 2] == '{') {
@@ -929,7 +927,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 				if (sum == 0) {
 					end = i;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "»ñÈ¡µ½µÄÖµ1£º" << da << endl;
+					//cout << "è·å–åˆ°çš„å€¼1ï¼š" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
@@ -940,7 +938,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 				if (sum == 0) {
 					end = i;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "»ñÈ¡µ½µÄÖµ1£º" << da << endl;
+					//cout << "è·å–åˆ°çš„å€¼1ï¼š" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
@@ -950,14 +948,14 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 				if (sum == 0) {
 					end = i;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "»ñÈ¡µ½µÄÖµ1£º" << da << endl;
+					//cout << "è·å–åˆ°çš„å€¼1ï¼š" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
 			}
 			else {
 				if (sum - 1 == 0 && xiabiao < i) {
-					//cout << "×Ö·û´®ÕÒ²»µ½Æ¥ÅäÖµ" << endl;
+					//cout << "å­—ç¬¦ä¸²æ‰¾ä¸åˆ°åŒ¹é…å€¼" << endl;
 				}
 			}
 			if (json_[i + 1] == ']' && status == 4) {
@@ -965,7 +963,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 				if (sum == 0) {
 					end = i + 1;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "»ñÈ¡µ½µÄÖµ3£º" << da << endl;
+					//cout << "è·å–åˆ°çš„å€¼3ï¼š" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
@@ -978,9 +976,9 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 					end = i;
 					string da = json_.substr(first, end - first);
 					if (da.npos != da.find(",")) {
-						cout << "Ê§°Ü" << endl;
+						cout << "å¤±è´¥" << endl;
 					}
-					//cout << "»ñÈ¡µ½µÄÖµ4£º" << da << endl;
+					//cout << "è·å–åˆ°çš„å€¼4ï¼š" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
@@ -991,19 +989,19 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 				if (sum == 0) {
 					end = i;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "»ñÈ¡µ½µÄÖµ5£º" << da << endl;
+					//cout << "è·å–åˆ°çš„å€¼5ï¼š" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
 				continue;
 			}
-			//3 ºÍ 6¿ÉÒÔÇø·ÖÊÇ²»ÊÇ¶ÔÏóÊı×é
+			//3 å’Œ 6å¯ä»¥åŒºåˆ†æ˜¯ä¸æ˜¯å¯¹è±¡æ•°ç»„
 			if (status == 4 && json_[i] == ']' && json_[i + 1] == ',') {
 				sum--;
 				if (sum == 0) {
 					end = i;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "»ñÈ¡µ½µÄÖµ6£º" << da << endl;
+					//cout << "è·å–åˆ°çš„å€¼6ï¼š" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
@@ -1018,15 +1016,15 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 					if (status == 2 && json_[i - 1] != '"') {
 						string da = json_.substr(first, end - first);
 						if (da.npos != da.find(",")) {
-							cout << "Ê§°Ü" << endl;
+							cout << "å¤±è´¥" << endl;
 						}
-						//cout << "»ñÈ¡µ½µÄÖµ71£º" << da << endl;
+						//cout << "è·å–åˆ°çš„å€¼71ï¼š" << da << endl;
 						status = -1;
 						json_array.push_back(da);
 					}
 					else {
 						string da = json_.substr(first, end - first + 1);
-						//cout << "»ñÈ¡µ½µÄÖµ72£º" << da << endl;
+						//cout << "è·å–åˆ°çš„å€¼72ï¼š" << da << endl;
 						status = -1;
 						json_array.push_back(da);
 					}
@@ -1038,7 +1036,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 				if (sum == 0) {
 					end = i;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "»ñÈ¡µ½µÄÖµ8£º" << da << endl;
+					//cout << "è·å–åˆ°çš„å€¼8ï¼š" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
@@ -1047,12 +1045,12 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 		}
 	}
 	if (status != -1) {
-		cout << "Æ¥ÅäÊ§°ÜÔÚ×Ö·û´®<";
+		cout << "åŒ¹é…å¤±è´¥åœ¨å­—ç¬¦ä¸²<";
 		int a = first;
 		for (int i = 0; i < (json_.length() - a > 20 ? 20 : json_.length() - a); i++) {
 			cout << json_[a++];
 		}
-		cout << ">¸½½ü" << endl;
+		cout << ">é™„è¿‘" << endl;
 	}
 	else {
 		int count = 0;
@@ -1060,7 +1058,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 			count = count + json_array[i].length() + 1;
 		}
 		if (count + 1 != json_.length()) {
-			cout << "³¤¶È³ö´í :" << json_ << "---Ô­×Ö·û´®³¤¶È£º" << json_.length() << "---ÏÖÔÚ³¤¶È:" << count + 1 << endl;
+			cout << "é•¿åº¦å‡ºé”™ :" << json_ << "---åŸå­—ç¬¦ä¸²é•¿åº¦ï¼š" << json_.length() << "---ç°åœ¨é•¿åº¦:" << count + 1 << endl;
 		}
 	}
 	if (1) {
@@ -1074,41 +1072,41 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 		}
 		json_a = json_a + "}";
 		if (json_ != json_a) {
-			cout << "¼Ó¶ººÅ»¹Ô­£¬²»Æ¥Åä" << json_a << endl;
+			cout << "åŠ é€—å·è¿˜åŸï¼Œä¸åŒ¹é…" << json_a << endl;
 		}
 	}
 	res.code = 0;
 	return res;
 }
 
-//ÅĞ¶Ï·½À¨ºÅÊÇ·ñÆ¥Åä
+//åˆ¤æ–­æ–¹æ‹¬å·æ˜¯å¦åŒ¹é…
 result FdogSerializer::IsSquareBracket(string json_) {
 	result res;
 	char start = json_[0];
 	char end = json_[json_.length() - 1];
 	if (start != '[' || end != ']') {
 		res.code = -1;
-		res.message = "¿ªÍ·»ò½áÎ²È±ÉÙ·½À¨ºÅ";
+		res.message = "å¼€å¤´æˆ–ç»“å°¾ç¼ºå°‘æ–¹æ‹¬å·";
 		return res;
 	}
 	return res;
 }
 
-//ÅĞ¶Ï»¨À¨ºÅÊÇ·ñÆ¥Åä
+//åˆ¤æ–­èŠ±æ‹¬å·æ˜¯å¦åŒ¹é…
 result FdogSerializer::IsCurlyBraces(string json_) {
 	result res;
 	char start = json_[0];
 	char end = json_[json_.length() - 1];
 	if (start != '{' || end != '}') {
 		res.code = -1;
-		res.message = "¿ªÍ·»ò½áÎ²È±ÉÙ»¨À¨ºÅ";
+		res.message = "å¼€å¤´æˆ–ç»“å°¾ç¼ºå°‘èŠ±æ‹¬å·";
 		return res;
 	}
 	res.code = 0;
 	return res;
 }
 
-//ÅĞ¶Ï×Ü·ûºÅÊıÊÇ·ñÆ¥Åä
+//åˆ¤æ–­æ€»ç¬¦å·æ•°æ˜¯å¦åŒ¹é…
 result FdogSerializer::isMatch(string json_) {
 	result res;
 	int h_sum = 0;
@@ -1134,23 +1132,23 @@ result FdogSerializer::isMatch(string json_) {
 	}
 	res.code = -1;
 	if (h_sum > 0) {
-		res.message = "È±ÉÙ»¨À¨ºÅ";
+		res.message = "ç¼ºå°‘èŠ±æ‹¬å·";
 	}
 	else if (f_sum > 0) {
-		res.message = "È±ÉÙ·½À¨ºÅ";
+		res.message = "ç¼ºå°‘æ–¹æ‹¬å·";
 	}
 	return res;
 }
 
-//ÅĞ¶ÏjsonÕıÈ·ĞÔ
+//åˆ¤æ–­jsonæ­£ç¡®æ€§
 result FdogSerializer::__JsonValidS(string json_) {
 	result res;
-	//¼ì²é×óÓÒ»¨À¨ºÅÊÇ·ñÆ¥Åä
+	//æ£€æŸ¥å·¦å³èŠ±æ‹¬å·æ˜¯å¦åŒ¹é…
 	res = IsCurlyBraces(json_);
 	if (res.code != 0) {
 		return res;
 	}
-	//¼ì²é×Ü·ûºÅÊıÊÇ·ñÆ¥Åä([]{})
+	//æ£€æŸ¥æ€»ç¬¦å·æ•°æ˜¯å¦åŒ¹é…([]{})
 	res = isMatch(json_);
 	if (res.code != 0) {
 		return res;
@@ -1168,12 +1166,12 @@ result FdogSerializer::__JsonValidS(string json_) {
 	return res;
 }
 
-//ÅĞ¶Ï×Ö¶ÎÊÇ·ñ´æÔÚ
+//åˆ¤æ–­å­—æ®µæ˜¯å¦å­˜åœ¨
 bool FdogSerializer::__Exist(string json_, string key) {
 	auto num = key.find(".");
 	if (num != key.npos) {
 		if (json_.find(key.substr(0, num)) != json_.npos) {
-			//ÕâÀïĞèÒªÔÚÕÒµ½µÄÀïÃæÕÒ¶ÔÓ¦×Ö·û´®
+			//è¿™é‡Œéœ€è¦åœ¨æ‰¾åˆ°çš„é‡Œé¢æ‰¾å¯¹åº”å­—ç¬¦ä¸²
 			string resp = "";
 			string jsonNew = "\"" + key.substr(0, num) + "\":";
 			cout << "n = " << num << endl;
@@ -1250,12 +1248,12 @@ bool FdogSerializer::__Exist(string json_, string key) {
 	return false;
 }
 
-//»ñÈ¡×Ö¶ÎµÄÖµ
+//è·å–å­—æ®µçš„å€¼
 string FdogSerializer::__GetStringValue(string json_, string key) {
 	auto num = key.find(".");
 	if (num != key.npos) {
 		if (json_.find(key.substr(0, num)) != json_.npos) {
-			//ÕâÀïĞèÒªÔÚÕÒµ½µÄÀïÃæÕÒ¶ÔÓ¦×Ö·û´®
+			//è¿™é‡Œéœ€è¦åœ¨æ‰¾åˆ°çš„é‡Œé¢æ‰¾å¯¹åº”å­—ç¬¦ä¸²
 			string resp = "";
 			string jsonNew = "\"" + key.substr(0, num) + "\":";
 			cout << "n = " << num << endl;
@@ -1318,7 +1316,7 @@ string FdogSerializer::__GetStringValue(string json_, string key) {
 		int x = json_.find(key);
 		if (x != json_.npos) {
 			if (json_[x - 1] == '"' && json_[x + key.length()] == '"') {
-				// //»ù´¡ÀàĞÍ¿ÉÒÔÊ¹ÓÃÕıÔò±í´ïÊ½»ñÈ¡
+				// //åŸºç¡€ç±»å‹å¯ä»¥ä½¿ç”¨æ­£åˆ™è¡¨è¾¾å¼è·å–
 				string res = "(\"" + key + "\":)((\"(.*?)\")|([+-]?([0-9]*\\.?[0-9]+|[0-9]+\\.?[0-9]*)([eE][+-]?[0-9]+)?))";
 				string res2 = "(\"" + key + "\":)((true)|(false))";
 				smatch result;
@@ -1344,7 +1342,7 @@ string FdogSerializer::__GetStringValue(string json_, string key) {
 	return "";
 }
 
-//»ñÈ¡×Ö¶ÎµÄÖµ
+//è·å–å­—æ®µçš„å€¼
 int FdogSerializer::__GetIntValue(string json_, string key) {
 	string value = __GetStringValue(json_, key);
 	if (value == "") {
@@ -1355,7 +1353,7 @@ int FdogSerializer::__GetIntValue(string json_, string key) {
 	}
 }
 
-//»ñÈ¡×Ö¶ÎµÄÖµ
+//è·å–å­—æ®µçš„å€¼
 double FdogSerializer::__GetDoubleValue(string json_, string key) {
 	string value = __GetStringValue(json_, key);
 	if (value == "") {
@@ -1366,7 +1364,7 @@ double FdogSerializer::__GetDoubleValue(string json_, string key) {
 	}
 }
 
-//»ñÈ¡×Ö¶ÎµÄÖµ
+//è·å–å­—æ®µçš„å€¼
 long FdogSerializer::__GetLongValue(string json_, string key) {
 	string value = __GetStringValue(json_, key);
 	if (value == "") {
@@ -1377,7 +1375,7 @@ long FdogSerializer::__GetLongValue(string json_, string key) {
 	}
 }
 
-//»ñÈ¡×Ö¶ÎµÄÖµ
+//è·å–å­—æ®µçš„å€¼
 bool FdogSerializer::__GetBoolValue(string json_, string key) {
 	string value = __GetStringValue(json_, key);
 	if (value == "true") {
@@ -1419,37 +1417,37 @@ string FdogSerializer::getTypeOfList(string objectName, string typeName) {
 	return "";
 }
 
-//ÅĞ¶ÏjsonÕıÈ·ĞÔ
+//åˆ¤æ–­jsonæ­£ç¡®æ€§
 result Fdog::JsonValidS(string json_) {
 	return FdogSerializer::Instance()->__JsonValidS(json_);
 }
 
-//ÅĞ¶Ï×Ö¶ÎÊÇ·ñ´æÔÚ
+//åˆ¤æ–­å­—æ®µæ˜¯å¦å­˜åœ¨
 bool Fdog::Exist(string json_, string key) {
 	return FdogSerializer::Instance()->__Exist(json_, key);
 }
 
-//»ñÈ¡×Ö¶ÎµÄÖµ
+//è·å–å­—æ®µçš„å€¼
 string Fdog::GetStringValue(string json_, string key) {
 	return FdogSerializer::Instance()->__GetStringValue(json_, key);
 }
 
-//»ñÈ¡×Ö¶ÎµÄÖµ
+//è·å–å­—æ®µçš„å€¼
 int Fdog::GetIntValue(string json_, string key) {
 	return FdogSerializer::Instance()->__GetIntValue(json_, key);
 }
 
-//»ñÈ¡×Ö¶ÎµÄÖµ
+//è·å–å­—æ®µçš„å€¼
 double Fdog::GetDoubleValue(string json_, string key) {
 	return FdogSerializer::Instance()->__GetDoubleValue(json_, key);
 }
 
-//»ñÈ¡×Ö¶ÎµÄÖµ
+//è·å–å­—æ®µçš„å€¼
 long Fdog::GetLongValue(string json_, string key) {
 	return FdogSerializer::Instance()->__GetLongValue(json_, key);
 }
 
-//»ñÈ¡×Ö¶ÎµÄÖµ
+//è·å–å­—æ®µçš„å€¼
 bool Fdog::GetBoolValue(string json_, string key) {
 	return FdogSerializer::Instance()->__GetBoolValue(json_, key);
 }

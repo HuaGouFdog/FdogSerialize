@@ -36,7 +36,6 @@ struct teacher {
 	int age;
 };
 
-//假设学校只有两个人
 struct school {
 	student stu;
 	teacher tea;
