@@ -2,9 +2,9 @@
 #define TEST_H
 #include <iostream>
 #ifdef __GNUC__
-    #include "../FStruct.h"
+#include "../FStruct.h"
 #elif _MSC_VER
-    #include "FStruct.h"
+#include "FStruct.h"
 #endif
 #include <sstream>
 #include <string>
@@ -29,27 +29,27 @@ struct TestType
 	std::wstring age8;
 };
 
-class student{
-    public:
-    string name;
-    int age;
-    REGISTEREDMEMBER(student, name, age);
+class student {
+public:
+	string name;
+	int age;
+	REGISTEREDMEMBER(student, name, age);
 };
 
-class teacher{
-    public:
-    string name;
-    int age;
-    REGISTEREDMEMBER(teacher, name, age);
+class teacher {
+public:
+	string name;
+	int age;
+	REGISTEREDMEMBER(teacher, name, age);
 };
 
 //假设学校只有两个人
-class school{
-    public:
-    student stu;
-    teacher tea;
-    vector<student> stuList;
-    REGISTEREDMEMBER(school, stu, tea, stuList);
+class school {
+public:
+	student stu;
+	teacher tea;
+	vector<student> stuList;
+	REGISTEREDMEMBER(school, stu, tea, stuList);
 };
 //容器中包含自定义类型需要添加TAGDISPATCH_LIST宏
 TAGDISPATCH_LIST(student)
@@ -88,8 +88,8 @@ struct class_map
 
 struct class_unordered_map
 {
-    unordered_map<string, int> grade;
-    REGISTEREDMEMBER(class_unordered_map, grade);
+	unordered_map<string, int> grade;
+	REGISTEREDMEMBER(class_unordered_map, grade);
 };
 
 

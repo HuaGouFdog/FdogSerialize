@@ -2,12 +2,17 @@
 该项目签署了Apache-2.0 License，详情请参见LICENSE
 根据 Apache 许可，版本 2.0（“许可”）获得许可
 除非遵守许可，否则您不得使用此文件。
+
 Copyright 2021-2022 花狗Fdog(张旭)
 */
-
+#ifdef __GNUC__
+	#include "FStruct.h"
+#elif _MSC_VER
 #include "FStruct.h"
+#endif
 
 /*
+
 "bool":
 "bool*"
 "char"
@@ -303,6 +308,9 @@ ObjectInfo & FdogSerializer::getObjectInfo(string objectName) {
 		if (objectinfo->objectType == objectName) {
 			return *objectinfo;
 		}
+		else if ("class " + objectinfo->objectType == objectName) {
+			return *objectinfo;
+		}
 	}
 	return *(FdogSerializer::Instance()->objectInfoList[0]);
 }
@@ -430,7 +438,7 @@ string FdogSerializer::getKey(string json) {
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
 ************************************/
 memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
-	//cout << "getMemberAttribute = " <<typeName << endl;
+	//cout << "getMemberAttribute = " << typeName << endl;
 	memberAttribute resReturn;
 	smatch result;
 	if (FdogSerializer::isBaseType(typeName)) {
@@ -453,9 +461,10 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 			else {
 				resReturn.first = value;
 			}
-		} else if (regex_search(typeName, result, pattern2)) {
+		}
+		else if (regex_search(typeName, result, pattern2)) {
 			string value = result.str(1).c_str();
-			cout << "=========>>2  isVectorType 暂时有问题 ============= = " << value << endl;
+			//cout << "=========>>2  isVectorType 暂时有问题 ============= = " << value << endl;
 			if (value == "string") {
 				resReturn.first = "string";
 			}
@@ -469,7 +478,7 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 		resReturn.valueType = typeName;
 		regex pattern(complexRegex[62]);
 		regex pattern2(complexRegex[63]);
-		cout << "值=" << typeName << endl;
+		//cout << "值=" << typeName << endl;
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
 			if (value == "std::__cxx11::basic_string<char" || value == "class std::basic_string<char") {
@@ -637,9 +646,6 @@ ObjectInfo FdogSerializer::getObjectInfoByType(string typeName, int objectTypeIn
 	}
 }
 
-#ifdef __GNUC__
-#elif _MSC_VER
-
 wstring FdogSerializer::string2wstring(string str)
 {
 	wstring result;
@@ -669,7 +675,6 @@ string FdogSerializer::wstring2string(wstring wstr)
 	delete[] buffer;
 	return result;
 }
-#endif
 
 int FdogSerializer::getObjectTypeByObjectInfo(string objectName) {
 	return getObjectInfo(objectName).objectTypeInt;
@@ -775,6 +780,9 @@ bool FdogSerializer::isDequeType(string objectName, string typeName) {
 
 bool FdogSerializer::isStructType(string objectName, string typeName) {
 	if (objectName == typeName) {
+		return true;
+	}
+	else if ("class " + objectName == typeName) {
 		return true;
 	}
 	return false;
