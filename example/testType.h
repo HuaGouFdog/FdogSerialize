@@ -55,8 +55,8 @@ public:
 	REGISTERED_MEMBER_S(school, stu, tea, stuList);
 };
 //容器中包含自定义类型需要添加TAGDISPATCH_LIST宏
-TAGDISPATCH_LIST(student)
-
+REGISTERE_CONTAINER_V(student)
+//REGISTERE_CONTAINER_M(int,student)
 
 class classtest {
 public:

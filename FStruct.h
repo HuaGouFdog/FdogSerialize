@@ -2,35 +2,32 @@
 该项目签署了Apache-2.0 License，详情请参见LICENSE
 根据 Apache 许可，版本 2.0（“许可”）获得许可
 除非遵守许可，否则您不得使用此文件。
-Copyright 2021-2022 花狗Fdog(张旭)
+Copyright 2021-2023 花狗Fdog(张旭)
 */
 
 #ifndef FSTRUCT_H
 #define FSTRUCT_H
-
+#include <iostream>
 #include <algorithm>
-#ifdef __GNUC__
-#include <cxxabi.h>
-#endif
 #include <cstring>
 #include <ctime>
-#include <deque>
 #include <mutex>
-#include <map>
-#include <list>
 #include <sstream>
 #include <string>
-#include <set>
-#include <vector>
 #include <regex>
 #include <codecvt>
+#include <codecvt>
+#include <map>
+#include <list>
+#include <set>
+#include <vector>
+#include <deque>
+#include <unordered_map>
 #ifdef __GNUC__
+#include <cxxabi.h>
 #elif _MSC_VER
 #include <Windows.h>
 #endif
-#include <codecvt> //
-#include <unordered_map>
-#include <iostream>
 
 using namespace std;
 
@@ -60,52 +57,22 @@ enum ObjectType {
 	OBJECT_DEQUE,
 };
 
-//保存结构体的init()
-//typedef struct GetInit {
-
-// static int (*pfunarr)() //函数指针
-// static int indexa = 0;
-// static int(*pfunarr[999])() = {};
-typedef int(*fun)();
-
-// char * (*(*ptrfun)[999])(char *p); //函数指针数组指针
-
-// char * (*pfun[999])(char *p);  	   //函数指针数组
-// char * fun2(char *p);   //函数
-
-// ptrfun=&pfun;
-// pfun[0]=fun1;
-
-// typedef int (*fun_t)();
-
-// static int addFun(fun_t operation) {
-//     operation();
-// }
-
-static void addFun(fun a) {
-	//pfunarr[indexa++] = a;
-	a();
-	return;
-};
-//}GetInit;
-
-
 /***********************************
 *   存储结构体元信息
 ************************************/
 typedef struct MetaInfo {
-	string memberName;              //成员名
-	string memberAliasName;         //成员别名
-	string memberType;              //成员类型
-	size_t memberOffset;            //偏移值
-	size_t memberTypeSize;          //类型大小
-	size_t memberArraySize;         //如果类型是数组，表示数组大小
-	int    memberTypeInt;           //成员类型 数值型
-	bool   isPointer;               //是否是指针
-	string first;                   //如果是map类型 first表示key的类型，如果是其他类型，表示value类型
-	string second;                  //如果是map类型，second表示value类型
-	bool   memberIsIgnore = false;    //是否忽略字段
-	bool   memberIsIgnoreLU = false;  //是否忽略大小写                                                                                                                
+	string memberName;              	//成员名
+	string memberAliasName;         	//成员别名
+	string memberType;              	//成员类型
+	size_t memberOffset;            	//偏移值
+	size_t memberTypeSize;          	//类型大小
+	size_t memberArraySize;         	//如果类型是数组，表示数组大小
+	int    memberTypeInt;           	//成员类型 数值型
+	bool   isPointer;               	//是否是指针
+	string first;                   	//如果是map类型 first表示key的类型，如果是其他类型，表示value类型
+	string second;                  	//如果是map类型，second表示value类型
+	bool   memberIsIgnore = false;    	//是否忽略字段
+	bool   memberIsIgnoreLU = false;  	//是否忽略大小写                                                                                                                
 }MetaInfo;
 
 /***********************************
@@ -119,11 +86,6 @@ typedef struct ObjectInfo {
 }ObjectInfo;
 
 
-typedef struct FdogMap {
-	string first;
-	string second;
-};
-
 /***********************************
 *   存储成员类型，数组大小
 ************************************/
@@ -135,7 +97,12 @@ struct memberAttribute {
 	int ArraySize;
 };
 
-//结构体用于返回信息
+typedef struct FdogMap {
+	string first;	//keyType
+	string second;  //valueType
+};
+
+
 struct result {
 	int code;           //1.正确 0.错误
 	string message;     //如果错误，返回错误提示
@@ -171,21 +138,20 @@ public:
 		}
 		if (valueType == "wstring") {
 			auto value = *((wstring *)((char *)&object + offsetValue));
-#ifdef __GNUC__
-			wcout << "value = " << value << endl;
-			std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-			string str_value = converter.to_bytes(value);
-#elif _MSC_VER
-			string str_value = FdogSerializer::Instance()->wstring2string(value);
-#endif
+		#ifdef __GNUC__
+					//wcout << "value = " << value << endl;
+					std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+					string str_value = converter.to_bytes(value);
+		#elif _MSC_VER
+					string str_value = FdogSerializer::Instance()->wstring2string(value);
+		#endif
 			return "\"" + str_value + "\"";
 		}
 		if (valueType == "bool") {
 			auto value = *((bool *)((char *)&object + offsetValue));
 			if (value) {
 				return "true";
-			}
-			else {
+			} else {
 				return "false";
 			}
 		}
@@ -256,14 +222,14 @@ public:
 			*((string *)((char *)&object + offsetValue)) = value;
 		}
 		if (valueType == "wstring") {
-#ifdef __GNUC__
-			cout << "检测到wstring" << endl;
-			std::wstring_convert< std::codecvt_utf8<wchar_t> > strCnv;
-			*((wstring *)((char *)&object + offsetValue)) = strCnv.from_bytes(value);
-#elif _MSC_VER
-			cout << "检测到wstring" << endl;
-			*((wstring *)((char *)&object + offsetValue)) = FdogSerializer::Instance()->string2wstring(value);
-#endif
+		#ifdef __GNUC__
+					//cout << "检测到wstring" << endl;
+					std::wstring_convert< std::codecvt_utf8<wchar_t> > strCnv;
+					*((wstring *)((char *)&object + offsetValue)) = strCnv.from_bytes(value);
+		#elif _MSC_VER
+					//cout << "检测到wstring" << endl;
+					*((wstring *)((char *)&object + offsetValue)) = FdogSerializer::Instance()->string2wstring(value);
+		#endif
 		}
 		std::stringstream ss;
 		ss.str(value);
@@ -318,8 +284,7 @@ public:
 		string value = getValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset);
 		if (metainfoobject->memberAliasName != "") {
 			json_ = json_ + "\"" + metainfoobject->memberAliasName + "\"" + ":" + value + ",";
-		}
-		else {
+		} else {
 			json_ = json_ + "\"" + metainfoobject->memberName + "\"" + ":" + value + ",";
 		}
 	}
@@ -346,8 +311,6 @@ struct BaseTag {};
 struct ArrayTag {};
 //处理 map  
 struct MapTag {};
-//处理 unordered_map
-//struct UnorderedMapTag {};
 
 template<typename T> struct TagDispatchTrait {
 	using Tag = BaseTag;
@@ -495,7 +458,7 @@ template<> struct TagSTLType<unordered_map<string, int>> {
 
 template<typename T>
 void F_init_s(T & object, InitBaseTag, string first, string second = "", string key = "") {
-	//cout << " F_init_s 走到这里了" << endl;
+	//
 }
 
 template<typename T>
@@ -508,44 +471,31 @@ void F_init_s(T & object, InitVectorTag, string first, string second = "", strin
 	// " F_init_s object size = " << object.size() << endl;
 	if (first == "char") {
 		object.push_back('0');
-	}
-	else if (first == "unsigned char") {
+	} else if (first == "unsigned char") {
 		object.push_back(0);
-	}
-	else if (first == "short") {
+	} else if (first == "short") {
 		object.push_back(0);
-	}
-	else if (first == "unsigned short") {
+	} else if (first == "unsigned short") {
 		object.push_back(0);
-	}
-	else if (first == "int") {
+	} else if (first == "int") {
 		object.push_back(0);
-	}
-	else if (first == "unsigned int") {
+	} else if (first == "unsigned int") {
 		object.push_back(0);
-	}
-	else if (first == "long") {
+	} else if (first == "long") {
 		object.push_back(0);
-	}
-	else if (first == "unsigned long") {
+	} else if (first == "unsigned long") {
 		object.push_back(0);
-	}
-	else if (first == "long long") {
+	} else if (first == "long long") {
 		object.push_back(0);
-	}
-	else if (first == "unsigned long long") {
+	} else if (first == "unsigned long long") {
 		object.push_back(0);
-	}
-	else if (first == "float") {
+	} else if (first == "float") {
 		object.push_back(0.1f);
-	}
-	else if (first == "double") {
+	} else if (first == "double") {
 		object.push_back(0.1);
-	}
-	else if (first == "long double") {
+	} else if (first == "long double") {
 		object.push_back(0.1);
-	}
-	else {
+	} else {
 
 	}
 }
@@ -555,11 +505,9 @@ void F_init_s(T & object, InitVectorStrTag, string first, string second = "", st
 	// " F_init_s object size = " << object.size() << endl;
 	if (first == "char*") {
 		object.push_back("");
-	}
-	else if (first == "string") {
+	} else if (first == "string") {
 		object.push_back("");
-	}
-	else {
+	} else {
 	}
 }
 
@@ -567,44 +515,31 @@ template<typename T>
 void F_init_s(T & object, InitDequeTag, string first, string second = "", string key = "") {
 	if (first == "char") {
 		object.push_back('0');
-	}
-	else if (first == "unsigned char") {
+	} else if (first == "unsigned char") {
 		object.push_back(0);
-	}
-	else if (first == "short") {
+	} else if (first == "short") {
 		object.push_back(0);
-	}
-	else if (first == "unsigned short") {
+	} else if (first == "unsigned short") {
 		object.push_back(0);
-	}
-	else if (first == "int") {
+	} else if (first == "int") {
 		object.push_back(0);
-	}
-	else if (first == "unsigned int") {
+	} else if (first == "unsigned int") {
 		object.push_back(0);
-	}
-	else if (first == "long") {
+	} else if (first == "long") {
 		object.push_back(0);
-	}
-	else if (first == "unsigned long") {
+	} else if (first == "unsigned long") {
 		object.push_back(0);
-	}
-	else if (first == "long long") {
+	} else if (first == "long long") {
 		object.push_back(0);
-	}
-	else if (first == "unsigned long long") {
+	} else if (first == "unsigned long long") {
 		object.push_back(0);
-	}
-	else if (first == "float") {
+	} else if (first == "float") {
 		object.push_back(0.1f);
-	}
-	else if (first == "double") {
+	} else if (first == "double") {
 		object.push_back(0.1);
-	}
-	else if (first == "long double") {
+	} else if (first == "long double") {
 		object.push_back(0.1);
-	}
-	else {
+	} else {
 
 	}
 }
@@ -613,11 +548,9 @@ template<typename T>
 void F_init_s(T & object, InitDequeStrTag, string first, string second = "", string key = "") {
 	if (first == "char*") {
 		object.push_back("");
-	}
-	else if (first == "string") {
+	} else if (first == "string") {
 		object.push_back("");
-	}
-	else {
+	} else {
 
 	}
 }
@@ -626,47 +559,33 @@ template<typename T>
 void F_init_s(T & object, InitListTag, string first, string second = "", string key = "") {
 	if (first == "int") {
 		object.push_back(0);
-	}
-	if (first == "char") {
+	} else if (first == "char") {
 		object.push_back('0');
-	}
-	else if (first == "unsigned char") {
+	} else if (first == "unsigned char") {
 		object.push_back(0);
-	}
-	else if (first == "short") {
+	} else if (first == "short") {
 		object.push_back(0);
-	}
-	else if (first == "unsigned short") {
+	} else if (first == "unsigned short") {
 		object.push_back(0);
-	}
-	else if (first == "int") {
+	} else if (first == "int") {
 		object.push_back(0);
-	}
-	else if (first == "unsigned int") {
+	} else if (first == "unsigned int") {
 		object.push_back(0);
-	}
-	else if (first == "long") {
+	} else if (first == "long") {
 		object.push_back(0);
-	}
-	else if (first == "unsigned long") {
+	} else if (first == "unsigned long") {
 		object.push_back(0);
-	}
-	else if (first == "long long") {
+	} else if (first == "long long") {
 		object.push_back(0);
-	}
-	else if (first == "unsigned long long") {
+	} else if (first == "unsigned long long") {
 		object.push_back(0);
-	}
-	else if (first == "float") {
+	} else if (first == "float") {
 		object.push_back(0.1f);
-	}
-	else if (first == "double") {
+	} else if (first == "double") {
 		object.push_back(0.1);
-	}
-	else if (first == "long double") {
+	} else if (first == "long double") {
 		object.push_back(0.1);
-	}
-	else {
+	} else {
 
 	}
 }
@@ -675,11 +594,9 @@ template<typename T>
 void F_init_s(T & object, InitListStrTag, string first, string second = "", string key = "") {
 	if (first == "char*") {
 		object.push_back("");
-	}
-	else if (first == "string") {
+	} else if (first == "string") {
 		object.push_back("");
-	}
-	else {
+	} else {
 
 	}
 }
@@ -695,44 +612,31 @@ void F_init_s(T & object, InitSetTag, string first, string second = "", string k
 		stringstream sstr;
 		sstr << a;
 		object.insert(sstr.str()[0]);
-	}
-	else if (first == "unsigned char") {
+	} else if (first == "unsigned char") {
 		object.insert(a);
-	}
-	else if (first == "short") {
+	} else if (first == "short") {
 		object.insert(a);
-	}
-	else if (first == "unsigned short") {
+	} else if (first == "unsigned short") {
 		object.insert(a);
-	}
-	else if (first == "int") {
+	} else if (first == "int") {
 		object.insert(a);
-	}
-	else if (first == "unsigned int") {
+	} else if (first == "unsigned int") {
 		object.insert(a);
-	}
-	else if (first == "long") {
+	} else if (first == "long") {
 		object.insert(a);
-	}
-	else if (first == "unsigned long") {
+	} else if (first == "unsigned long") {
 		object.insert(a);
-	}
-	else if (first == "long long") {
+	} else if (first == "long long") {
 		object.insert(a);
-	}
-	else if (first == "unsigned long long") {
+	} else if (first == "unsigned long long") {
 		object.insert(a);
-	}
-	else if (first == "float") {
+	} else if (first == "float") {
 		object.insert(static_cast<float>(a));
-	}
-	else if (first == "double") {
+	} else if (first == "double") {
 		object.insert(static_cast<double>(a));
-	}
-	else if (first == "long double") {
+	} else if (first == "long double") {
 		object.insert(static_cast<long double>(a));
-	}
-	else {
+	} else {
 
 	}
 }
@@ -753,13 +657,11 @@ void F_init_s(T & object, InitSetStrTag, string first, string second = "", strin
 		//cout << "cc = " << (char *)cc << "---"<< *cc << "---" << &cc << " sstr 地址：" << &sstr << endl;
 		object.insert(cc);
 		temp.push_back(cc);
-	}
-	else if (first == "string") {
+	} else if (first == "string") {
 		stringstream sstr;
 		sstr << a;
 		object.insert((char *)sstr.str().c_str());
-	}
-	else {
+	} else {
 
 	}
 	//cout << "长度：" << object.size() << endl;
@@ -790,20 +692,15 @@ void F_init(T & object, int stlType, string first, string second = "", string ke
 	if (stlType == OBJECT_VECTOR) {
 		// "F_init OBJECT_VECTOR" << endl;
 		F_init_s(object, typename TagSTLType<T>::Tag{}, first);
-	}
-	if (stlType == OBJECT_LIST) {
+	} else if (stlType == OBJECT_LIST) {
 		F_init_s(object, typename TagSTLType<T>::Tag{}, first);
-	}
-	if (stlType == OBJECT_DEQUE) {
+	} else if (stlType == OBJECT_DEQUE) {
 		F_init_s(object, typename TagSTLType<T>::Tag{}, first);
-	}
-	if (stlType == OBJECT_SET) {
+	} else if (stlType == OBJECT_SET) {
 		F_init_s(object, typename TagSTLType<T>::Tag{}, first);
-	}
-	if (stlType == OBJECT_MAP) {
+	} else if (stlType == OBJECT_MAP) {
 		F_init_s(object, typename TagSTLType<T>::Tag{}, first, second, key);
-	}
-	if (stlType == OBJECT_UNORDERED_MAP) {
+	} else if (stlType == OBJECT_UNORDERED_MAP) {
 		//cout << "%$$$$$$$$ 进入" << endl;
 		F_init_s(object, typename TagSTLType<T>::Tag{}, first, second, key);
 	}
@@ -943,6 +840,7 @@ template<> struct TagDispatchTrait_zx<class std::deque<bool>> {
 };
 
 //GCC 5在编译时会将std::string类型按c++11下std::__cxx11::basic_string<char> 来处理
+//这里可能还需要判断一下是不是GCC5以下的版本
 #ifdef __GNUC__
 template<> struct TagDispatchTrait_zx<const class std::__cxx11::basic_string<char>> {
 	using Tag = BaseTag_zx;
@@ -962,24 +860,21 @@ template<> struct TagDispatchTrait_zx<class std::list<bool>> {
 
 
 //用于区分(基础类型结构体/数组)
-struct BaseAndStructTag {};
-struct BaseArrayTag {};
+// struct BaseAndStructTag {};
+// struct BaseArrayTag {};
 
-template<typename T> struct TagSTLAAAType {
-	using Tag = BaseAndStructTag;
-};
-
-// template<> struct TagSTLAAAType<student[2]> {
-//     using Tag = BaseArrayTag;
+// template<typename T> struct TagSTLAAAType {
+// 	using Tag = BaseAndStructTag;
 // };
 
-template<> struct TagSTLAAAType<int[2]> {
-	using Tag = BaseArrayTag;
-};
+//这里有问题，如何能拿到数组大小呢
+// template<> struct TagSTLAAAType<int[2]> {
+// 	using Tag = BaseArrayTag;
+// };
 
-template<> struct TagSTLAAAType<list<int>> {
-	using Tag = BaseAndStructTag;
-};
+// template<> struct TagSTLAAAType<list<int>> {
+// 	using Tag = BaseAndStructTag;
+// };
 
 class FdogSerializer {
 
@@ -992,8 +887,6 @@ private:
 	map<string, string> baseRegex;
 	map<int, string> complexRegex;
 	map<string, string> TypeName;
-	//初始化init
-	//vector<void (*pfun)()> pfunList;
 	FdogSerializer();
 	~FdogSerializer();
 
@@ -1031,9 +924,10 @@ public:
 	//设置进行模糊转换 结构体转json不存在这个问题主要是针对json转结构体的问题，如果存在分歧，可以尝试进行模糊转换
 	void __setFuzzy(string Type);
 
+	//废弃
 	void __setAliasNameS(string Type) {};//退出
 
-										 //一次性设置多个别名  必须对应  类型  原成员名 别名 一旦使用，最少三个参数
+	//一次性设置多个别名  必须对应  类型  原成员名 别名 一旦使用，最少三个参数
 	template<class T, class ...Args>
 	void __setAliasNameS(T Type, T memberName, T AliasName, Args... args) {
 		if (memberName == "" && AliasName == "") {
@@ -1050,9 +944,10 @@ public:
 		__setAliasNameS(Type, args...);
 	}
 
+	//废弃
 	void __setIgnoreFieldS(string Type) {};//退出
 
-										   //一次性设置忽略多个字段序列化
+	//一次性设置忽略多个字段序列化
 	template<class T, class ...Args>
 	void __setIgnoreFieldS(T Type, T memberName, Args... args) {
 		if (memberName == "") {
@@ -1066,9 +961,10 @@ public:
 		__setIgnoreFieldS(Type, args...);
 	}
 
+	//废弃
 	void __setIgnoreLUS(string Type) {}//退出
 
-									   //一次性设置忽略多个字段的大小写
+	//一次性设置忽略多个字段的大小写
 	template<class T, class ...Args>
 	void __setIgnoreLUS(T Type, T memberName, Args... args) {
 		if (memberName == "") {
@@ -1101,11 +997,11 @@ public:
 	//获取基础类型 只有base和struct两种
 	ObjectInfo getObjectInfoByType(string typeName, int objectTypeInt);
 
-#ifdef __GNUC__
-#elif _MSC_VER
-	wstring string2wstring(string str);
-	string wstring2string(wstring wstr);
-#endif
+	#ifdef __GNUC__
+	#elif _MSC_VER
+		wstring string2wstring(string str);
+		string wstring2string(wstring wstr);
+	#endif
 
 	//通过宏定义加载的信息获取
 	int getObjectTypeByObjectInfo(string objectName);
@@ -1156,8 +1052,8 @@ public:
 	vector<string> split(string str, string pattern);
 
 	//判断json格式是否正确
-	//vector<string> CuttingJson(string json_);
 	result CuttingJson(vector<string> & array_json, string json_);
+
 	//判断方括号是否匹配
 	result IsSquareBracket(string json_);
 
@@ -1643,42 +1539,37 @@ public:
 	}
 	template<typename T>
 	void Serialize_struct(string & json_, string & json_s, T & object_, MetaInfo * metainfoObject, BaseTag_zx) {
+		//
 	}
 
+	// template<typename T>
+	// void SerializeS(string & json_, T & object_, BaseAndStructTag, string name = "") {
+	// 	//cout << "SerializeS1" << endl;
+	// 	Serialize(json_, object_, name);
+	// }
 
-	template<typename T>
-	void SerializeS(string & json_, T & object_, BaseAndStructTag, string name = "") {
-		//cout << "SerializeS1" << endl;
-		Serialize(json_, object_, name);
-	}
+	// template<typename T>
+	// void SerializeS(string & json_, T & object_, BaseArrayTag, string name = "") {
+	// 	//cout << "SerializeS2" << endl;
+	// 	for (auto & object_one : object_) {
+	// 		Serialize(json_, object_one);
+	// 	}
+	// }
 
-	template<typename T>
-	void SerializeS(string & json_, T & object_, BaseArrayTag, string name = "") {
-		//cout << "SerializeS2" << endl;
-		for (auto & object_one : object_) {
-			Serialize(json_, object_one);
-		}
-	}
-
-	template<typename T>
-	void SerializeS_s(string & json_, T & object_, bool isArray, string name = "") {
-		// if(isArray){
-		//     SerializeS(json_, object_, TagSTLAAAType<int[2]>::Tag{}, name);
-		// }else{
-		// SerializeS(json_, object_, TagSTLAAAType<list<int>>::Tag{}, name);
-		// }
-		SerializeS(json_, object_, typename TagSTLAAAType<T>::Tag{}, name);
-	}
+	// template<typename T>
+	// void SerializeS_s(string & json_, T & object_, bool isArray, string name = "") {
+	// 	SerializeS(json_, object_, typename TagSTLAAAType<T>::Tag{}, name);
+	// }
 
 
 	//用于解析基础类型，数组(只需要判断有没有[]就能确定是不是数组，结构体和基础类型都不具备[]条件)，结构体
 	template<typename T>
 	void FSerialize(string & json_, T & object_, BaseTag, string name = "") {
 		//cout << "进入array==========0 " << typeid(T).name() << endl;
-		bool isArray = isArrayType("", FdogSerializer::Instance()->getTypeName(typeid(T).name()));
+		//bool isArray = isArrayType("", FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		//cout << "是否是数组 ： " << isArray << endl;
-		SerializeS_s(json_, object_, isArray, name);
-		//Serialize(json_, object_, name);
+		//SerializeS(json_, object_, typename TagSTLAAAType<T>::Tag{}, name);
+		Serialize(json_, object_, name);
 		//这里需要判断类型 如果是基础类型直接使用name 不是基础类型，可以使用
 		if (isBaseType(FdogSerializer::Instance()->getTypeName(typeid(T).name()))) {
 			removeLastComma(json_);
@@ -2197,38 +2088,39 @@ public:
 	void Deserialize_struct(T & object_, string & value, MetaInfo * metainfoObject, BaseTag_zx) {
 	}
 
-	template<typename T>
-	void DeserializeS(string & json_, T & object_, BaseAndStructTag, string name = "") {
-		//cout << "DeserializeS BaseAndStructTag json_ = " << json_ << endl;
-		Deserialize(object_, json_, name);
-	}
+	// template<typename T>
+	// void DeserializeS(string & json_, T & object_, BaseAndStructTag, string name = "") {
+	// 	//cout << "DeserializeS BaseAndStructTag json_ = " << json_ << endl;
+	// 	Deserialize(object_, json_, name);
+	// }
 
-	template<typename T>
-	void DeserializeS(string & json_, T & object_, BaseArrayTag, string name = "") {
-		vector<string> json_array;
-		json_array = FdogSerializer::Instance()->CuttingArray(json_);
-		//cout << "----" << json_array.size() << endl;
-		for (auto & object_one : object_) {
-			Deserialize(object_one, json_);
-		}
-	}
+	// template<typename T>
+	// void DeserializeS(string & json_, T & object_, BaseArrayTag, string name = "") {
+	// 	vector<string> json_array;
+	// 	json_array = FdogSerializer::Instance()->CuttingArray(json_);
+	// 	//cout << "----" << json_array.size() << endl;
+	// 	for (auto & object_one : object_) {
+	// 		Deserialize(object_one, json_);
+	// 	}
+	// }
 
-	template<typename T>
-	void DeserializeS_s(T & object_, string & json_, bool isArray, string name = "") {
-		// if(isArray){
-		//     DeserializeS(json_, object_, TagSTLAAAType<int[2]>::Tag{}, name);
-		// }else{
+	// template<typename T>
+	// void DeserializeS_s(T & object_, string & json_, bool isArray, string name = "") {
+	// 	// if(isArray){
+	// 	//     DeserializeS(json_, object_, TagSTLAAAType<int[2]>::Tag{}, name);
+	// 	// }else{
 
-		DeserializeS(json_, object_, typename TagSTLAAAType<T>::Tag{}, name);
-		//}
-	}
+	// 	DeserializeS(json_, object_, typename TagSTLAAAType<T>::Tag{}, name);
+	// 	//}
+	// }
 
 	//用于解析基础类型，数组(只需要判断有没有[]就能确定是不是数组，结构体和基础类型都不具备[]条件)，结构体
 	template<typename T>
 	void FDeserialize(T & object_, string & json_, BaseTag, string name = "") {
 		//cout << "FDeserialize BaseTag json_ = " << json_ << endl;
-		bool isArray = isArrayType("", FdogSerializer::Instance()->getTypeName(typeid(T).name()));
-		DeserializeS_s(object_, json_, isArray, name);
+		//bool isArray = isArrayType("", FdogSerializer::Instance()->getTypeName(typeid(T).name()));
+		//DeserializeS_s(object_, json_, isArray, name);
+		Deserialize(object_, json_, name);
 	}
 
 	//用于解析STL（map除外）
@@ -2847,7 +2739,7 @@ REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
         metaInfoObjectList.push_back(metainfo_one);\
     }while(0);
 
-#define TAGDISPATCH_LIST(object)\
+#define REGISTERE_CONTAINER_V(object)\
 template<> struct TagDispatchTrait_zx<vector<object>> {using Tag = BaseTag_zx;};\
 template<> struct TagDispatchTrait<vector<object>> {using Tag = ArrayTag;};\
 template<> struct TagSTLType<vector<object>> {using Tag = InitStructTag;};\
@@ -2864,7 +2756,7 @@ template<> struct TagDispatchTrait_zx<list<object>> {using Tag = BaseTag_zx;};\
 template<> struct TagDispatchTrait<list<object>> {using Tag = ArrayTag;};\
 template<> struct TagSTLType<list<object>> {using Tag = InitStructTag;};\
 
-#define TAGDISPATCH_MAP(object, object2)\
+#define REGISTERE_CONTAINER_M(object, object2)\
 template<> struct TagDispatchTrait_zx<map<object, object2>> {using Tag = BaseTag_zx;};\
 template<> struct TagDispatchTrait<map<object, object2>> {using Tag = ArrayTag;};\
 template<> struct TagSTLType<map<object, object2>> {using Tag = InitStructTag;};\
