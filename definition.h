@@ -1,72 +1,85 @@
-/*
-¸ÃÏîÄ¿Ç©ÊğÁËApache-2.0 License£¬ÏêÇéÇë²Î¼ûLICENSE
-¸ù¾İ Apache Ğí¿É£¬°æ±¾ 2.0£¨¡°Ğí¿É¡±£©»ñµÃĞí¿É
-³ı·Ç×ñÊØĞí¿É£¬·ñÔòÄú²»µÃÊ¹ÓÃ´ËÎÄ¼ş¡£
-
-Copyright 2021-2022 »¨¹·Fdog(ÕÅĞñ)
-*/
-
 #ifndef BEHAVIOR_H
 #define BEHAVIOR_H
 #include "define.h"
-#include "testType.h"
-/******ÔÚ´ËÌí¼Ó½á¹¹ÌåËù°üº¬µÄÍ·ÎÄ¼ş****/
-//#include "example/testType.h"
-/*********************************/
+//#include "./example/testType.h"
+
+// /*
+// è¯¥é¡¹ç›®ç­¾ç½²äº†Apache-2.0 Licenseï¼Œè¯¦æƒ…è¯·å‚è§LICENSE
+// æ ¹æ® Apache è®¸å¯ï¼Œç‰ˆæœ¬ 2.0ï¼ˆâ€œè®¸å¯â€ï¼‰è·å¾—è®¸å¯
+// é™¤ééµå®ˆè®¸å¯ï¼Œå¦åˆ™æ‚¨ä¸å¾—ä½¿ç”¨æ­¤æ–‡ä»¶ã€‚
+
+// Copyright 2021-2022 èŠ±ç‹—Fdog(å¼ æ—­)
+// */
+
+// #ifndef BEHAVIOR_H
+// #define BEHAVIOR_H
+// #include "define.h"
+// //#include "./example/testType.h"
+// /******åœ¨æ­¤æ·»åŠ ç»“æ„ä½“æ‰€åŒ…å«çš„å¤´æ–‡ä»¶****/
+// //#include "example/testType.h"
+// /*********************************/
 
 
-//½á¹¹ÌåÖĞ°üº¬×Ô¶¨Òå½á¹¹ÌåÔÚ´ËÌí¼Ó
-//ÓÃÓÚĞòÁĞ»¯
-#define Serialize_type_judgment_all\
-    Serialize_type_judgment(student)\
-    Serialize_type_judgment(teacher)\
-    Serialize_type_judgment(classtest)\
-//ÓÃÓÚ·´ĞòÁĞ»¯
-#define Deserialize_type_judgment_all\
-    Deserialize_type_judgment(student)\
-    Deserialize_type_judgment(teacher)\
-    Deserialize_type_judgment(classtest)\
+// //ç»“æ„ä½“ä¸­åŒ…å«è‡ªå®šä¹‰ç»“æ„ä½“åœ¨æ­¤æ·»åŠ 
+// //ç”¨äºåºåˆ—åŒ–
+#define Serialize_type_judgment_all
+
+//     // Serialize_type_judgment(student)
+//     // Serialize_type_judgment(teacher)
+//     // Serialize_type_judgment(classtest)
+// //ç”¨äºååºåˆ—åŒ–
+#define Deserialize_type_judgment_all
+
+//     // Deserialize_type_judgment(student)
+//     // Deserialize_type_judgment(teacher)
+//     // Deserialize_type_judgment(classtest)
 
 
-//½á¹¹ÌåÖĞ°üº¬×Ô¶¨ÒåÀàĞÍµÄÊı×éÔÚ´ËÌáÌí¼Ó
-//ÓÃÓÚĞòÁĞ»¯
-#define Serialize_arraytype_judgment_all\
-    Serialize_arraytype_judgment(student)\
-//ÓÃÓÚ·´ĞòÁĞ»¯
-#define Deserialize_arraytype_judgment_all\
-    Deserialize_arraytype_judgment(student)\
+// //ç»“æ„ä½“ä¸­åŒ…å«è‡ªå®šä¹‰ç±»å‹çš„æ•°ç»„åœ¨æ­¤ææ·»åŠ 
+// //ç”¨äºåºåˆ—åŒ–
+#define Serialize_arraytype_judgment_all
+
+//     //Serialize_arraytype_judgment(student)
+// //ç”¨äºååºåˆ—åŒ–
+#define Deserialize_arraytype_judgment_all
+
+//     //Deserialize_arraytype_judgment(student)
 
 
 
-//½á¹¹ÌåÖĞ°üº¬×Ô¶¨ÒåÀàĞÍSTLÈİÆ÷ÔÚ´ËÌí¼Ó
+// //ç»“æ„ä½“ä¸­åŒ…å«è‡ªå®šä¹‰ç±»å‹STLå®¹å™¨åœ¨æ­¤æ·»åŠ 
 
-//ÓÃÓÚĞòÁĞ»¯
-#define Serialize_vector_type_judgment_all\
-    Serialize_vector_type_judgment(student)\
+// //ç”¨äºåºåˆ—åŒ–
+#define Serialize_vector_type_judgment_all
 
-#define Serialize_list_type_judgment_all\
-    Serialize_list_type_judgment(student)\
+//     //Serialize_vector_type_judgment(student)
 
-#define Serialize_deque_type_judgment_all\
-    Serialize_deque_type_judgment(student)\
+#define Serialize_list_type_judgment_all
 
-#define Serialize_set_type_judgment_all\
-    Serialize_set_type_judgment(student)\
+//    // Serialize_list_type_judgment(student)
 
-#define Serialize_map_type_judgment_all\
-    //Serialize_map_type_judgment(string,student)
+#define Serialize_deque_type_judgment_all
 
-//ÓÃÓÚ·´ĞòÁĞ»¯
-#define Deserialize_vector_type_judgment_all\
-    Deserialize_vector_type_judgment(student)\
+//     //Serialize_deque_type_judgment(student)
 
-#define Deserialize_list_type_judgment_all\
-    Deserialize_list_type_judgment(student)\
+#define Serialize_set_type_judgment_all
 
-#define Deserialize_deque_type_judgment_all\
-    Deserialize_deque_type_judgment(student)\
+//     //Serialize_set_type_judgment(student)
 
-#define Deserialize_set_type_judgment_all Deserialize_set_type_judgment(student)\
+#define Serialize_map_type_judgment_all
+//     //Serialize_map_type_judgment(string,student)
+
+// //ç”¨äºååºåˆ—åŒ–
+#define Deserialize_vector_type_judgment_all
+//     //Deserialize_vector_type_judgment(student)
+
+#define Deserialize_list_type_judgment_all
+//     //Deserialize_list_type_judgment(student)
+
+#define Deserialize_deque_type_judgment_all
+//     //Deserialize_deque_type_judgment(student)
+
+#define Deserialize_set_type_judgment_all //Deserialize_set_type_judgment(student)
 
 #define Deserialize_map_type_judgment_all //Deserialize_map_type_judgment(string,student)
 

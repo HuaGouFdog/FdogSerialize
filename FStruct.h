@@ -1,15 +1,13 @@
 /*
-¸ÃÏîÄ¿Ç©ÊğÁËApache-2.0 License£¬ÏêÇéÇë²Î¼ûLICENSE
-¸ù¾İ Apache Ğí¿É£¬°æ±¾ 2.0£¨¡°Ğí¿É¡±£©»ñµÃĞí¿É
-³ı·Ç×ñÊØĞí¿É£¬·ñÔòÄú²»µÃÊ¹ÓÃ´ËÎÄ¼ş¡£
-
-Copyright 2021-2022 »¨¹·Fdog(ÕÅĞñ)
+è¯¥é¡¹ç›®ç­¾ç½²äº†Apache-2.0 Licenseï¼Œè¯¦æƒ…è¯·å‚è§LICENSE
+æ ¹æ® Apache è®¸å¯ï¼Œç‰ˆæœ¬ 2.0ï¼ˆâ€œè®¸å¯â€ï¼‰è·å¾—è®¸å¯
+é™¤ééµå®ˆè®¸å¯ï¼Œå¦åˆ™æ‚¨ä¸å¾—ä½¿ç”¨æ­¤æ–‡ä»¶ã€‚
+Copyright 2021-2022 èŠ±ç‹—Fdog(å¼ æ—­)
 */
 
 #ifndef FSTRUCT_H
 #define FSTRUCT_H
 
-#include "definition.h"
 #include <algorithm>
 #ifdef __GNUC__
 #include <cxxabi.h>
@@ -19,7 +17,6 @@ Copyright 2021-2022 »¨¹·Fdog(ÕÅĞñ)
 #include <deque>
 #include <mutex>
 #include <map>
-#include <map>
 #include <list>
 #include <sstream>
 #include <string>
@@ -27,20 +24,27 @@ Copyright 2021-2022 »¨¹·Fdog(ÕÅĞñ)
 #include <vector>
 #include <regex>
 #include <codecvt>
+#ifdef __GNUC__
+#elif _MSC_VER
 #include <Windows.h>
+#endif
+#include <codecvt> //
+#include <unordered_map>
+#include <iostream>
+
 using namespace std;
 
-//ÓÃÓÚÊı×éÀàĞÍÕûÌåÌáÈ¡
+//ç”¨äºæ•°ç»„ç±»å‹æ•´ä½“æå–
 const string arrayRegex = "(\\[(.*?)\\])";
-//ÓÃÓÚMapÀàĞÍÕûÌåÌáÈ¡
+//ç”¨äºMapç±»å‹æ•´ä½“æå–
 const string mapRegex = "(\\{(.*?)\\})";
-//Æ¥ÅäÊı×é
+//åŒ¹é…æ•°ç»„
 const string patternArray = "((A)(\\d+)_\\d?(\\D+))";
-//Æ¥Åä±ğÃû
+//åŒ¹é…åˆ«å
 const string patterAlias = "(\\(A:(.*?)\\))";
-//ÓÃÓÚ½á¹¹ÌåÕûÌåÌáÈ¡
+//ç”¨äºç»“æ„ä½“æ•´ä½“æå–
 const string objectRegex = "(\\{(.*?)\\})";
-//Æ¥Åä½á¹¹Ìå
+//åŒ¹é…ç»“æ„ä½“
 const string patternObject = "((\\d+)(\\D+))";
 
 enum ObjectType {
@@ -56,33 +60,62 @@ enum ObjectType {
 	OBJECT_DEQUE,
 };
 
+//ä¿å­˜ç»“æ„ä½“çš„init()
+//typedef struct GetInit {
+
+// static int (*pfunarr)() //å‡½æ•°æŒ‡é’ˆ
+// static int indexa = 0;
+// static int(*pfunarr[999])() = {};
+typedef int(*fun)();
+
+// char * (*(*ptrfun)[999])(char *p); //å‡½æ•°æŒ‡é’ˆæ•°ç»„æŒ‡é’ˆ
+
+// char * (*pfun[999])(char *p);  	   //å‡½æ•°æŒ‡é’ˆæ•°ç»„
+// char * fun2(char *p);   //å‡½æ•°
+
+// ptrfun=&pfun;
+// pfun[0]=fun1;
+
+// typedef int (*fun_t)();
+
+// static int addFun(fun_t operation) {
+//     operation();
+// }
+
+static void addFun(fun a) {
+	//pfunarr[indexa++] = a;
+	a();
+	return;
+};
+//}GetInit;
+
 
 /***********************************
-*   ´æ´¢½á¹¹ÌåÔªĞÅÏ¢
+*   å­˜å‚¨ç»“æ„ä½“å…ƒä¿¡æ¯
 ************************************/
 typedef struct MetaInfo {
-	string memberName;              //³ÉÔ±Ãû
-	string memberAliasName;         //³ÉÔ±±ğÃû
-	string memberType;              //³ÉÔ±ÀàĞÍ
-	size_t memberOffset;            //Æ«ÒÆÖµ
-	size_t memberTypeSize;          //ÀàĞÍ´óĞ¡
-	size_t memberArraySize;         //Èç¹ûÀàĞÍÊÇÊı×é£¬±íÊ¾Êı×é´óĞ¡
-	int    memberTypeInt;           //³ÉÔ±ÀàĞÍ ÊıÖµĞÍ
-	bool   isPointer;               //ÊÇ·ñÊÇÖ¸Õë
-	string first;                   //Èç¹ûÊÇmapÀàĞÍ first±íÊ¾keyµÄÀàĞÍ£¬Èç¹ûÊÇÆäËûÀàĞÍ£¬±íÊ¾valueÀàĞÍ
-	string second;                  //Èç¹ûÊÇmapÀàĞÍ£¬second±íÊ¾valueÀàĞÍ
-	bool   memberIsIgnore = false;    //ÊÇ·ñºöÂÔ×Ö¶Î
-	bool   memberIsIgnoreLU = false;  //ÊÇ·ñºöÂÔ´óĞ¡Ğ´                                                                                                                
+	string memberName;              //æˆå‘˜å
+	string memberAliasName;         //æˆå‘˜åˆ«å
+	string memberType;              //æˆå‘˜ç±»å‹
+	size_t memberOffset;            //åç§»å€¼
+	size_t memberTypeSize;          //ç±»å‹å¤§å°
+	size_t memberArraySize;         //å¦‚æœç±»å‹æ˜¯æ•°ç»„ï¼Œè¡¨ç¤ºæ•°ç»„å¤§å°
+	int    memberTypeInt;           //æˆå‘˜ç±»å‹ æ•°å€¼å‹
+	bool   isPointer;               //æ˜¯å¦æ˜¯æŒ‡é’ˆ
+	string first;                   //å¦‚æœæ˜¯mapç±»å‹ firstè¡¨ç¤ºkeyçš„ç±»å‹ï¼Œå¦‚æœæ˜¯å…¶ä»–ç±»å‹ï¼Œè¡¨ç¤ºvalueç±»å‹
+	string second;                  //å¦‚æœæ˜¯mapç±»å‹ï¼Œsecondè¡¨ç¤ºvalueç±»å‹
+	bool   memberIsIgnore = false;    //æ˜¯å¦å¿½ç•¥å­—æ®µ
+	bool   memberIsIgnoreLU = false;  //æ˜¯å¦å¿½ç•¥å¤§å°å†™                                                                                                                
 }MetaInfo;
 
 /***********************************
-*   ´æ´¢¶ÔÏóÔªĞÅÏ¢
+*   å­˜å‚¨å¯¹è±¡å…ƒä¿¡æ¯
 ************************************/
 typedef struct ObjectInfo {
-	string objectType;                      //½á¹¹ÌåÀàĞÍ ×Ö·û´®±íÊ¾
-	int objectTypeInt;                      //½á¹¹ÌåÀàĞÍ ÊıÖµ±íÊ¾
-	int objectSize;                         //½á¹¹Ìå´óĞ¡
-	vector<MetaInfo *> metaInfoObjectList;  //½á¹¹ÌåÔªĞÅÏ¢ 
+	string objectType;                      //ç»“æ„ä½“ç±»å‹ å­—ç¬¦ä¸²è¡¨ç¤º
+	int objectTypeInt;                      //ç»“æ„ä½“ç±»å‹ æ•°å€¼è¡¨ç¤º
+	int objectSize;                         //ç»“æ„ä½“å¤§å°
+	vector<MetaInfo *> metaInfoObjectList;  //ç»“æ„ä½“å…ƒä¿¡æ¯
 }ObjectInfo;
 
 
@@ -92,23 +125,23 @@ typedef struct FdogMap {
 };
 
 /***********************************
-*   ´æ´¢³ÉÔ±ÀàĞÍ£¬Êı×é´óĞ¡
+*   å­˜å‚¨æˆå‘˜ç±»å‹ï¼Œæ•°ç»„å¤§å°
 ************************************/
 struct memberAttribute {
 	string valueType;
-	int valueTypeInt;   //ÀàĞÍ ÊıÖµ±íÊ¾
-	string first;       //Èç¹ûÊÇmapÀàĞÍ first±íÊ¾keyµÄÀàĞÍ£¬Èç¹ûÊÇÆäËûÀàĞÍ£¬±íÊ¾valueÀàĞÍ
-	string second;      //Èç¹ûÊÇmapÀàĞÍ£¬second±íÊ¾valueÀàĞÍ
+	int valueTypeInt;   //ç±»å‹ æ•°å€¼è¡¨ç¤º
+	string first;       //å¦‚æœæ˜¯mapç±»å‹ firstè¡¨ç¤ºkeyçš„ç±»å‹ï¼Œå¦‚æœæ˜¯å…¶ä»–ç±»å‹ï¼Œè¡¨ç¤ºvalueç±»å‹
+	string second;      //å¦‚æœæ˜¯mapç±»å‹ï¼Œsecondè¡¨ç¤ºvalueç±»å‹
 	int ArraySize;
 };
 
-//½á¹¹ÌåÓÃÓÚ·µ»ØĞÅÏ¢
+//ç»“æ„ä½“ç”¨äºè¿”å›ä¿¡æ¯
 struct result {
-	int code;           //1.ÕıÈ· 0.´íÎó
-	string message;     //Èç¹û´íÎó£¬·µ»Ø´íÎóÌáÊ¾
+	int code;           //1.æ­£ç¡® 0.é”™è¯¯
+	string message;     //å¦‚æœé”™è¯¯ï¼Œè¿”å›é”™è¯¯æç¤º
 };
 
-//ÉùÃ÷ĞòÁĞ»¯baseÀà
+//å£°æ˜åºåˆ—åŒ–baseç±»
 class FdogSerializerBase {
 private:
 	static mutex * mutex_base;
@@ -224,11 +257,11 @@ public:
 		}
 		if (valueType == "wstring") {
 #ifdef __GNUC__
-			cout << "¼ì²âµ½wstring" << endl;
+			cout << "æ£€æµ‹åˆ°wstring" << endl;
 			std::wstring_convert< std::codecvt_utf8<wchar_t> > strCnv;
 			*((wstring *)((char *)&object + offsetValue)) = strCnv.from_bytes(value);
 #elif _MSC_VER
-			cout << "¼ì²âµ½wstring" << endl;
+			cout << "æ£€æµ‹åˆ°wstring" << endl;
 			*((wstring *)((char *)&object + offsetValue)) = FdogSerializer::Instance()->string2wstring(value);
 #endif
 		}
@@ -278,7 +311,7 @@ public:
 		}
 	}
 
-	// »ù´¡ÀàĞÍ×ªjson
+	// åŸºç¡€ç±»å‹è½¬json
 	template<class T>
 	void BaseToJson(string & json_, MetaInfo * metainfoobject, T & object_) {
 		//cout << "BaseToJson metainfoobject->memberType = " << metainfoobject->memberType << "&metainfoobject->memberName = " << metainfoobject->memberName << endl;
@@ -291,14 +324,14 @@ public:
 		}
 	}
 
-	// //»ù´¡ÀàĞÍ×ªjson
+	// //åŸºç¡€ç±»å‹è½¬json
 	template<class T>
 	void BaseToJsonA(string & json_, MetaInfo * metainfoobject, T & object_) {
 		string value = getValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset);
 		json_ = json_ + value + ",";
 	}
 
-	// //json×ª»ù´¡ÀàĞÍ
+	// //jsonè½¬åŸºç¡€ç±»å‹
 	template<class T>
 	void JsonToBase(T & object_, MetaInfo * metainfoobject, string json_) {
 		setValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset, json_);
@@ -306,14 +339,14 @@ public:
 };
 
 
-//BaseTag ArrayTag MapTag ÓÃÓÚ´¦ÀíÔÚSerialize£¬DeserializeÉÏµÄ·Ö·¢
-//´¦Àí base
+//BaseTag ArrayTag MapTag ç”¨äºå¤„ç†åœ¨Serializeï¼ŒDeserializeä¸Šçš„åˆ†å‘
+//å¤„ç† base
 struct BaseTag {};
-//´¦Àí array vector list deque set
+//å¤„ç† array vector list deque set
 struct ArrayTag {};
-//´¦Àí map  
+//å¤„ç† map  
 struct MapTag {};
-//´¦Àí unordered_map
+//å¤„ç† unordered_map
 //struct UnorderedMapTag {};
 
 template<typename T> struct TagDispatchTrait {
@@ -344,7 +377,7 @@ template<> struct TagDispatchTrait<unordered_map<int, int>> {
 	using Tag = MapTag;
 };
 
-// Çø·Ö·Ç×Ö·û´®ºÍ×Ö·û´® ´¦ÀíÔÚFSerialize(map) keyµÄÖµ£¬¿ÉÄÜÊÇÊıÖµ£¬¿ÉÄÜÊÇ·ÇÊıÖµ
+// åŒºåˆ†éå­—ç¬¦ä¸²å’Œå­—ç¬¦ä¸² å¤„ç†åœ¨FSerialize(map) keyçš„å€¼ï¼Œå¯èƒ½æ˜¯æ•°å€¼ï¼Œå¯èƒ½æ˜¯éæ•°å€¼
 struct NoStringTag {};
 struct StringTag {};
 
@@ -373,9 +406,9 @@ string F_toString(T object) {
 	return F_toString_s(object, typename TagString<T>::Tag{});
 }
 
-// ÓÃÓÚ·´ĞòÁĞ»¯Ê±¶ÔÏóÎª¿ÕµÄÇé¿ö£¬ĞèÒª¸ù¾İÊı¾İ½øĞĞÀ©Õ¹³¤¶È Init  ·ÖÎªÊıÖµºÍ·ÇÊıÖµÀàĞÍ
+// ç”¨äºååºåˆ—åŒ–æ—¶å¯¹è±¡ä¸ºç©ºçš„æƒ…å†µï¼Œéœ€è¦æ ¹æ®æ•°æ®è¿›è¡Œæ‰©å±•é•¿åº¦ Init  åˆ†ä¸ºæ•°å€¼å’Œéæ•°å€¼ç±»å‹
 struct InitBaseTag {};
-
+struct InitStructTag {};
 struct InitVectorTag {};
 struct InitVectorStrTag {};
 
@@ -462,12 +495,17 @@ template<> struct TagSTLType<unordered_map<string, int>> {
 
 template<typename T>
 void F_init_s(T & object, InitBaseTag, string first, string second = "", string key = "") {
+	//cout << " F_init_s èµ°åˆ°è¿™é‡Œäº†" << endl;
+}
 
+template<typename T>
+void F_init_s(T & object, InitStructTag, string first, string second = "", string key = "") {
+	object.resize(2);
 }
 
 template<typename T>
 void F_init_s(T & object, InitVectorTag, string first, string second = "", string key = "") {
-	//cout << " F_init_s object size = " << object.size() << endl;
+	// " F_init_s object size = " << object.size() << endl;
 	if (first == "char") {
 		object.push_back('0');
 	}
@@ -514,6 +552,7 @@ void F_init_s(T & object, InitVectorTag, string first, string second = "", strin
 
 template<typename T>
 void F_init_s(T & object, InitVectorStrTag, string first, string second = "", string key = "") {
+	// " F_init_s object size = " << object.size() << endl;
 	if (first == "char*") {
 		object.push_back("");
 	}
@@ -521,7 +560,6 @@ void F_init_s(T & object, InitVectorStrTag, string first, string second = "", st
 		object.push_back("");
 	}
 	else {
-
 	}
 }
 
@@ -648,7 +686,7 @@ void F_init_s(T & object, InitListStrTag, string first, string second = "", stri
 
 template<typename T>
 void F_init_s(T & object, InitSetTag, string first, string second = "", string key = "") {
-	//setÊÇ²»¿ÉÒÔÖØ¸´µÄ£¬¿ÉÒÔÄÃËæ»úÊı
+	//setæ˜¯ä¸å¯ä»¥é‡å¤çš„ï¼Œå¯ä»¥æ‹¿éšæœºæ•°
 	int a = rand() % 100;
 	if (first == "int") {
 		object.insert(a);
@@ -699,7 +737,7 @@ void F_init_s(T & object, InitSetTag, string first, string second = "", string k
 	}
 }
 
-//Èç¹ûÊÇchar * ÀàĞÍ£¬Ã¿´ÎdeleteÖ®ºó µØÖ·¶¼ÊÇÏàÍ¬µÄ£¬ËùÒÔ²»ÄÜÔÚÄÚ²¿Ê¹ÓÃÍê¹éÁã£¬ÒªÔÚÍâÃæÕûÌå¸³ÍêÖµdelete
+//å¦‚æœæ˜¯char * ç±»å‹ï¼Œæ¯æ¬¡deleteä¹‹å åœ°å€éƒ½æ˜¯ç›¸åŒçš„ï¼Œæ‰€ä»¥ä¸èƒ½åœ¨å†…éƒ¨ä½¿ç”¨å®Œå½’é›¶ï¼Œè¦åœ¨å¤–é¢æ•´ä½“èµ‹å®Œå€¼delete
 static vector<char *> temp;
 
 template<typename T>
@@ -710,9 +748,9 @@ void F_init_s(T & object, InitSetStrTag, string first, string second = "", strin
 		stringstream sstr;
 		sstr << a;
 		char * cc = new char[4];
-		//cout << "cc = " << (char *)cc << "---"<< *cc << "---" << &cc << " sstr µØÖ·£º" << &sstr << endl;
+		//cout << "cc = " << (char *)cc << "---"<< *cc << "---" << &cc << " sstr åœ°å€ï¼š" << &sstr << endl;
 		strcpy(cc, (char *)sstr.str().data());
-		//cout << "cc = " << (char *)cc << "---"<< *cc << "---" << &cc << " sstr µØÖ·£º" << &sstr << endl;
+		//cout << "cc = " << (char *)cc << "---"<< *cc << "---" << &cc << " sstr åœ°å€ï¼š" << &sstr << endl;
 		object.insert(cc);
 		temp.push_back(cc);
 	}
@@ -724,7 +762,7 @@ void F_init_s(T & object, InitSetStrTag, string first, string second = "", strin
 	else {
 
 	}
-	//cout << "³¤¶È£º" << object.size() << endl;
+	//cout << "é•¿åº¦ï¼š" << object.size() << endl;
 }
 
 template<typename T>
@@ -750,6 +788,7 @@ template<typename T>
 void F_init(T & object, int stlType, string first, string second = "", string key = "") {
 
 	if (stlType == OBJECT_VECTOR) {
+		// "F_init OBJECT_VECTOR" << endl;
 		F_init_s(object, typename TagSTLType<T>::Tag{}, first);
 	}
 	if (stlType == OBJECT_LIST) {
@@ -765,12 +804,164 @@ void F_init(T & object, int stlType, string first, string second = "", string ke
 		F_init_s(object, typename TagSTLType<T>::Tag{}, first, second, key);
 	}
 	if (stlType == OBJECT_UNORDERED_MAP) {
-		//cout << "%$$$$$$$$ ½øÈë" << endl;
+		//cout << "%$$$$$$$$ è¿›å…¥" << endl;
 		F_init_s(object, typename TagSTLType<T>::Tag{}, first, second, key);
 	}
 }
 
-//ÓÃÓÚÇø·Ö(»ù´¡ÀàĞÍ½á¹¹Ìå/Êı×é)
+//ç”¨äºè§£æ
+struct StructTag_zx {};
+struct BaseTag_zx {};
+struct ArrayTag_zx {};
+
+template<typename T> struct TagDispatchTrait_zx {
+	using Tag = StructTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<char> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<unsigned char> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<char*> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<short int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<short unsigned int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<unsigned int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<long int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<long unsigned int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<long long int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<long long unsigned int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<float> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<double> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<long double> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<string> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const char> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const unsigned char> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<char* const> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const short int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const short unsigned int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const unsigned int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const long int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const long unsigned int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const long long int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const long long unsigned int> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const float> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const double> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<const long double> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<class std::set<bool>> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<class std::deque<bool>> {
+	using Tag = BaseTag_zx;
+};
+
+//GCC 5åœ¨ç¼–è¯‘æ—¶ä¼šå°†std::stringç±»å‹æŒ‰c++11ä¸‹std::__cxx11::basic_string<char> æ¥å¤„ç†
+#ifdef __GNUC__
+template<> struct TagDispatchTrait_zx<const class std::__cxx11::basic_string<char>> {
+	using Tag = BaseTag_zx;
+};
+template<> struct TagDispatchTrait_zx<class std::__cxx11::list<bool>> {
+	using Tag = BaseTag_zx;
+};
+#elif _MSC_VER
+template<> struct TagDispatchTrait_zx<const class std::basic_string<char>> {
+	using Tag = BaseTag_zx;
+};
+
+template<> struct TagDispatchTrait_zx<class std::list<bool>> {
+	using Tag = BaseTag_zx;
+};
+#endif
+
+
+//ç”¨äºåŒºåˆ†(åŸºç¡€ç±»å‹ç»“æ„ä½“/æ•°ç»„)
 struct BaseAndStructTag {};
 struct BaseArrayTag {};
 
@@ -801,71 +992,73 @@ private:
 	map<string, string> baseRegex;
 	map<int, string> complexRegex;
 	map<string, string> TypeName;
+	//åˆå§‹åŒ–init
+	//vector<void (*pfun)()> pfunList;
 	FdogSerializer();
 	~FdogSerializer();
 
 public:
-	//»ñÈ¡ÊµÀı
+	//è·å–å®ä¾‹
 	static FdogSerializer * Instance();
 
-	//Ìí¼Óobjectinfo
+	//æ·»åŠ objectinfo
 	void addObjectInfo(ObjectInfo * objectinfo);
 
-	//»ñÈ¡¶ÔÓ¦Info
+	//è·å–å¯¹åº”Info
 	ObjectInfo & getObjectInfo(string objectName);
 
-	//»ñÈ¡¶ÔÓÚInfo Õë¶Ô»ù´¡ÀàĞÍ»ñÈ¡
+	//è·å–å¯¹äºInfo é’ˆå¯¹åŸºç¡€ç±»å‹è·å–
 	MetaInfo * getMetaInfo(string TypeName);
 
-	//Õë¶Ô²»Í¬Æ½Ì¨»ñÈ¡Î¨Ò»ÀàĞÍÖµ
+	//é’ˆå¯¹ä¸åŒå¹³å°è·å–å”¯ä¸€ç±»å‹å€¼
 	std::string getTypeName(string TypeName);
 
-	//ÉèÖÃ±ğÃû
+	//è®¾ç½®åˆ«å
 	void __setAliasName(string Type, string memberName, string AliasName);
-	//ÒÆ³ı±ğÃû
+	//ç§»é™¤åˆ«å
 	void __removeAliasName(string Type, string memberName);
 
-	//ÉèÖÃÊÇ·ñºöÂÔ¸Ã×Ö¶ÎĞòÁĞ»¯
+	//è®¾ç½®æ˜¯å¦å¿½ç•¥è¯¥å­—æ®µåºåˆ—åŒ–
 	void __setIgnoreField(string Type, string memberName);
-	//ÒÆ³ıºöÂÔ×Ö¶Î
+	//ç§»é™¤å¿½ç•¥å­—æ®µ
 	void __removeIgnoreField(string Type, string memberName);
 
-	//ÉèÖÃÊÇ·ñºöÂÔ´óĞ¡Ğ´
+	//è®¾ç½®æ˜¯å¦å¿½ç•¥å¤§å°å†™
 	void __setIgnoreLU(string Type, string memberName);
-	//ÒÆ³ıºöÂÔ´óĞ¡Ğ´
+	//ç§»é™¤å¿½ç•¥å¤§å°å†™
 	void __removeIgnoreLU(string Type, string memberName);
 
-	//ÉèÖÃ½øĞĞÄ£ºı×ª»» ½á¹¹Ìå×ªjson²»´æÔÚÕâ¸öÎÊÌâÖ÷ÒªÊÇÕë¶Ôjson×ª½á¹¹ÌåµÄÎÊÌâ£¬Èç¹û´æÔÚ·ÖÆç£¬¿ÉÒÔ³¢ÊÔ½øĞĞÄ£ºı×ª»»
+	//è®¾ç½®è¿›è¡Œæ¨¡ç³Šè½¬æ¢ ç»“æ„ä½“è½¬jsonä¸å­˜åœ¨è¿™ä¸ªé—®é¢˜ä¸»è¦æ˜¯é’ˆå¯¹jsonè½¬ç»“æ„ä½“çš„é—®é¢˜ï¼Œå¦‚æœå­˜åœ¨åˆ†æ­§ï¼Œå¯ä»¥å°è¯•è¿›è¡Œæ¨¡ç³Šè½¬æ¢
 	void __setFuzzy(string Type);
 
-	void __setAliasNameS(string Type) {};//ÍË³ö
+	void __setAliasNameS(string Type) {};//é€€å‡º
 
-										 //Ò»´ÎĞÔÉèÖÃ¶à¸ö±ğÃû  ±ØĞë¶ÔÓ¦  ÀàĞÍ  Ô­³ÉÔ±Ãû ±ğÃû Ò»µ©Ê¹ÓÃ£¬×îÉÙÈı¸ö²ÎÊı
+										 //ä¸€æ¬¡æ€§è®¾ç½®å¤šä¸ªåˆ«å  å¿…é¡»å¯¹åº”  ç±»å‹  åŸæˆå‘˜å åˆ«å ä¸€æ—¦ä½¿ç”¨ï¼Œæœ€å°‘ä¸‰ä¸ªå‚æ•°
 	template<class T, class ...Args>
 	void __setAliasNameS(T Type, T memberName, T AliasName, Args... args) {
 		if (memberName == "" && AliasName == "") {
-			//ÓĞÎÊÌâ
+			//æœ‰é—®é¢˜
 		}
-		//Ã¿´Î»ñÈ¡Á½¸öÖµ
+		//æ¯æ¬¡è·å–ä¸¤ä¸ªå€¼
 		__setAliasName(Type, memberName, AliasName);
 		if (sizeof...(args) == 0) {
 			return;
 		}
 		else if ((sizeof...(args) % 2) != 0) {
-			//ÓĞÎÊÌâ
+			//æœ‰é—®é¢˜
 		}
 		__setAliasNameS(Type, args...);
 	}
 
-	void __setIgnoreFieldS(string Type) {};//ÍË³ö
+	void __setIgnoreFieldS(string Type) {};//é€€å‡º
 
-										   //Ò»´ÎĞÔÉèÖÃºöÂÔ¶à¸ö×Ö¶ÎĞòÁĞ»¯
+										   //ä¸€æ¬¡æ€§è®¾ç½®å¿½ç•¥å¤šä¸ªå­—æ®µåºåˆ—åŒ–
 	template<class T, class ...Args>
 	void __setIgnoreFieldS(T Type, T memberName, Args... args) {
 		if (memberName == "") {
-			//ÓĞÎÊÌâ
+			//æœ‰é—®é¢˜
 		}
-		//Ã¿´Î»ñÈ¡Ò»¸öÖµ
+		//æ¯æ¬¡è·å–ä¸€ä¸ªå€¼
 		__setIgnoreField(Type, memberName);
 		if (sizeof...(args) == 0) {
 			return;
@@ -873,15 +1066,15 @@ public:
 		__setIgnoreFieldS(Type, args...);
 	}
 
-	void __setIgnoreLUS(string Type) {}//ÍË³ö
+	void __setIgnoreLUS(string Type) {}//é€€å‡º
 
-									   //Ò»´ÎĞÔÉèÖÃºöÂÔ¶à¸ö×Ö¶ÎµÄ´óĞ¡Ğ´
+									   //ä¸€æ¬¡æ€§è®¾ç½®å¿½ç•¥å¤šä¸ªå­—æ®µçš„å¤§å°å†™
 	template<class T, class ...Args>
 	void __setIgnoreLUS(T Type, T memberName, Args... args) {
 		if (memberName == "") {
-			//ÓĞÎÊÌâ
+			//æœ‰é—®é¢˜
 		}
-		//Ã¿´Î»ñÈ¡Ò»¸öÖµ
+		//æ¯æ¬¡è·å–ä¸€ä¸ªå€¼
 		__setIgnoreLU(Type, memberName);
 		if (sizeof...(args) == 0) {
 			return;
@@ -889,131 +1082,134 @@ public:
 		__setIgnoreLUS(Type, args...);
 	}
 
-	//ÒÆ³ıµÚÒ»¸ö¶ººÅ
+	//ç§»é™¤ç¬¬ä¸€ä¸ªé€—å·
 	void removeFirstComma(string & return_);
-	//ÒÆ³ı×îºóÒ»¸ö¶ººÅ
+	//ç§»é™¤æœ€åä¸€ä¸ªé€—å·
 	void removeLastComma(string & return_);
-	//ÒÆ³ıÊı×Ö
+	//ç§»é™¤æ•°å­—
 	void removeNumbers(string & return_);
 
-	//»ñÈ¡keyÖµ
+	//è·å–keyå€¼
 	string getKey(string json);
 
-	//»ñÈ¡³ÉÔ±ÊôĞÔ
+	//è·å–æˆå‘˜å±æ€§
 	memberAttribute getMemberAttribute(string key);
 
-	//»ñÈ¡objectÀàĞÍ
+	//è·å–objectç±»å‹
 	int getObjectTypeInt(string objectName, string typeName);
 
-	//»ñÈ¡»ù´¡ÀàĞÍ Ö»ÓĞbaseºÍstructÁ½ÖÖ
+	//è·å–åŸºç¡€ç±»å‹ åªæœ‰baseå’Œstructä¸¤ç§
 	ObjectInfo getObjectInfoByType(string typeName, int objectTypeInt);
 
+#ifdef __GNUC__
+#elif _MSC_VER
 	wstring string2wstring(string str);
-
 	string wstring2string(wstring wstr);
+#endif
 
-	//Í¨¹ıºê¶¨Òå¼ÓÔØµÄĞÅÏ¢»ñÈ¡
+	//é€šè¿‡å®å®šä¹‰åŠ è½½çš„ä¿¡æ¯è·å–
 	int getObjectTypeByObjectInfo(string objectName);
 
-	//ÅĞ¶ÏÊÇ·ñÊÇ»ù´¡ÀàĞÍ
+	//åˆ¤æ–­æ˜¯å¦æ˜¯åŸºç¡€ç±»å‹
 	bool isBaseType(string typeName);
 
-	//ÔÚmapµÄ»ù´¡ÉÏÅĞ¶ÏÊÇ·ñÊÇ»ù´¡ÀàĞÍ
+	//åœ¨mapçš„åŸºç¡€ä¸Šåˆ¤æ–­æ˜¯å¦æ˜¯åŸºç¡€ç±»å‹
 	bool isBaseTypeByMap(string typeName);
 
-	//ÅĞ¶ÏÊÇ·ñÎªvectorÀàĞÍ
+	//åˆ¤æ–­æ˜¯å¦ä¸ºvectorç±»å‹
 	bool isVectorType(string objectName, string typeName);
 
-	//»ñÈ¡vectorÖĞµÄÀàĞÍ
+	//è·å–vectorä¸­çš„ç±»å‹
 	string getTypeOfVector(string objectName, string typeName);
 
-	//ÅĞ¶ÏÊÇ·ñÎªmapÀàĞÍ
+	//åˆ¤æ–­æ˜¯å¦ä¸ºmapç±»å‹
 	bool isMapType(string objectName, string typeName);
 
-	//ÅĞ¶ÏÊÇ·ñÎªunordered_mapÀàĞÍ
+	//åˆ¤æ–­æ˜¯å¦ä¸ºunordered_mapç±»å‹
 	bool isUnorderedMapType(string objectName, string typeName);
 
-	//»ñÈ¡mapÖĞµÄkey£¬valueÀàĞÍ
+	//è·å–mapä¸­çš„keyï¼Œvalueç±»å‹
 	FdogMap getTypeOfMap(string objectName, string typeName);
 
-	//ÅĞ¶ÏÊÇ·ñÊÇlistÀàĞÍ
+	//åˆ¤æ–­æ˜¯å¦æ˜¯listç±»å‹
 	bool isListType(string objectName, string typeName);
 
-	//»ñÈ¡listÖĞµÄÀàĞÍ
+	//è·å–listä¸­çš„ç±»å‹
 	string getTypeOfList(string objectName, string typeName);
 
-	//ÅĞ¶ÏÊÇ·ñÊÇdequeÀàĞÍ
+	//åˆ¤æ–­æ˜¯å¦æ˜¯dequeç±»å‹
 	bool isDequeType(string objectName, string typeName);
 
-	//ÅĞ¶ÏÊÇ·ñÊÇsetÀàĞÍ
+	//åˆ¤æ–­æ˜¯å¦æ˜¯setç±»å‹
 	bool isSetType(string objectName, string typeName);
 
-	//ÅĞ¶ÏÊÇ·ñÊÇ½á¹¹ÌåÀàĞÍ
+	//åˆ¤æ–­æ˜¯å¦æ˜¯ç»“æ„ä½“ç±»å‹
 	bool isStructType(string objectName, string typeName);
 
-	//ÅĞ¶ÏÊÇ·ñÊÇÊı×é
+	//åˆ¤æ–­æ˜¯å¦æ˜¯æ•°ç»„
 	bool isArrayType(string objectName, string typeName);
 
-	//½âÎöÊı×é
+	//è§£ææ•°ç»„
 	vector<string> CuttingArray(string data);
 
-	//ÇĞ¸î
+	//åˆ‡å‰²
 	vector<string> split(string str, string pattern);
 
-	//ÅĞ¶Ïjson¸ñÊ½ÊÇ·ñÕıÈ·
+	//åˆ¤æ–­jsonæ ¼å¼æ˜¯å¦æ­£ç¡®
 	//vector<string> CuttingJson(string json_);
 	result CuttingJson(vector<string> & array_json, string json_);
-	//ÅĞ¶Ï·½À¨ºÅÊÇ·ñÆ¥Åä
+	//åˆ¤æ–­æ–¹æ‹¬å·æ˜¯å¦åŒ¹é…
 	result IsSquareBracket(string json_);
 
-	//ÅĞ¶Ï»¨À¨ºÅÊÇ·ñÆ¥Åä
+	//åˆ¤æ–­èŠ±æ‹¬å·æ˜¯å¦åŒ¹é…
 	result IsCurlyBraces(string json_);
 
-	//ÅĞ¶Ï×Ü·ûºÅÊıÊÇ·ñÆ¥Åä
+	//åˆ¤æ–­æ€»ç¬¦å·æ•°æ˜¯å¦åŒ¹é…
 	result isMatch(string json_);
 
-	//ÅĞ¶ÏjsonÕıÈ·ĞÔ
+	//åˆ¤æ–­jsonæ­£ç¡®æ€§
 	result __JsonValidS(string json_);
 
-	//ÅĞ¶Ï×Ö¶ÎÊÇ·ñ´æÔÚ
+	//åˆ¤æ–­å­—æ®µæ˜¯å¦å­˜åœ¨
 	bool __Exist(string json_, string key);
 
-	//»ñÈ¡×Ö¶ÎµÄÖµ
+	//è·å–å­—æ®µçš„å€¼
 	string __GetStringValue(string json_, string key);
 
-	//»ñÈ¡×Ö¶ÎµÄÖµ
+	//è·å–å­—æ®µçš„å€¼
 	int __GetIntValue(string json_, string key);
 
-	//»ñÈ¡×Ö¶ÎµÄÖµ
+	//è·å–å­—æ®µçš„å€¼
 	double __GetDoubleValue(string json_, string key);
 
-	//»ñÈ¡×Ö¶ÎµÄÖµ
+	//è·å–å­—æ®µçš„å€¼
 	long __GetLongValue(string json_, string key);
 
-	//»ñÈ¡×Ö¶ÎµÄÖµ
+	//è·å–å­—æ®µçš„å€¼
 	bool __GetBoolValue(string json_, string key);
 
-	//ĞòÁĞ»¯
+	//åºåˆ—åŒ–
 	template<typename T>
 	void Serialize(string & json_, T & object_, string name = "") {
 		//cout << "Serialize =" << abi::__cxa_demangle(typeid(T).name(),0,0,0) << endl;
-		//Í¨¹ı´«½øÀ´µÄTÅĞ¶ÏÊÇÊ²Ã´¸´ºÏÀàĞÍ£¬ObjectInfoÖ»±£´æ½á¹¹Ìå,Èç¹ûÊÇNULL¿ÉÒÔÈ·¶¨´«½øÀ´µÄ²»ÊÇstructÀàĞÍ
+		//é€šè¿‡ä¼ è¿›æ¥çš„Tåˆ¤æ–­æ˜¯ä»€ä¹ˆå¤åˆç±»å‹ï¼ŒObjectInfoåªä¿å­˜ç»“æ„ä½“,å¦‚æœæ˜¯NULLå¯ä»¥ç¡®å®šä¼ è¿›æ¥çš„ä¸æ˜¯structç±»å‹
 		ObjectInfo objectinfo = FdogSerializer::Instance()->getObjectInfo(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
-		//»ñÈ¡µÄÖ»ÄÜÊÇ½á¹¹ÌåµÄĞÅÏ¢£¬ÎŞ·¨ÖªµÀÊÇÊ²Ã´¸´ºÏÀàĞÍ£¬³¢ÊÔ½âÎöÀàĞÍ objectTypeÆäÊµÊÇÒ»¸ö½á¹¹ÌåÀàĞÍÃû³Æ
+		//è·å–çš„åªèƒ½æ˜¯ç»“æ„ä½“çš„ä¿¡æ¯ï¼Œæ— æ³•çŸ¥é“æ˜¯ä»€ä¹ˆå¤åˆç±»å‹ï¼Œå°è¯•è§£æç±»å‹ objectTypeå…¶å®æ˜¯ä¸€ä¸ªç»“æ„ä½“ç±»å‹åç§°
 		int objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
+		//cout << "getObjectTypeInt" << objectType << endl;
 		if (objectinfo.objectType == "NULL" && objectType != OBJECT_BASE && objectType != OBJECT_STRUCT) {
-			//ËµÃ÷²»ÊÇstructÀàĞÍºÍbaseÀàĞÍ³¢ÊÔ£¬³¢ÊÔ½âÎöÀàĞÍ
+			//è¯´æ˜ä¸æ˜¯structç±»å‹å’Œbaseç±»å‹å°è¯•ï¼Œå°è¯•è§£æç±»å‹
 			objectinfo = getObjectInfoByType(FdogSerializer::Instance()->getTypeName(typeid(T).name()), objectType);
 			objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
-			//ÕâÀïÕâ¸öobjectinfoÓ¦¸Ã»¹ÊÇ¿Õ ËùÒÔÄÃobjecttypeµÄÊıÖµÅĞ¶Ï
+			//è¿™é‡Œè¿™ä¸ªobjectinfoåº”è¯¥è¿˜æ˜¯ç©º æ‰€ä»¥æ‹¿objecttypeçš„æ•°å€¼åˆ¤æ–­
 		}
 		int sum = objectinfo.metaInfoObjectList.size();
-		//cout << "sum£º" << sum << endl;
+		//cout << "sumï¼š" << sum << endl;
 		int i = 1;
-		//»ñÈ¡µ½µÄobjectType²ÅÊÇÕæÕıµÄÀàĞÍ£¬¸ù¾İÕâ¸öÀàĞÍ½øĞĞ²Ù×÷
-		//cout << "objectType type = " << objectType  << " json_ : " << json_ << endl;
+		//è·å–åˆ°çš„objectTypeæ‰æ˜¯çœŸæ­£çš„ç±»å‹ï¼Œæ ¹æ®è¿™ä¸ªç±»å‹è¿›è¡Œæ“ä½œ
+		// "objectType type = " << objectType  << " json_ : " << json_ << endl;
 		switch (objectType) {
-			//µÚÒ»´Îµ÷ÓÃ½øÀ´±íÊ¾Æä±¾ÉíÀàĞÍ Ö»ÓĞÁ½ÖÖ ½á¹¹Ìå»ò×Å»ù´¡ÀàĞÍ
+			//ç¬¬ä¸€æ¬¡è°ƒç”¨è¿›æ¥è¡¨ç¤ºå…¶æœ¬èº«ç±»å‹ åªæœ‰ä¸¤ç§ ç»“æ„ä½“æˆ–ç€åŸºç¡€ç±»å‹
 		case OBJECT_BASE:
 		{
 			MetaInfo * metainfo1 = nullptr;
@@ -1023,18 +1219,28 @@ public:
 				FdogSerializerBase::Instance()->BaseToJsonA(json_, metainfo1, object_);
 			}
 			else {
-				//cout << "»ñÈ¡MetaInfoÊ§°Ü" << endl;
+				//cout << "è·å–MetaInfoå¤±è´¥" << endl;
 			}
 		}
 		break;
 		case OBJECT_STRUCT:
 		{
+			// "5555555" << endl;
 			for (auto metainfoObject : objectinfo.metaInfoObjectList) {
 				string json_s;
-				//cout <<"³ÉÔ±ÀàĞÍ£º" << metainfoObject->memberType << " -- " << metainfoObject->memberTypeInt << " -- " << metainfoObject->first <<":" << metainfoObject->second << " -- " << metainfoObject->memberOffset << endl;
+				//cout <<"æˆå‘˜ç±»å‹ï¼š" << metainfoObject->memberType << " -- " << metainfoObject->memberTypeInt << " -- " << metainfoObject->first <<":" << metainfoObject->second << " -- " << metainfoObject->memberOffset << endl;
 				if (metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true) {
 					FdogSerializerBase::Instance()->BaseToJson(json_s, metainfoObject, object_);
 					json_ = json_ + json_s;
+					// if(i == sum){
+					//     if(json_.length() > 0){
+					//         removeLastComma(json_);
+					//     }
+					// }
+					// json_s = "";
+					// i++;
+					// cout << "i = " << i << endl;
+					// continue;
 				}
 				if (metainfoObject->memberTypeInt == OBJECT_ARRAY && metainfoObject->memberIsIgnore != true) {
 					if (metainfoObject->first == "bool") {
@@ -1133,14 +1339,14 @@ public:
 							json_s = json_s + value + ",";
 						}
 					}
-					//Ìí¼ÓÈİÆ÷×Ô¶¨Òå²ÎÊıºê
-					Serialize_arraytype_judgment_all;
-
+					//æ·»åŠ å®¹å™¨è‡ªå®šä¹‰å‚æ•°å®
+					//Serialize_arraytype_judgment_all;
+					//Serialize_struct(json_s, json_, object_, metainfoObject, typename TagDispatchTrait_zx<T>::Tag{});
 					removeLastComma(json_s);
 					json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
 				}
 				if (metainfoObject->memberTypeInt == OBJECT_VECTOR && metainfoObject->memberIsIgnore != true) {
-					//cout << "====»ñÈ¡µÄÖµ£º" << metainfoObject->first << endl;
+					//cout << "====OBJECT_VECTORè·å–çš„å€¼ï¼š" << metainfoObject->first << " name = " << typeid(object_).name() << " metainfoObject->memberOffset = " << metainfoObject->memberOffset<< endl;
 					if (metainfoObject->first == "char") {
 						FSerialize(json_s, *(vector<char> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
 					}
@@ -1188,11 +1394,23 @@ public:
 					if (metainfoObject->first == "long double") {
 						FSerialize(json_s, *(vector<long double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
 					}
-					Serialize_vector_type_judgment_all;
+					Serialize_struct(json_s, json_, object_, metainfoObject, typename TagDispatchTrait_zx<T>::Tag{});
+					//Serialize_vector_type_judgment_all;
+					//cout << "json_ =" << json_ << endl;
+					//cout << "json_s =" << json_s << endl;                                                                                                                                                                                                                                                   
+
 					json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
+					if (i == sum) {
+						if (json_.length() > 0) {
+							removeLastComma(json_);
+						}
+					}
+					json_s = "";
+					i++;
+					continue;
 				}
 				if (metainfoObject->memberTypeInt == OBJECT_LIST && metainfoObject->memberIsIgnore != true) {
-					//cout << "====»ñÈ¡µÄÖµ£º" << metainfoObject->first << endl;
+					//cout << "====è·å–çš„å€¼ï¼š" << metainfoObject->first << endl;
 					if (metainfoObject->first == "bool") {
 						FSerialize(json_s, *(list<bool> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<bool>>::Tag{});
 					}
@@ -1241,7 +1459,8 @@ public:
 					if (metainfoObject->first == "long double") {
 						FSerialize(json_s, *(list<long double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<int>>::Tag{});
 					}
-					Serialize_list_type_judgment_all;
+					//Serialize_list_type_judgment_all;
+					Serialize_struct(json_s, json_, object_, metainfoObject, typename TagDispatchTrait_zx<T>::Tag{});
 					json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
 				}
 				if (metainfoObject->memberTypeInt == OBJECT_DEQUE && metainfoObject->memberIsIgnore != true) {
@@ -1293,7 +1512,8 @@ public:
 					if (metainfoObject->first == "long double") {
 						FSerialize(json_s, *(deque<long double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
 					}
-					Serialize_deque_type_judgment_all;
+					//Serialize_deque_type_judgment_all;
+					Serialize_struct(json_s, json_, object_, metainfoObject, typename TagDispatchTrait_zx<T>::Tag{});
 					json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
 				}
 				if (metainfoObject->memberTypeInt == OBJECT_SET && metainfoObject->memberIsIgnore != true) {
@@ -1345,7 +1565,8 @@ public:
 					if (metainfoObject->first == "long double") {
 						FSerialize(json_s, *(set<long double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<set<int>>::Tag{});
 					}
-					Serialize_set_type_judgment_all;
+					//Serialize_set_type_judgment_all;
+					Serialize_struct(json_s, json_, object_, metainfoObject, typename TagDispatchTrait_zx<T>::Tag{});
 					json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
 				}
 				if (metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberIsIgnore != true) {
@@ -1364,11 +1585,12 @@ public:
 					if (metainfoObject->first == "int" && metainfoObject->second == "int") {
 						FSerialize(json_s, *(map<int, int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<map<int, int>>::Tag{});
 					}
-					Serialize_map_type_judgment_all;
+					//Serialize_map_type_judgment_all;
+					Serialize_struct(json_s, json_, object_, metainfoObject, typename TagDispatchTrait_zx<T>::Tag{});
 					json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";
 				}
 				if (metainfoObject->memberTypeInt == OBJECT_UNORDERED_MAP && metainfoObject->memberIsIgnore != true) {
-					//cout << "×ßOBJECT_UNORDERED_MAP" << endl;
+					//cout << "èµ°OBJECT_UNORDERED_MAP" << endl;
 					if (metainfoObject->first == "char*" && metainfoObject->second == "int") {
 						FSerialize(json_s, *(unordered_map<char *, int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<unordered_map<int, int>>::Tag{});
 					}
@@ -1384,12 +1606,18 @@ public:
 					if (metainfoObject->first == "int" && metainfoObject->second == "int") {
 						FSerialize(json_s, *(unordered_map<int, int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<unordered_map<int, int>>::Tag{});
 					}
-					Serialize_map_type_judgment_all;
+					//Serialize_map_type_judgment_all;
+					Serialize_struct(json_s, json_, object_, metainfoObject, typename TagDispatchTrait_zx<T>::Tag{});
 					json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";
 				}
-				//»¹ĞèÒªÌí¼ÓÈİÆ÷×Ô¶¨Òå²ÎÊıºê
-				//Õâ¸öºêÓÃÓÚ½øÈëOBJECT_STRUCT
-				Serialize_type_judgment_all;
+				//è¿˜éœ€è¦æ·»åŠ å®¹å™¨è‡ªå®šä¹‰å‚æ•°å®
+				//è¿™ä¸ªå®ç”¨äºè¿›å…¥OBJECT_STRUCT
+				//Serialize_type_judgment_all;
+				// "json_ = " << json_ << endl;
+				//cout << "json_s = " << json_s << endl;
+				Serialize_struct(json_, json_s, object_, metainfoObject, typename TagDispatchTrait_zx<T>::Tag{});
+				//json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";
+
 				if (i == sum) {
 					if (json_.length() > 0) {
 						removeLastComma(json_);
@@ -1400,11 +1628,23 @@ public:
 			}
 		}
 		break;
-		//ºóĞøÔö¼Ó»ù´¡STLÀàĞÍ
-		//ÆÕÍ¨mapĞèÒªÔÚÕâÀï¶¨Òå
-		//´¦ÀíÖ±½ÓÊÇSTLÀàĞÍ
+		//åç»­å¢åŠ åŸºç¡€STLç±»å‹
+		//æ™®é€šmapéœ€è¦åœ¨è¿™é‡Œå®šä¹‰
+		//å¤„ç†ç›´æ¥æ˜¯STLç±»å‹
 		}
 	}
+
+	//è‡ªå®šä¹‰ç»“æ„ä½“
+	template<typename T>
+	void Serialize_struct(string & json_, string & json_s, T & object_, MetaInfo * metainfoObject, StructTag_zx) {
+		//cout << "èµ°åˆ°è¿™é‡Œ222" << endl;
+		object_.Serialize_struct_s(json_, json_s, object_, metainfoObject);
+		//json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
+	}
+	template<typename T>
+	void Serialize_struct(string & json_, string & json_s, T & object_, MetaInfo * metainfoObject, BaseTag_zx) {
+	}
+
 
 	template<typename T>
 	void SerializeS(string & json_, T & object_, BaseAndStructTag, string name = "") {
@@ -1431,14 +1671,15 @@ public:
 	}
 
 
-	//ÓÃÓÚ½âÎö»ù´¡ÀàĞÍ£¬Êı×é(Ö»ĞèÒªÅĞ¶ÏÓĞÃ»ÓĞ[]¾ÍÄÜÈ·¶¨ÊÇ²»ÊÇÊı×é£¬½á¹¹ÌåºÍ»ù´¡ÀàĞÍ¶¼²»¾ß±¸[]Ìõ¼ş)£¬½á¹¹Ìå
+	//ç”¨äºè§£æåŸºç¡€ç±»å‹ï¼Œæ•°ç»„(åªéœ€è¦åˆ¤æ–­æœ‰æ²¡æœ‰[]å°±èƒ½ç¡®å®šæ˜¯ä¸æ˜¯æ•°ç»„ï¼Œç»“æ„ä½“å’ŒåŸºç¡€ç±»å‹éƒ½ä¸å…·å¤‡[]æ¡ä»¶)ï¼Œç»“æ„ä½“
 	template<typename T>
 	void FSerialize(string & json_, T & object_, BaseTag, string name = "") {
+		//cout << "è¿›å…¥array==========0 " << typeid(T).name() << endl;
 		bool isArray = isArrayType("", FdogSerializer::Instance()->getTypeName(typeid(T).name()));
-		//cout << "ÊÇ·ñÊÇÊı×é £º " << isArray << endl;
+		//cout << "æ˜¯å¦æ˜¯æ•°ç»„ ï¼š " << isArray << endl;
 		SerializeS_s(json_, object_, isArray, name);
 		//Serialize(json_, object_, name);
-		//ÕâÀïĞèÒªÅĞ¶ÏÀàĞÍ Èç¹ûÊÇ»ù´¡ÀàĞÍÖ±½ÓÊ¹ÓÃname ²»ÊÇ»ù´¡ÀàĞÍ£¬¿ÉÒÔÊ¹ÓÃ
+		//è¿™é‡Œéœ€è¦åˆ¤æ–­ç±»å‹ å¦‚æœæ˜¯åŸºç¡€ç±»å‹ç›´æ¥ä½¿ç”¨name ä¸æ˜¯åŸºç¡€ç±»å‹ï¼Œå¯ä»¥ä½¿ç”¨
 		if (isBaseType(FdogSerializer::Instance()->getTypeName(typeid(T).name()))) {
 			removeLastComma(json_);
 			json_ = "{\"" + name + "\":" + json_ + "}";
@@ -1451,10 +1692,10 @@ public:
 		}
 		json_ = "{" + json_ + "}";
 	}
-	//ÓÃÓÚ½âÎöSTL£¨map³ıÍâ£©ÆäÊµÉÏÃæ½Ó¿ÚÒ²¿ÉÒÔ´¦Àívector£¬µ«ÆäËûÀàĞÍÎŞ·¨´¦Àí£¬ËùÒÔÕâ¸ö´¦ÀíSTL
+	//ç”¨äºè§£æSTLï¼ˆmapé™¤å¤–ï¼‰å…¶å®ä¸Šé¢æ¥å£ä¹Ÿå¯ä»¥å¤„ç†vectorï¼Œä½†å…¶ä»–ç±»å‹æ— æ³•å¤„ç†ï¼Œæ‰€ä»¥è¿™ä¸ªå¤„ç†STL
 	template<typename T>
 	void FSerialize(string & json_, T & object_, ArrayTag, string name = "") {
-		//cout << "½øÈëarray==========1" << typeid(T).name() << endl;
+		// "è¿›å…¥array=====================1 " << typeid(T).name() << endl;
 		for (auto & object_one : object_) {
 			//ji
 			int objectType = isBaseType(FdogSerializer::Instance()->getTypeName(typeid(object_one).name()));
@@ -1463,24 +1704,27 @@ public:
 			}
 			//cout << "1=====" << endl;
 			Serialize(json_, object_one);
-			//cout << "½øÈëarray==========2" << typeid(object_one).name() << endl;
+
 			if (!objectType) {
 				json_ = json_ + "},";
 			}
+			//cout << "è¿›å…¥array=================2" << typeid(object_one).name()  << " json_ = " << json_<< endl;
 		}
 		if (json_.length() > 0) {
 			removeLastComma(json_);
 		}
 		//json_ = "{\"" + name + "\":[" + json_ + "]}";
-		//Èç¹û×ª»»¶ÔÏóÖ±½Ó¾ÍÊÇÊı×é£¬¿ÉÒÔÔÙ¶îÍâÌá¹©Ò»¸ö£¬»òÕßËµÆäËû
+		//cout << "è¿›å…¥array=================3" << " json_ = " << json_<< endl;
+		//å¦‚æœè½¬æ¢å¯¹è±¡ç›´æ¥å°±æ˜¯æ•°ç»„ï¼Œå¯ä»¥å†é¢å¤–æä¾›ä¸€ä¸ªï¼Œæˆ–è€…è¯´å…¶ä»–
 	}
-	//ÓÃÓÚ½âÎömap
+	//ç”¨äºè§£æmap
 	template<typename T>
 	void FSerialize(string & json_, T & object_, MapTag, string name = "") {
+		//cout << "è¿›å…¥array==========2 " << typeid(T).name() << endl;
 		int i = 0;
-		int len = object_.size();
+		//int len = object_.size();
 		for (auto & object_one : object_) {
-			//¿´Çé¿ö£¬Èç¹ûÊÇ½á¹¹Ìå£¬ĞèÒª»¨À¨ºÅ£¬»ù±¾ÀàĞÍ²»ĞèÒª
+			//çœ‹æƒ…å†µï¼Œå¦‚æœæ˜¯ç»“æ„ä½“ï¼Œéœ€è¦èŠ±æ‹¬å·ï¼ŒåŸºæœ¬ç±»å‹ä¸éœ€è¦
 			json_ = json_ + "\"" + F_toString(object_one.first) + "\"" + ":";
 			Serialize(json_, object_one.second);
 			removeLastComma(json_);
@@ -1491,31 +1735,20 @@ public:
 		//json_ = "{" + json_ + "}";
 	}
 
-	//ÓÃÓÚ½âÎöunordered_map
+	//ç”¨äºè¿‡åº¦
 	// template<typename T>
-	// void FSerialize(string & json_, T & object_, UnorderedMapTag, string name = ""){
-	//     int i = 0;
-	//     int len = object_.size();
-	//     for(auto & object_one : object_){
-	//         //¿´Çé¿ö£¬Èç¹ûÊÇ½á¹¹Ìå£¬ĞèÒª»¨À¨ºÅ£¬»ù±¾ÀàĞÍ²»ĞèÒª
-	//         json_ = json_ + "\"" + F_toString(object_one.first) + "\"" + ":";
-	//         Serialize(json_, object_one.second);
-	//         removeLastComma(json_);
-	//         json_ = json_ + ",";
-	//         i++;
-	//     }
-	//     removeLastComma(json_);
-	//     //json_ = "{" + json_ + "}";
+	// void FSerialize(string & json_, T & object_, BaseAndStructTag, string name = ""){
+	//     //ä»€ä¹ˆéƒ½ä¸åš
 	// }
 
-	//·´ĞòÁĞ»¯
+	//ååºåˆ—åŒ–
 	template<typename T>
 	void Deserialize(T & object_, string & json_, string name = "") {
 		//cout << "Deserialize json_ = " << json_ << endl; 
 		ObjectInfo & objectinfo = FdogSerializer::Instance()->getObjectInfo(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		int objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		if (objectinfo.objectType == "NULL" && objectType != OBJECT_BASE && objectType != OBJECT_STRUCT) {
-			//ËµÃ÷²»ÊÇstructÀàĞÍºÍbaseÀàĞÍ³¢ÊÔ£¬³¢ÊÔ½âÎöÀàĞÍ
+			//è¯´æ˜ä¸æ˜¯structç±»å‹å’Œbaseç±»å‹å°è¯•ï¼Œå°è¯•è§£æç±»å‹
 			objectinfo = getObjectInfoByType(FdogSerializer::Instance()->getTypeName(typeid(T).name()), objectType);
 			objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		}
@@ -1533,77 +1766,77 @@ public:
 				// if (metainfoObject->memberIsIgnoreLU == false){
 				//     pattern = new regex(regex_key + ":" +regex_value);
 				// }else{
-				//     pattern = new regex(regex_key + ":" +regex_value,regex::icase);//icaseÓÃÓÚºöÂÔ´óĞ¡Ğ´
+				//     pattern = new regex(regex_key + ":" +regex_value,regex::icase);//icaseç”¨äºå¿½ç•¥å¤§å°å†™
 				// }
 			}
-			//cout << "       ·´ĞòÁĞ»¯»ñÈ¡µÄregex_value£º" << regex_value << "  memberType = " << metainfo1->memberType << endl;
+			//cout << "       ååºåˆ—åŒ–è·å–çš„regex_valueï¼š" << regex_value << "  memberType = " << metainfo1->memberType << endl;
 			if (regex_search(json_, result, *pattern)) {
 				string value = result.str(2).c_str();
 				if (value == "") {
 					value = result.str(1).c_str();
 				}
-				//cout << "@@@@@@@@@@@@@·´ĞòÁĞ»¯value = " << value << endl;
+				//cout << "@@@@@@@@@@@@@ååºåˆ—åŒ–value = " << value << endl;
 				FdogSerializerBase::Instance()->JsonToBase(object_, metainfo1, value);
 			}
 		}
 
 		if (OBJECT_STRUCT == objectType) {
 			for (auto metainfoObject : objectinfo.metaInfoObjectList) {
-				//Í¨¹ıÕıÔò±í´ïÊ½»ñÈ¡¶ÔÓ¦µÄjson
+				//é€šè¿‡æ­£åˆ™è¡¨è¾¾å¼è·å–å¯¹åº”çš„json
 				smatch result;
 				string regex_key = "(\"" + metainfoObject->memberName + "\")";
 				string regex_value = baseRegex[metainfoObject->memberType];
-				cout << "       ·´ĞòÁĞ»¯»ñÈ¡µÄregex_value£º" << regex_value << "  memberType = " << metainfoObject->memberType << endl;
+				//cout << "       ååºåˆ—åŒ–è·å–çš„regex_valueï¼š" << regex_value << "  memberType = " << metainfoObject->memberType << endl;
 				if (regex_value == "") {
 					if (metainfoObject->memberTypeInt == OBJECT_STRUCT) {
-						//cout << "------------" << "structÀàĞÍ" << endl;
+						//cout << "------------" << "structç±»å‹" << endl;
 						regex_value = objectRegex;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_ARRAY) {
-						//cout << "------------" << "appayÀàĞÍ" << endl;
+						//cout << "------------" << "appayç±»å‹" << endl;
 						regex_value = arrayRegex;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_VECTOR) {
-						//cout << "------------" << "vectorÀàĞÍ" << endl;
+						//cout << "------------" << "vectorç±»å‹" << endl;
 						regex_value = arrayRegex;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_LIST) {
-						//cout << "------------" << "listÀàĞÍ" << endl;
+						//cout << "------------" << "listç±»å‹" << endl;
 						regex_value = arrayRegex;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_SET) {
-						//cout << "------------" << "setÀàĞÍ" << endl;
+						//cout << "------------" << "setç±»å‹" << endl;
 						regex_value = arrayRegex;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_DEQUE) {
-						//cout << "------------" << "dequeÀàĞÍ" << endl;
+						//cout << "------------" << "dequeç±»å‹" << endl;
 						regex_value = arrayRegex;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_MAP) {
-						//cout << "------------" << "mapÀàĞÍ" << endl;
+						//cout << "------------" << "mapç±»å‹" << endl;
 						regex_value = mapRegex;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_UNORDERED_MAP) {
-						//cout << "------------" << "mapÀàĞÍ" << endl;
+						//cout << "------------" << "mapç±»å‹" << endl;
 						regex_value = mapRegex;
 					}
 				}
 				else {
-					//cout << "------------" << "baseÀàĞÍ" << endl;
+					//cout << "------------" << "baseç±»å‹" << endl;
 				}
-				//¸ù¾İ´óĞ¡Ğ´ÅĞ¶Ï
+				//æ ¹æ®å¤§å°å†™åˆ¤æ–­
 				regex * pattern = nullptr;
 				if (metainfoObject->memberIsIgnoreLU == false) {
 					pattern = new regex(regex_key + ":" + regex_value);
 				}
 				else {
-					pattern = new regex(regex_key + ":" + regex_value, regex::icase);//icaseÓÃÓÚºöÂÔ´óĞ¡Ğ´
+					pattern = new regex(regex_key + ":" + regex_value, regex::icase);//icaseç”¨äºå¿½ç•¥å¤§å°å†™
 				}
 				if (regex_search(json_, result, *pattern)) {
 					string value = result.str(2).c_str();
-					//cout << endl << "ÕıÔò±í´ïÊ½ »ñÈ¡µÄÖµ£º" << value << "   type = " << metainfoObject->memberTypeInt << endl;
+					//cout << endl << "æ­£åˆ™è¡¨è¾¾å¼ è·å–çš„å€¼ï¼š" << value << "   type = " << metainfoObject->memberTypeInt << endl;
 					if (metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true) {
-						//cout << "·´ĞòÁĞ»¯½øÈëbase£º" << value << endl << endl;
+						//cout << "ååºåˆ—åŒ–è¿›å…¥baseï¼š" << value << endl << endl;
 						FdogSerializerBase::Instance()->JsonToBase(object_, metainfoObject, value);
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_ARRAY && metainfoObject->memberIsIgnore != true) {
@@ -1704,7 +1937,7 @@ public:
 								FdogSerializerBase::Instance()->setValueByAddress(metainfoObject->first, object_, metainfoObject->memberOffset + (i * sizeof(long double)), json_array[j++]);
 							}
 						}
-						Deserialize_arraytype_judgment_all;
+						//Deserialize_arraytype_judgment_all;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_VECTOR && metainfoObject->memberIsIgnore != true) {
 						if (metainfoObject->first == "char") {
@@ -1717,7 +1950,7 @@ public:
 							FDeserialize(*(vector<char *> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
 						}
 						if (metainfoObject->first == "string") {
-							//cout << "½øÈëstring" << endl;
+							//cout << "è¿›å…¥string" << endl;
 							FDeserialize(*(vector<string> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
 						}
 						if (metainfoObject->first == "short") {
@@ -1753,7 +1986,9 @@ public:
 						if (metainfoObject->first == "long double") {
 							FDeserialize(*(vector<long double> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
 						}
-						Deserialize_vector_type_judgment_all;
+						//Deserialize_vector_type_judgment_all;
+						Deserialize_struct(object_, value, metainfoObject, typename TagDispatchTrait_zx<T>::Tag{});
+						continue;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_LIST && metainfoObject->memberIsIgnore != true) {
 						if (metainfoObject->first == "bool") {
@@ -1778,7 +2013,7 @@ public:
 							FDeserialize(*(list<unsigned short> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
 						}
 						if (metainfoObject->first == "int") {
-							//cout << "dasdsa======½øÈëlist" << endl;                        
+							//cout << "dasdsa======è¿›å…¥list" << endl;                        
 							FDeserialize(*(list<int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
 						}
 						if (metainfoObject->first == "unsigned int") {
@@ -1805,7 +2040,7 @@ public:
 						if (metainfoObject->first == "long double") {
 							FDeserialize(*(list<long double> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<list<int>>::Tag{});
 						}
-						Deserialize_list_type_judgment_all;
+						//Deserialize_list_type_judgment_all;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_DEQUE && metainfoObject->memberIsIgnore != true) {
 						if (metainfoObject->first == "bool") {
@@ -1856,7 +2091,7 @@ public:
 						if (metainfoObject->first == "long double") {
 							FDeserialize(*(deque<long double> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<deque<int>>::Tag{});
 						}
-						Deserialize_deque_type_judgment_all;
+						//Deserialize_deque_type_judgment_all;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_SET && metainfoObject->memberIsIgnore != true) {
 						if (metainfoObject->first == "bool") {
@@ -1907,7 +2142,7 @@ public:
 						if (metainfoObject->first == "long double") {
 							FDeserialize(*(set<long double> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<set<int>>::Tag{});
 						}
-						Deserialize_set_type_judgment_all;
+						//Deserialize_set_type_judgment_all;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberIsIgnore != true) {
 						if (metainfoObject->first == "char*" && metainfoObject->second == "int") {
@@ -1925,7 +2160,7 @@ public:
 						if (metainfoObject->first == "int" && metainfoObject->second == "int") {
 							FDeserialize(*(map<int, int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int, int>>::Tag{});
 						}
-						Deserialize_map_type_judgment_all;
+						//Deserialize_map_type_judgment_all;
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_UNORDERED_MAP && metainfoObject->memberIsIgnore != true) {
 						if (metainfoObject->first == "char*" && metainfoObject->second == "int") {
@@ -1943,12 +2178,23 @@ public:
 						if (metainfoObject->first == "int" && metainfoObject->second == "int") {
 							FDeserialize(*(unordered_map<int, int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<unordered_map<int, int>>::Tag{});
 						}
-						Deserialize_map_type_judgment_all;
+						//Deserialize_map_type_judgment_all;
 					}
-					Deserialize_type_judgment_all;
+					//Deserialize_type_judgment_all;
+					Deserialize_struct(object_, value, metainfoObject, typename TagDispatchTrait_zx<T>::Tag{});
+
 				}
 			}
 		}
+	}
+	//è‡ªå®šä¹‰ç»“æ„ä½“
+	template<typename T>
+	void Deserialize_struct(T & object_, string & value, MetaInfo * metainfoObject, StructTag_zx) {
+		// "èµ°åˆ°è¿™é‡Œ222" << endl;
+		object_.Deserialize_struct_s(object_, value, metainfoObject);
+	}
+	template<typename T>
+	void Deserialize_struct(T & object_, string & value, MetaInfo * metainfoObject, BaseTag_zx) {
 	}
 
 	template<typename T>
@@ -1977,7 +2223,7 @@ public:
 		//}
 	}
 
-	//ÓÃÓÚ½âÎö»ù´¡ÀàĞÍ£¬Êı×é(Ö»ĞèÒªÅĞ¶ÏÓĞÃ»ÓĞ[]¾ÍÄÜÈ·¶¨ÊÇ²»ÊÇÊı×é£¬½á¹¹ÌåºÍ»ù´¡ÀàĞÍ¶¼²»¾ß±¸[]Ìõ¼ş)£¬½á¹¹Ìå
+	//ç”¨äºè§£æåŸºç¡€ç±»å‹ï¼Œæ•°ç»„(åªéœ€è¦åˆ¤æ–­æœ‰æ²¡æœ‰[]å°±èƒ½ç¡®å®šæ˜¯ä¸æ˜¯æ•°ç»„ï¼Œç»“æ„ä½“å’ŒåŸºç¡€ç±»å‹éƒ½ä¸å…·å¤‡[]æ¡ä»¶)ï¼Œç»“æ„ä½“
 	template<typename T>
 	void FDeserialize(T & object_, string & json_, BaseTag, string name = "") {
 		//cout << "FDeserialize BaseTag json_ = " << json_ << endl;
@@ -1985,24 +2231,28 @@ public:
 		DeserializeS_s(object_, json_, isArray, name);
 	}
 
-	//ÓÃÓÚ½âÎöSTL£¨map³ıÍâ£©
+	//ç”¨äºè§£æSTLï¼ˆmapé™¤å¤–ï¼‰
 	template<typename T>
 	void FDeserialize(T & object_, string & json_, ArrayTag, string name = "") {
-		//cout << "FDeserialize ArrayTag json_ = " << json_ << endl;
-		//cout << "·´ĞòÁĞ»¯½øÈë~array£º" << json_  << endl;
-		//cout << "ÀàĞÍ" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
-		//cout << "³¤¶È = " << object_.size() << endl;
-		int objectType = -1;
-		//Õâ¸öÑ­»·½ø²»È¥
-		for (auto & object_one : object_) {
-			//ÅĞ¶ÏÄÚ²¿ÀàĞÍÊÇ·ñÎª»ù´¡ÀàĞÍ
-			objectType = isBaseType(FdogSerializer::Instance()->getTypeName(typeid(object_one).name()));
-			//cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
-			break;
-		}
-		//cout << "×ßµ½ÕâÀï1"<<endl;
+		// "FDeserialize ArrayTag json_ = " << json_ << endl;
+		//cout << "ååºåˆ—åŒ–è¿›å…¥~arrayï¼š" << json_  << endl;
+		//cout << "ç±»å‹" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
+		//cout << "é•¿åº¦ = " << object_.size() << endl;
+		memberAttribute Member = getMemberAttribute(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
+		int objectType = 0;
+		objectType = isBaseType(Member.first);
+		//cout << " objectType = " << objectType <<endl;
+		//è¿™ä¸ªå¾ªç¯è¿›ä¸å»
+		// for(auto & object_one : object_){
+		//     //åˆ¤æ–­å†…éƒ¨ç±»å‹æ˜¯å¦ä¸ºåŸºç¡€ç±»å‹
+		//     objectType = isBaseType(FdogSerializer::Instance()->getTypeName(typeid(object_one).name()));
+		//     cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
+		//     break;
+		// }
+		//cout << "èµ°åˆ°è¿™é‡Œ1"<<endl;
 		vector<string> json_array;
 		if (objectType) {
+			//æåŸºç¡€
 			smatch result;
 			regex pattern(arrayRegex);
 			if (regex_search(json_, result, pattern)) {
@@ -2011,37 +2261,44 @@ public:
 			}
 		}
 		else {
+			//æå¯¹è±¡
 			removeFirstComma(json_);
 			removeLastComma(json_);
 			json_array = FdogSerializer::Instance()->CuttingArray(json_);
 		}
-		//cout << "×ßµ½ÕâÀï2"<<endl;
+		//cout << "èµ°åˆ°è¿™é‡Œ2"<<endl;
 		int i = 0;
-		//ÕâÀïĞèÒª×¢Òâ£¬½øÀ´µÄSTLÈİÆ÷³¤¶ÈÎª0£¬ĞèÒªÖØĞÂÖ¸¶¨³¤¶È ĞèÒªÏë°ì·¨
-		//ĞèÒªÖªµÀÈİÒ×ÄÚ²¿ÀàĞÍ£¬È»ºó×÷Îª²ÎÊı´«½øÈ¥,Èç¹û³¤¶ÈĞ¡ÓÚĞèÒª×ª»»µÄ£¬¾ÍĞèÒªÌí¼Ó³¤¶È,STLÓĞÀ©Èİ»úÖÆ
+		//è¿™é‡Œéœ€è¦æ³¨æ„ï¼Œè¿›æ¥çš„STLå®¹å™¨é•¿åº¦ä¸º0ï¼Œéœ€è¦é‡æ–°æŒ‡å®šé•¿åº¦ éœ€è¦æƒ³åŠæ³•
+		//éœ€è¦çŸ¥é“å®¹æ˜“å†…éƒ¨ç±»å‹ï¼Œç„¶åä½œä¸ºå‚æ•°ä¼ è¿›å»,å¦‚æœé•¿åº¦å°äºéœ€è¦è½¬æ¢çš„ï¼Œå°±éœ€è¦æ·»åŠ é•¿åº¦,STLæœ‰æ‰©å®¹æœºåˆ¶
 		int len = json_array.size();
 		int len2 = object_.size();
 		//cout << "changdu:" << len  << "----" << len2 << endl;
-		memberAttribute Member = getMemberAttribute(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
-		srand((int)time(NULL)); //ÓÃÓÚset
+		// for (int i = 0; i< len; i++) {
+		//     cout << "json_array i:" << json_array[i] << endl;
+		// }
+		//object_.resize(2);
+		srand((int)time(NULL)); //ç”¨äºset
 		for (int i = 0; i < json_array.size(); i++) {
 			//cout << "xunhuan1 :" << i << " & object_.size() = " << object_.size() << endl;
 			if (json_array.size() > object_.size()) {
 				F_init(object_, Member.valueTypeInt, Member.first);
 				//cout << "xunhuan2 :" << i << " & object_.size() = " << object_.size() << endl;
 			}
-			//cout << "xunhuan2 :" << i << " & object_.size() = " << object_.size() << endl;
+			//cout << "xunhuan3 :" << i << " & object_.size() = " << object_.size() << endl;
 		}
-		//cout << "×ßµ½ÕâÀï3 size = " << object_.size() <<endl;
+		//cout << "èµ°åˆ°è¿™é‡Œ3 size = " << object_.size() <<endl;
 		for (auto & object_one : object_) {
-			//cout << "start " << endl;
+			//cout << "start size = "<< object_.size() << endl;
 			//cout << "json_array[i] = " << json_array[i] << endl;
-			//cout << "end " << endl;
+			//cout << "end i = "<< i << endl;
+			if (i > len) {
+				break;
+			}
 			Deserialize(object_one, json_array[i]);
 			i++;
 		}
-		//cout << "×ßµ½ÕâÀï4"<<endl;
-		//ÕâÀïÊÍ·ÅinitÀïÃæÉêÇëµÄÄÚ´æ
+		//cout << "èµ°åˆ°è¿™é‡Œ4"<<endl;
+		//è¿™é‡Œé‡Šæ”¾inité‡Œé¢ç”³è¯·çš„å†…å­˜
 		if (1) {
 			vector<char *>::iterator it = temp.begin();
 			while (it != temp.end()) {
@@ -2049,25 +2306,26 @@ public:
 				++it;
 			}
 		}
-		//cout << "×ßµ½ÕâÀï5"<<endl;
+		//cout << "èµ°åˆ°è¿™é‡Œ5"<<endl;
 		temp.clear();
-		//cout << "×ßµ½ÕâÀï6"<<endl;
+		//cout << "èµ°åˆ°è¿™é‡Œ6"<<endl;
 	}
-	//ÓÃÓÚmap
+	//ç”¨äºmap
 	template<typename T>
 	void FDeserialize(T & object_, string & json_, MapTag) {
-		//cout << "·´ĞòÁĞ»¯½øÈë~map£º" << json_ << endl;
-		//cout << "ÀàĞÍ" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
-		int objectType = -1;
+		//cout << "ååºåˆ—åŒ–è¿›å…¥~mapï¼š" << json_ << endl;
+		//cout << "ç±»å‹" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
+		int objectType;
 		for (auto & object_one : object_) {
-			//ÅĞ¶ÏÄÚ²¿ÀàĞÍÊÇ·ñÎª»ù´¡ÀàĞÍ
+			//åˆ¤æ–­å†…éƒ¨ç±»å‹æ˜¯å¦ä¸ºåŸºç¡€ç±»å‹
 			objectType = isBaseTypeByMap(FdogSerializer::Instance()->getTypeName(typeid(object_one).name()));
 			//cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
 			break;
 		}
-		//ÕâÀïÓĞÎÊÌâ objectTypeÓÀÔ¶Îª0 ÕÒµÚ¶şÖÖ·½·¨
+		//è¿™é‡Œæœ‰é—®é¢˜ objectTypeæ°¸è¿œä¸º0 æ‰¾ç¬¬äºŒç§æ–¹æ³•
 		vector<string> json_array;
 		if (objectType) {
+			// "è¿›å…¥q = "<< objectType << endl;
 			smatch result;
 			regex pattern(mapRegex);
 			if (regex_search(json_, result, pattern)) {
@@ -2087,21 +2345,20 @@ public:
 		memberAttribute Member = getMemberAttribute(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		for (int i = 0; i < json_array.size(); i++) {
 			if (json_array.size() > object_.size()) {
-				//cout <<"##### ½øÈë" << endl;
+				//cout <<"##### è¿›å…¥" << endl;
 				F_init(object_, Member.valueTypeInt, Member.first, Member.second, getKey(json_array[i]));
 			}
-			//i++;
 		}
-		//ÕâÀïÓĞ¸öÎÊÌâ£¬¾ÍÊÇ¿ÉÄÜkeyµÄË³Ğò²»Æ¥Åä
-		//ÕâÀï´æÔÚÎÊÌâ£¬½øÀ´µÄSTLÈİÆ÷³¤¶ÈÎª0£¬ĞèÒªÖØĞÂÖ¸¶¨³¤¶È
+		//è¿™é‡Œæœ‰ä¸ªé—®é¢˜ï¼Œå°±æ˜¯å¯èƒ½keyçš„é¡ºåºä¸åŒ¹é…
+		//è¿™é‡Œå­˜åœ¨é—®é¢˜ï¼Œè¿›æ¥çš„STLå®¹å™¨é•¿åº¦ä¸º0ï¼Œéœ€è¦é‡æ–°æŒ‡å®šé•¿åº¦
 		for (auto & object_one : object_) {
-			//cout << "½øÀ´À² object_one.second = " << object_one.second << " json_array[i] = " << json_array[i] << endl;
-			//ÌáÈ¡key:
+			//cout << "è¿›æ¥å•¦ object_one.second = " << object_one.second << " json_array[i] = " << json_array[i] << endl;
+			//æå–key:
 			//object_one.first = getKey(json_array[i]);
 			Deserialize(object_one.second, json_array[i]);
 			i++;
 		}
-		//ÕâÀïÊÍ·ÅinitÀïÃæÉêÇëµÄÄÚ´æ
+		//è¿™é‡Œé‡Šæ”¾inité‡Œé¢ç”³è¯·çš„å†…å­˜
 		if (Member.valueTypeInt == OBJECT_MAP) {
 			vector<char *>::iterator it = temp.begin();
 			while (it != temp.end()) {
@@ -2132,55 +2389,55 @@ namespace Fdog {
 		return json_;
 	}
 
-	//ÉèÖÃ±ğÃû
+	//è®¾ç½®åˆ«å
 	void setAliasName(string Type, string memberName, string AliasName);
 
-	//ÉèÖÃ¶à¸ö±ğÃû
+	//è®¾ç½®å¤šä¸ªåˆ«å
 	template<class T, class ...Args>
 	void setAliasNameS(T Type, T memberName, T AliasName, Args... args) {
 		FdogSerializer::Instance()->__setAliasNameS(Type, memberName, AliasName, args...);
 	}
 
-	//ÉèÖÃÊÇ·ñºöÂÔ¸Ã×Ö¶ÎĞòÁĞ»¯
+	//è®¾ç½®æ˜¯å¦å¿½ç•¥è¯¥å­—æ®µåºåˆ—åŒ–
 	void setIgnoreField(string Type, string memberName);
 
-	//ÉèÖÃ¶à¸öºöÂÔ×Ö¶ÎĞòÁĞ»¯
+	//è®¾ç½®å¤šä¸ªå¿½ç•¥å­—æ®µåºåˆ—åŒ–
 	template<class T, class ...Args>
 	void setIgnoreFieldS(T Type, T memberName, Args... args) {
 		FdogSerializer::Instance()->__setIgnoreFieldS(Type, memberName, args...);
 	}
 
-	//ÉèÖÃÊÇ·ñºöÂÔ´óĞ¡Ğ´
+	//è®¾ç½®æ˜¯å¦å¿½ç•¥å¤§å°å†™
 	void setIgnoreLU(string Type, string memberName);
 
-	//ÉèÖÃ¶à¸öºöÂÔ´óĞ¡Ğ´
+	//è®¾ç½®å¤šä¸ªå¿½ç•¥å¤§å°å†™
 	template<class T, class ...Args>
 	void setIgnoreLUS(T Type, T memberName, Args... args) {
 		FdogSerializer::Instance()->__setIgnoreLUS(Type, memberName, args...);
 	}
 
-	//ÉèÖÃ½øĞĞÄ£ºı×ª»» ½á¹¹Ìå×ªjson²»´æÔÚÕâ¸öÎÊÌâÖ÷ÒªÊÇÕë¶Ôjson×ª½á¹¹ÌåµÄÎÊÌâ£¬Èç¹û´æÔÚ·ÖÆç£¬¿ÉÒÔ³¢ÊÔ½øĞĞÄ£ºı×ª»»
+	//è®¾ç½®è¿›è¡Œæ¨¡ç³Šè½¬æ¢ ç»“æ„ä½“è½¬jsonä¸å­˜åœ¨è¿™ä¸ªé—®é¢˜ä¸»è¦æ˜¯é’ˆå¯¹jsonè½¬ç»“æ„ä½“çš„é—®é¢˜ï¼Œå¦‚æœå­˜åœ¨åˆ†æ­§ï¼Œå¯ä»¥å°è¯•è¿›è¡Œæ¨¡ç³Šè½¬æ¢
 	void setFuzzy(string Type);
 
-	//ÅĞ¶ÏjsonÕıÈ·ĞÔ
+	//åˆ¤æ–­jsonæ­£ç¡®æ€§
 	result JsonValidS(string json_);
 
-	//ÅĞ¶Ï×Ö¶ÎÊÇ·ñ´æÔÚ
+	//åˆ¤æ–­å­—æ®µæ˜¯å¦å­˜åœ¨
 	bool Exist(string json_, string key);
 
-	//»ñÈ¡×Ö¶ÎµÄÖµ
+	//è·å–å­—æ®µçš„å€¼
 	string GetStringValue(string json_, string key);
 
-	//»ñÈ¡×Ö¶ÎµÄÖµ
+	//è·å–å­—æ®µçš„å€¼
 	int GetIntValue(string json_, string key);
 
-	//»ñÈ¡×Ö¶ÎµÄÖµ
+	//è·å–å­—æ®µçš„å€¼
 	double GetDoubleValue(string json_, string key);
 
-	//»ñÈ¡×Ö¶ÎµÄÖµ
+	//è·å–å­—æ®µçš„å€¼
 	long GetLongValue(string json_, string key);
 
-	//»ñÈ¡×Ö¶ÎµÄÖµ
+	//è·å–å­—æ®µçš„å€¼
 	bool GetBoolValue(string json_, string key);
 
 }
@@ -2191,7 +2448,7 @@ namespace Fdog {
 
 #define NAME(...) EXPAND(NAME_MSVC(__VA_ARGS__))
 
-#define EXTAND_ARGS(args) args //__VA_ARGS__ ÔÚvsÖĞ»á±»ÈÏÎªÊÇÒ»¸öÊµ²Î£¬ËùÒÔĞèÒª¶¨Òå¸Ãºê¹ı¶É
+#define EXTAND_ARGS(args) args //__VA_ARGS__ åœ¨vsä¸­ä¼šè¢«è®¤ä¸ºæ˜¯ä¸€ä¸ªå®å‚ï¼Œæ‰€ä»¥éœ€è¦å®šä¹‰è¯¥å®è¿‡æ¸¡
 
 #define ARG_N(...) \
     EXTAND_ARGS(ARG_N_(0, __VA_ARGS__, ARG_N_RESQ()))
@@ -2207,6 +2464,20 @@ namespace Fdog {
 
 #define PLACEHOLDER(placeholder, ...) placeholder
 
+#ifdef __GNUC__
+
+#define REGISTERED_FUCK_MSVC(TYPE, ...) \
+do{ \
+    ObjectInfo * objectinfo_one = new ObjectInfo();\
+    objectinfo_one->objectType = NAME(TYPE);\
+    objectinfo_one->objectTypeInt = FdogSerializer::Instance()->getObjectTypeInt(objectinfo_one->objectType, FdogSerializer::Instance()->getTypeName(typeid(TYPE).name()));\
+    objectinfo_one->objectSize = sizeof(TYPE);\
+    FdogSerializer::Instance()->addObjectInfo(objectinfo_one);\
+	EXPAND(REGISTEREDMEMBER_s_1_MSVC(TYPE, PLACEHOLDER(__VA_ARGS__), objectinfo_one->metaInfoObjectList, ARG_N(__VA_ARGS__) - 1, __VA_ARGS__, PLACEHOLDER(__VA_ARGS__)));\
+}while(0);
+
+#elif _MSC_VER
+
 #define REGISTERED_FUCK_MSVC(TYPE, ...) \
 do{ \
     ObjectInfo * objectinfo_one = new ObjectInfo();\
@@ -2215,14 +2486,283 @@ do{ \
     objectinfo_one->objectSize = sizeof(TYPE);\
     FdogSerializer::Instance()->addObjectInfo(objectinfo_one);\
 	EXPAND(REGISTEREDMEMBER_s_1_MSVC(TYPE, PLACEHOLDER(__VA_ARGS__), objectinfo_one->metaInfoObjectList, ARG_N(__VA_ARGS__) - 1, __VA_ARGS__, PLACEHOLDER(##__VA_ARGS__)));\
-}while(0); //3g //4g   //    //5g
+}while(0);
+
+#endif
 
 #define REGISTEREDMEMBER(...) EXPAND(REGISTERED_FUCK_MSVC(##__VA_ARGS__))
+
+#define SERIALIZE_FUCK_MSVC(TYPE, ...) \
+    SERIALIZE_FUCK_MSVC_s_1(TYPE, PLACEHOLDER(__VA_ARGS__), ARG_N(__VA_ARGS__) - 1, __VA_ARGS__, PLACEHOLDER(__VA_ARGS__));
+
+#define SERIALIZE_FUCK_MSVC_s_1(TYPE, ...)\
+    EXPAND(SERIALIZE_s_1(TYPE, __VA_ARGS__))
+
+#define SERIALIZE_s_1(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_2(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_2(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_3(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_3(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_4(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_4(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_5(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_5(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_6(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_6(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_7(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_7(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_8(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_8(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_9(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_9(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_10(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_10(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_11(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_11(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_12(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_12(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_13(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_13(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_14(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_14(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_15(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_15(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_16(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_16(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_17(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_17(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_18(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_18(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size); if (size > 0)EXPAND(SERIALIZE_s_19(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define SERIALIZE_s_19(TYPE, PLACE, size, arg1, ...)\
+    SERIALIZE_s(TYPE, arg1, size);
+
+#define DESERIALIZE_FUCK_MSVC(TYPE, ...) \
+    DESERIALIZE_FUCK_MSVC_s_1(TYPE, PLACEHOLDER(__VA_ARGS__), ARG_N(__VA_ARGS__) - 1, __VA_ARGS__, PLACEHOLDER(__VA_ARGS__));
+
+#define DESERIALIZE_FUCK_MSVC_s_1(TYPE, ...)\
+    EXPAND(DESERIALIZE_s_1(TYPE, __VA_ARGS__))
+
+#define DESERIALIZE_s_1(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_2(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_2(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_3(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_3(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_4(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_4(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_5(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_5(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_6(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_6(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_7(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_7(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_8(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_8(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_9(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_9(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_10(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_10(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_11(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_11(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_12(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_12(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_13(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_13(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_14(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_14(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_15(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_15(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_16(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_16(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_17(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_17(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_18(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_18(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size); EXPAND(DESERIALIZE_s_19(TYPE, PLACE, size-1, __VA_ARGS__, PLACE));
+
+#define DESERIALIZE_s_19(TYPE, PLACE, size, arg1, ...)\
+    DESERIALIZE_s(TYPE, arg1, size);
+
+#define SERIALIZE_s(TYPE, arg1, size)\
+    if (size > -1 && metainfoObject->memberTypeInt == OBJECT_STRUCT && metainfoObject->memberType == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name()) && metainfoObject->memberIsIgnore != true && metainfoObject->memberType != "string" && metainfoObject->memberType != "int") {\
+        Serialize_struct_Temp(json_, json_s, object_, object_.arg1, metainfoObject);\
+    } else if (metainfoObject->memberTypeInt == OBJECT_ARRAY && metainfoObject->first == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name())) {\
+        Serialize_array_Temp(json_, json_s, object_, object_.arg1, metainfoObject);\
+    }else if (size > -1 && metainfoObject->memberTypeInt == OBJECT_VECTOR && metainfoObject->memberType == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name())) {\
+        Serialize_vector_Temp(json_, object_, object_.arg1, metainfoObject);\
+    } else if (size > -1 && metainfoObject->memberTypeInt == OBJECT_LIST && metainfoObject->first == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name())) {\
+        Serialize_list_Temp(json_, object_, object_.arg1, metainfoObject);\
+    } else if (size > -1 && metainfoObject->memberTypeInt == OBJECT_SET && metainfoObject->first == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name())) {\
+        Serialize_set_Temp(json_, object_, object_.arg1, metainfoObject);\
+    } else if (size > -1 && metainfoObject->memberTypeInt == OBJECT_DEQUE && metainfoObject->first == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name())) {\
+        Serialize_deque_Temp(json_, object_, object_.arg1, metainfoObject);\
+    } else if (size > -1 && metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->first == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name())) {\
+        Serialize_map_Temp(json_, object_, object_.arg1, metainfoObject);\
+    } else if (size > -1 && metainfoObject->memberTypeInt == OBJECT_UNORDERED_MAP && metainfoObject->memberType == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name())) {\
+        Serialize_unordered_map_Temp(json_, object_, object_.arg1, metainfoObject);\
+    };\
+
+#define DESERIALIZE_s(TYPE, arg1, size)\
+    if (size > -1 && metainfoObject->memberTypeInt == OBJECT_STRUCT && metainfoObject->memberType == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name()) && metainfoObject->memberIsIgnore != true && size > -1 && metainfoObject->memberType != "string" && metainfoObject->memberType != "int") {\
+        Deserialize_struct_Temp(object_, object_.arg1, value, metainfoObject);\
+    } else if (metainfoObject->memberTypeInt == OBJECT_ARRAY && metainfoObject->memberType == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name())) {\
+        Deserialize_array_Temp(object_, object_.arg1, value, metainfoObject);\
+    } else if (metainfoObject->memberTypeInt == OBJECT_VECTOR && metainfoObject->memberType == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name()) && size > -1) {\
+        Deserialize_vector_Temp(object_, object_.arg1, value, metainfoObject);\
+    } else if (metainfoObject->memberTypeInt == OBJECT_LIST && metainfoObject->memberType == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name()) && size > -1) {\
+        Deserialize_list_Temp(object_, object_.arg1, value, metainfoObject);\
+    } else if (metainfoObject->memberTypeInt == OBJECT_SET && metainfoObject->memberType == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name()) && size > -1) {\
+        Deserialize_set_Temp(object_, object_.arg1, value, metainfoObject);\
+    } else if (metainfoObject->memberTypeInt == OBJECT_DEQUE && metainfoObject->memberType == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name()) && size > -1) {\
+        Deserialize_deque_Temp(object_, object_.arg1, value, metainfoObject);\
+    } else if (metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberType == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name()) && size > -1) {\
+        Deserialize_map_Temp(object_, object_.arg1, value, metainfoObject);\
+    } else if (metainfoObject->memberTypeInt == OBJECT_UNORDERED_MAP && metainfoObject->memberType == FdogSerializer::Instance()->getTypeName(typeid(object_.arg1).name())) {\
+        Deserialize_unordered_map_Temp(object_, object_.arg1, value, metainfoObject);\
+    };\
+
+#define REGISTERED_MEMBER_S(...)\
+public:\
+EXPAND(PLACEHOLDER(__VA_ARGS__))() {\
+	EXPAND(PLACEHOLDER(__VA_ARGS__)):InitFdogSerialize();\
+};\
+EXPAND(REGISTEREDMEMBER(__VA_ARGS__))
+
+#define REGISTERED_MEMBER_C(...)\
+EXPAND(REGISTEREDMEMBER(__VA_ARGS__))
+
+#define REGISTEREDMEMBER(...)\
+public:\
+template<typename T, typename X>\
+void Serialize_struct_Temp(string & json_, string & json_s, T & object_, X & object_2, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->Serialize(json_s, object_2);\
+    json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";\
+};\
+template<typename T, typename X>\
+void Deserialize_struct_Temp(T & object_, X & object_2, string & value, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->Deserialize(object_2, value);\
+};\
+template<typename T, typename X>\
+void Serialize_array_Temp(string & json_, string & json_s, T & object_, X & object_2, MetaInfo * metainfoObject) {\
+    for(int i = 0; i < metainfoObject->memberArraySize; i++){\
+        string json_z = "";\
+        FdogSerializer::Instance()->Serialize(json_z, *(X *)((char *)&object_ + metainfoObject->memberOffset + (i * sizeof(X))));\
+        json_ = json_ + "{" + json_z + "}" + ",";\
+    }\
+};\
+template<typename T, typename X>\
+void Deserialize_array_Temp(T & object_, X & object_2, string & value, MetaInfo * metainfoObject) {\
+    vector<string> json_array;\
+    int j = 0;\
+    for(int i = 0; i < metainfoObject->memberArraySize; i++){\
+        FdogSerializer::Instance()->Deserialize(*(X *)((char *)&object_ + metainfoObject->memberOffset + (i * sizeof(X))), json_array[j++]);\
+    }\
+};\
+template<typename T, typename X>\
+void Serialize_vector_Temp(string & json_, T & object_, X & object_2, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->FSerialize(json_, *(X *)((char *)&object_ + metainfoObject->memberOffset), typename TagDispatchTrait<X>::Tag{});\
+};\
+template<typename T, typename X>\
+void Deserialize_vector_Temp(T & object_, X & object_2, string & value, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->FDeserialize(*(X *)((char *)&object_ + metainfoObject->memberOffset), value, typename TagDispatchTrait<X>::Tag{});\
+};\
+template<typename T, typename X>\
+void Serialize_list_Temp(string & json_, T & object_, X & object_2, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->FSerialize(json_, *(X *)((char *)&object_ + metainfoObject->memberOffset), typename TagDispatchTrait<X>::Tag{});\
+};\
+template<typename T, typename X>\
+void Deserialize_list_Temp(T & object_, X & object_2, string & value, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->FDeserialize(*(X *)((char *)&object_ + metainfoObject->memberOffset), value, typename TagDispatchTrait<X>::Tag{});\
+};\
+template<typename T, typename X>\
+void Serialize_set_Temp(string & json_, T & object_, X & object_2, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->FSerialize(json_, *(X *)((char *)&object_ + metainfoObject->memberOffset), typename TagDispatchTrait<X>::Tag{});\
+};\
+template<typename T, typename X>\
+void Deserialize_set_Temp( T & object_, X & object_2, string & value, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->FDeserialize(*(X *)((char *)&object_ + metainfoObject->memberOffset), value, typename TagDispatchTrait<X>::Tag{});\
+};\
+template<typename T, typename X>\
+void Serialize_deque_Temp(string & json_, T & object_, X & object_2, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->FSerialize(json_, *(X *)((char *)&object_ + metainfoObject->memberOffset), typename TagDispatchTrait<X>::Tag{});\
+};\
+template<typename T, typename X>\
+void Deserialize_deque_Temp(T & object_, X & object_2, string & value, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->FDeserialize(*(X *)((char *)&object_ + metainfoObject->memberOffset), value, typename TagDispatchTrait<X>::Tag{});\
+};\
+template<typename T, typename X>\
+void Serialize_map_Temp(string & json_, T & object_, X & object_2, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->FSerialize(json_, *(X *)((char *)&object_ + metainfoObject->memberOffset), typename TagDispatchTrait<X>::Tag{});\
+};\
+template<typename T, typename X>\
+void Deserialize_map_Temp(T & object_, X & object_2, string & value, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->FDeserialize(*(X *)((char *)&object_ + metainfoObject->memberOffset), value, typename TagDispatchTrait<X>::Tag{});\
+};\
+template<typename T, typename X>\
+void Serialize_unordered_map_Temp(string & json_, T & object_, X & object_2, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->FSerialize(json_, *(X *)((char *)&object_ + metainfoObject->memberOffset), typename TagDispatchTrait<X>::Tag{});\
+};\
+template<typename T, typename X>\
+void Deserialize_unordered_map_Temp(T & object_, X & object_2, string & value, MetaInfo * metainfoObject) {\
+    FdogSerializer::Instance()->FDeserialize(*(X *)((char *)&object_ + metainfoObject->memberOffset), value, typename TagDispatchTrait<X>::Tag{});\
+};\
+template<typename T>\
+void Serialize_struct_s(string & json_, string & json_s, T & object_, MetaInfo * metainfoObject){\
+    EXPAND(SERIALIZE_FUCK_MSVC(__VA_ARGS__));\
+};\
+template<typename T>\
+void Deserialize_struct_s(T & object_, string & value, MetaInfo * metainfoObject){\
+    EXPAND(DESERIALIZE_FUCK_MSVC(__VA_ARGS__));\
+};\
+static int InitFdogSerialize() {\
+    EXPAND(REGISTERED_FUCK_MSVC(__VA_ARGS__));\
+    return 1;\
+};
 
 #define REGISTEREDMEMBER_s_1(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
 REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) EXPAND(REGISTEREDMEMBER_s_2(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE));
 
+
+#ifdef __GNUC__
+#define REGISTEREDMEMBER_s_1_MSVC(...) EXPAND(REGISTEREDMEMBER_s_1(__VA_ARGS__))
+#elif _MSC_VER
 #define REGISTEREDMEMBER_s_1_MSVC(...) EXPAND(REGISTEREDMEMBER_s_1(##__VA_ARGS__))
+#endif
 
 #define REGISTEREDMEMBER_s_2(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
 REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) EXPAND(REGISTEREDMEMBER_s_3(TYPE, PLACE, metaInfoObjectList, size-1, ##__VA_ARGS__, PLACE));
@@ -2281,9 +2821,13 @@ REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1); if (size > 0) EXPAND(REGISTE
 #define REGISTEREDMEMBER_s_20(TYPE, PLACE, metaInfoObjectList, size, arg1, ...) \
 REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
 
-#define offsetof_MSVC(...) EXPAND(offsetof(##__VA_ARGS__));
-
+#ifdef __GNUC__
+#define MEMBERTYPE_MSVC(...) EXPAND(MEMBERTYPE(__VA_ARGS__));
+#define offsetof_MSVC(...) EXPAND(offsetof(__VA_ARGS__));
+#elif _MSC_VER
 #define MEMBERTYPE_MSVC(...) EXPAND(MEMBERTYPE(##__VA_ARGS__));
+#define offsetof_MSVC(...) EXPAND(offsetof(##__VA_ARGS__));
+#endif
 
 #define REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg) \
     do{\
@@ -2302,5 +2846,31 @@ REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
         metainfo_one->memberIsIgnoreLU = false;\
         metaInfoObjectList.push_back(metainfo_one);\
     }while(0);
+
+#define TAGDISPATCH_LIST(object)\
+template<> struct TagDispatchTrait_zx<vector<object>> {using Tag = BaseTag_zx;};\
+template<> struct TagDispatchTrait<vector<object>> {using Tag = ArrayTag;};\
+template<> struct TagSTLType<vector<object>> {using Tag = InitStructTag;};\
+\
+template<> struct TagDispatchTrait_zx<set<object>> {using Tag = BaseTag_zx;};\
+template<> struct TagDispatchTrait<set<object>> {using Tag = ArrayTag;};\
+template<> struct TagSTLType<set<object>> {using Tag = InitStructTag;};\
+\
+template<> struct TagDispatchTrait_zx<deque<object>> {using Tag = BaseTag_zx;};\
+template<> struct TagDispatchTrait<deque<object>> {using Tag = ArrayTag;};\
+template<> struct TagSTLType<deque<object>> {using Tag = InitStructTag;};\
+\
+template<> struct TagDispatchTrait_zx<list<object>> {using Tag = BaseTag_zx;};\
+template<> struct TagDispatchTrait<list<object>> {using Tag = ArrayTag;};\
+template<> struct TagSTLType<list<object>> {using Tag = InitStructTag;};\
+
+#define TAGDISPATCH_MAP(object, object2)\
+template<> struct TagDispatchTrait_zx<map<object, object2>> {using Tag = BaseTag_zx;};\
+template<> struct TagDispatchTrait<map<object, object2>> {using Tag = ArrayTag;};\
+template<> struct TagSTLType<map<object, object2>> {using Tag = InitStructTag;};\
+\
+template<> struct TagDispatchTrait_zx<unordered_map<object, object2>> {using Tag = BaseTag_zx;};\
+template<> struct TagDispatchTrait<unordered_map<object, object2>> {using Tag = ArrayTag;};\
+template<> struct TagSTLType<unordered_map<object, object2>> {using Tag = InitStructTag;};\
 
 #endif
