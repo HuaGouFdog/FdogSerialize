@@ -645,9 +645,9 @@ ObjectInfo FdogSerializer::getObjectInfoByType(string typeName, int objectTypeIn
 		break;
 	}
 }
-
-wstring FdogSerializer::string2wstring(string str)
-{
+#ifdef __GNUC__
+#elif _MSC_VER
+wstring FdogSerializer::string2wstring(string str) {
 	wstring result;
 	//获取缓冲区大小，并申请空间，缓冲区大小按字符计算  
 	int len = MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.size(), NULL, 0);
@@ -661,8 +661,7 @@ wstring FdogSerializer::string2wstring(string str)
 	return result;
 }
 
-string FdogSerializer::wstring2string(wstring wstr)
-{
+string FdogSerializer::wstring2string(wstring wstr) {
 	string result;
 	//获取缓冲区大小，并申请空间，缓冲区大小事按字节计算的  
 	int len = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), wstr.size(), NULL, 0, NULL, NULL);
@@ -675,6 +674,7 @@ string FdogSerializer::wstring2string(wstring wstr)
 	delete[] buffer;
 	return result;
 }
+#endif
 
 int FdogSerializer::getObjectTypeByObjectInfo(string objectName) {
 	return getObjectInfo(objectName).objectTypeInt;

@@ -27,12 +27,22 @@
 
 using namespace std;
 
-void initFdog() {
-	addFun(student::init);
-	addFun(teacher::init);
-	addFun(school::init);
-	return;
-}
+// void initFdog() {
+// 	addFun(student::init);
+// 	addFun(teacher::init);
+// 	addFun(school::init);
+// 	return;
+// }
+
+// Fdog::AddSerialize{
+// 	student::init, 
+// 	teacher::init, 
+// 	school::init
+// }
+
+//Fdog::InitFdogSerialize();
+
+
 
 string to_string(const wstring& str, const locale& loc = locale("chs"))
 {
@@ -272,9 +282,9 @@ int main() {
 	// t.age = 12;
 	// Fdog::FJson(sch1, s); 
 	// cout << sch1 << endl;
-	// Fdog::FJson(sch2, t); 
+	// Fdog::FJson(sch2, t);
 	// cout << sch2 << endl;
-	initFdog();
+	//initFdog();
 	double dur;
 	clock_t start, end;
 	start = clock();

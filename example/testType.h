@@ -33,14 +33,17 @@ class student {
 public:
 	string name;
 	int age;
-	REGISTEREDMEMBER(student, name, age);
+	student(){
+		student::InitFdogSerialize();
+	}
+	REGISTERED_MEMBER_C(student, name, age);
 };
 
 class teacher {
 public:
 	string name;
 	int age;
-	REGISTEREDMEMBER(teacher, name, age);
+	REGISTERED_MEMBER_S(teacher, name, age);
 };
 
 //假设学校只有两个人
@@ -49,7 +52,7 @@ public:
 	student stu;
 	teacher tea;
 	vector<student> stuList;
-	REGISTEREDMEMBER(school, stu, tea, stuList);
+	REGISTERED_MEMBER_S(school, stu, tea, stuList);
 };
 //容器中包含自定义类型需要添加TAGDISPATCH_LIST宏
 TAGDISPATCH_LIST(student)

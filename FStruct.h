@@ -62,9 +62,19 @@ enum ObjectType {
 
 //保存结构体的init()
 //typedef struct GetInit {
-static int indexa = 0;
-static int(*pfunarr[999])() = {};
+
+// static int (*pfunarr)() //函数指针
+// static int indexa = 0;
+// static int(*pfunarr[999])() = {};
 typedef int(*fun)();
+
+// char * (*(*ptrfun)[999])(char *p); //函数指针数组指针
+
+// char * (*pfun[999])(char *p);  	   //函数指针数组
+// char * fun2(char *p);   //函数
+
+// ptrfun=&pfun;
+// pfun[0]=fun1;
 
 // typedef int (*fun_t)();
 
@@ -982,6 +992,8 @@ private:
 	map<string, string> baseRegex;
 	map<int, string> complexRegex;
 	map<string, string> TypeName;
+	//初始化init
+	//vector<void (*pfun)()> pfunList;
 	FdogSerializer();
 	~FdogSerializer();
 
@@ -2644,6 +2656,16 @@ do{ \
         Deserialize_unordered_map_Temp(object_, object_.arg1, value, metainfoObject);\
     };\
 
+#define REGISTERED_MEMBER_S(...)\
+public:\
+EXPAND(PLACEHOLDER(__VA_ARGS__))() {\
+	EXPAND(PLACEHOLDER(__VA_ARGS__)):InitFdogSerialize();\
+};\
+EXPAND(REGISTEREDMEMBER(__VA_ARGS__))
+
+#define REGISTERED_MEMBER_C(...)\
+EXPAND(REGISTEREDMEMBER(__VA_ARGS__))
+
 #define REGISTEREDMEMBER(...)\
 public:\
 template<typename T, typename X>\
@@ -2727,7 +2749,7 @@ template<typename T>\
 void Deserialize_struct_s(T & object_, string & value, MetaInfo * metainfoObject){\
     EXPAND(DESERIALIZE_FUCK_MSVC(__VA_ARGS__));\
 };\
-static int init() {\
+static int InitFdogSerialize() {\
     EXPAND(REGISTERED_FUCK_MSVC(__VA_ARGS__));\
     return 1;\
 };
