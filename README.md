@@ -1,6 +1,6 @@
 **中文**|English
 
-
+[![Security Status](https://s.murphysec.com/badge/HuaGouFdog/FdogSerialize.svg)](https://www.murphysec.com/p/HuaGouFdog/FdogSerialize)
 
 # :fire:FStruct:fire:
 
