@@ -29,7 +29,12 @@ struct TestType
 	std::wstring age8;
 };
 
-class student {
+// class student;
+// template<> struct TagDispatchTrait<student> {
+// 	using Tag = BaseTag;
+// };
+
+F_CLASS(student) {
 public:
 	string name;
 	int age;
@@ -39,24 +44,33 @@ public:
 	REGISTERED_MEMBER_C(student, name, age);
 };
 
-class teacher {
+// class teacher;
+F_CLASS(teacher) {
 public:
 	string name;
 	int age;
 	REGISTERED_MEMBER_S(teacher, name, age);
 };
 
+
 //假设学校只有两个人
-class school {
+F_CLASS(school) {
 public:
 	student stu;
 	teacher tea;
 	vector<student> stuList;
-	REGISTERED_MEMBER_S(school, stu, tea, stuList);
+	vector<int>  intTesst;
+	vector<long>  intTesst2;
+	map<int, student> intMap;
+	REGISTERED_MEMBER_S(school, stu, tea, stuList, intTesst, intTesst2, intMap);
 };
-//容器中包含自定义类型需要添加TAGDISPATCH_LIST宏
-REGISTERE_CONTAINER_V(student)
-//REGISTERE_CONTAINER_M(int,student)
+// template<> struct TagDispatchTrait<vector<student>> {using Tag = ArrayTag;};
+// template<> struct TagSTLType<vector<student>> {using Tag = InitStructTag;};
+
+
+//map容器中包含自定义类型需要添加REGISTERE_CONTAINER_M宏
+//
+REGISTERE_CONTAINER_M(int,student)
 
 class classtest {
 public:

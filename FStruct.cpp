@@ -814,6 +814,7 @@ void FdogSerializer::removeNumbers(string & return_) {
 	}
 }
 
+
 vector<string> FdogSerializer::CuttingArray(string data) {
 	int sum = 0;
 	int first = 0;
@@ -869,6 +870,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 	int sum = 0;
 	int xiabiao = 0; //记录匹配下标
 	bool isadd = false;
+	res.code = 0;
 	for (int i = 0; i < len; i++) {
 		//cout << "i = " << i << endl;
 		if (json_[i] == '"') {
@@ -888,6 +890,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 
 		if (json_[i] == ',' && json_[i - 1] == '"' && status == 2) {
 			cout << ",后面是\" 且 status = 2 出错" << endl;
+			res.code = -1;
 		}
 
 		if (json_[i] == '"' && json_[i + 1] == ':' && json_[i + 2] == '{') {
@@ -977,6 +980,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 					string da = json_.substr(first, end - first);
 					if (da.npos != da.find(",")) {
 						cout << "失败" << endl;
+						res.code = -1;
 					}
 					//cout << "获取到的值4：" << da << endl;
 					status = -1;
@@ -1017,6 +1021,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 						string da = json_.substr(first, end - first);
 						if (da.npos != da.find(",")) {
 							cout << "失败" << endl;
+							res.code = -1;
 						}
 						//cout << "获取到的值71：" << da << endl;
 						status = -1;
@@ -1051,14 +1056,15 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 			cout << json_[a++];
 		}
 		cout << ">附近" << endl;
-	}
-	else {
+		res.code = -1;
+	} else {
 		int count = 0;
 		for (int i = 0; i < json_array.size(); i++) {
 			count = count + json_array[i].length() + 1;
 		}
 		if (count + 1 != json_.length()) {
 			cout << "长度出错 :" << json_ << "---原字符串长度：" << json_.length() << "---现在长度:" << count + 1 << endl;
+			res.code = -1;
 		}
 	}
 	if (1) {
@@ -1073,9 +1079,9 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 		json_a = json_a + "}";
 		if (json_ != json_a) {
 			cout << "加逗号还原，不匹配" << json_a << endl;
+			res.code = -1;
 		}
 	}
-	res.code = 0;
 	return res;
 }
 
@@ -1138,6 +1144,47 @@ result FdogSerializer::isMatch(string json_) {
 		res.message = "缺少方括号";
 	}
 	return res;
+}
+
+//截取字符串
+string FdogSerializer::getFdogString(string a, string json_) {
+	//cout << "a = " << a << " json_ =" << json_ << endl;
+	size_t num = json_.find(a);
+	size_t num_2 = a.length();
+	if (num > json_.length()) {
+		cout << "错误" << endl;
+	}
+	cout << "num = " << num << endl;
+	cout << "num2 = " << num_2 << endl;
+
+	bool isCall = false;
+	result res;
+	int h_sum = 0;
+	int f_sum = 0;
+	int i;
+	for (i = num + num_2; i < json_.length(); i++) {
+		if (json_[i] == '{') {
+			h_sum++;
+			isCall = true;
+		}
+		if (json_[i] == '}') {
+			isCall = true;
+			h_sum--;
+		}
+		if (json_[i] == '[') {
+			isCall = true;
+			f_sum++;
+		}
+		if (json_[i] == ']') {
+			isCall = true;
+			f_sum--;
+		}
+		//cout << " i = " << i << endl;
+		if (isCall && h_sum == f_sum && f_sum == 0) {
+			string b = json_.substr(num + num_2, i - (num + num_2) + 1);
+			//cout << "b = " << b << " num + num_2 = "<< num + num_2 << " num + num_2 + i = " << i << " json_.length() =" << json_.length() << endl;
+		}
+	}
 }
 
 //判断json正确性

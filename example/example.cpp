@@ -27,6 +27,12 @@
 
 using namespace std;
 
+// vector<struct> a;
+
+// template <typename T> struct qqa {
+// 	a
+// }
+
 // void initFdog() {
 // 	addFun(student::init);
 // 	addFun(teacher::init);
@@ -272,6 +278,11 @@ int main() {
 	// }
 
 	cout << "===============================================================" << endl;
+
+	// vector<struct> a
+	// vector<T>
+	// T c
+
 	// string sch1 = "";
 	// string sch2 = "";
 	// student s;
@@ -297,34 +308,67 @@ int main() {
 	student stu3;
 	stu3.name = "zhangxu";
 	stu3.age = 21;
+
+	string aaaaa ="";
+	Fdog::FJson(aaaaa, stu3);
+	cout << "aaaaa=" << aaaaa << endl;
+
 	student stu4;
 	stu4.name = "yujing";
 	stu4.age = 21;
 	sch.stuList.push_back(stu3);
 	sch.stuList.push_back(stu4);
-	for (int i = 0; i < 1; i++) {
-
+	sch.intTesst.push_back(1);
+	sch.intTesst.push_back(2);
+	sch.intTesst2.push_back(2222);
+	sch.intTesst2.push_back(3333);
+	sch.intMap[12] = stu3;
+	sch.intMap[13] = stu4;
+	//cout << "长度 =" << sch.intTesst.size() << endl;
 		string sch_json = "";
 		//结构体转json
 		Fdog::FJson(sch_json, sch);
 		//结果 输出sch_json为：{"stu":{"name":"liuliu","age":18},"tea":{"name":"wufang","age":48}}
-		cout << sch_json << endl;
+		cout << "字符串 = " << sch_json << endl;
+		//string dsaasd =  "{\"stu\"1:{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48},\"stuList\":[{\"name\":\"zhangxu\",\"age\":21},{\"name\":\"yujing\",\"age\":21}]}";
+		auto res = Fdog::JsonValidS(sch_json);
+		//cout << "字符串是否正确：" << res.code << endl;
+		//cout << "字符串错误提示：" << res.message << endl;
 		//json转结构体
 		school sch2;
 		//sch2.stuList.resize(2);
-		string sch2_json = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48},\"stuList\":[{\"name\":\"zhangxu\",\"age\":21},{\"name\":\"yujing\",\"age\":21}]}";
-		Fdog::FObject(sch2, sch2_json);
+		string sch2_json = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48},\"stuList\":[{\"name\":\"zhangxu\",\"age\":21},{\"name\":\"yujing\",\"age\":21}],\"intTesst\":[1,2],\"intTesst2\":[2222,3333],\"intMap\":{\"12\":\"name\":\"zhangxu\",\"age\":2,\"13\":\"name\":\"yujing\",\"age\":2}}";
+		Fdog::FObject(sch2, sch_json);
 		// //结果  
 		cout << "name = " << sch2.stu.name << " age = " << sch2.stu.age << endl;
 		cout << "name = " << sch2.tea.name << " age = " << sch2.tea.age << endl;
 		for (int i = 0; i < sch2.stuList.size(); i++) {
 			cout << "stuList name = " << sch2.stuList[i].name << " age = " << sch2.stuList[i].age << endl;
+			cout << "intTesst = " << sch2.intTesst[i] << endl;
+			cout << "intTesst2 = " << sch2.intTesst2[i] << endl;
+			cout << "intMap[12] name = " << sch2.intMap[12].name << " age = " << sch2.intMap[12].age << endl;
+			cout << "intMap[13] name = " << sch2.intMap[13].name << " age = " << sch2.intMap[13].age << endl;
 		}
-	}
 
 	end = clock();
 	dur = (double)(end - start);
 	printf("Use Time:%f\n", (dur / CLOCKS_PER_SEC));
+
+	// template<class T, T V> struct TMP{};
+	// template<class T> struct TA2;
+
+	// template<class T, T V>
+	// struct TA2<TMP<T, V>>
+	// {
+	// 	typedef T type;
+	// 	static constexpr T value = V;
+	// };
+
+
+	// typedef TMP<int, 10> TA1;
+	// TA2<TA1>::type value = TA2<TA1>::value;
+	// std::cout << value << std::endl;
+
 	//   // REGISTEREDMEMBER(test_map, grade1);
 	//   // test_map tm;
 	//   // tm.grade1[11] = 88;
