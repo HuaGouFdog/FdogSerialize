@@ -275,6 +275,9 @@ public:
 
 	template<class T>
 	void setValueByAddress(string valueType, T &object, int offsetValue, string value) {
+		//cout << "addr = " << *object << endl;
+		cout << "type = " << typeid(object).name() << endl;
+
 		//cout << "setValueByAddress offsetValue = " << offsetValue << endl;
 		if (valueType == "char*") {
 			*((char **)((char *)&object + offsetValue)) = new char[strlen(value.c_str())];
@@ -284,6 +287,9 @@ public:
 			*((string *)((char *)&object + offsetValue)) = value;
 		}
 		if (valueType == "string*") {
+			if (*((string **)((char **)&object + offsetValue)) == NULL) {
+				*((string **)((char **)&object + offsetValue)) = new string();
+			}
 			**((string **)((char *)&object + offsetValue)) = value;
 		}
 		if (valueType == "wstring") {
@@ -311,72 +317,108 @@ public:
 			ss >> *((unsigned char *)((char *)&object + offsetValue));
 		}
 		if (valueType == "unsigned char*") {
+			if (*((unsigned char **)((char **)&object + offsetValue)) == NULL) {
+				*((unsigned char **)((char **)&object + offsetValue)) = new unsigned char();
+			}
 			ss >> **((unsigned char **)((char *)&object + offsetValue));
 		}
 		if (valueType == "int") {
 			ss >> *((int *)((char *)&object + offsetValue));
 		}
 		if (valueType == "int*") {
+			if (*((int **)((char **)&object + offsetValue)) == NULL) {
+				*((int **)((char **)&object + offsetValue)) = new int();
+			}
 			ss >> **((int **)((char *)&object + offsetValue));
 		}
 		if (valueType == "unsigned int") {
 			ss >> *((unsigned int *)((char *)&object + offsetValue));
 		}
 		if (valueType == "unsigned int*") {
+			if (*((unsigned int **)((char **)&object + offsetValue)) == NULL) {
+				*((unsigned int **)((char **)&object + offsetValue)) = new unsigned int();
+			}
 			ss >> **((unsigned int **)((char *)&object + offsetValue));
 		}
 		if (valueType == "short") {
 			ss >> *((short int *)((char *)&object + offsetValue));
 		}
 		if (valueType == "short*") {
+			if (*((short **)((char **)&object + offsetValue)) == NULL) {
+				*((short **)((char **)&object + offsetValue)) = new short();
+			}
 			ss >> **((short int **)((char *)&object + offsetValue));
 		}
 		if (valueType == "unsigned short") {
 			ss >> *((unsigned short int *)((char *)&object + offsetValue));
 		}
 		if (valueType == "unsigned short*") {
+			if (*((unsigned short **)((char **)&object + offsetValue)) == NULL) {
+				*((unsigned short **)((char **)&object + offsetValue)) = new unsigned short();
+			}
 			ss >> **((unsigned short int **)((char *)&object + offsetValue));
 		}
 		if (valueType == "long") {
 			ss >> *((long int *)((char *)&object + offsetValue));
 		}
 		if (valueType == "long*") {
+			if (*((long **)((char **)&object + offsetValue)) == NULL) {
+				*((long **)((char **)&object + offsetValue)) = new long();
+			}
 			ss >> **((long int **)((char **)&object + offsetValue));
 		}
 		if (valueType == "unsigned long") {
 			ss >> *((unsigned long int *)((char *)&object + offsetValue));
 		}
 		if (valueType == "unsigned long*") {
+			if (*((unsigned long **)((char **)&object + offsetValue)) == NULL) {
+				*((unsigned long **)((char **)&object + offsetValue)) = new unsigned long();
+			}
 			ss >> **((unsigned long int **)((char *)&object + offsetValue));
 		}
 		if (valueType == "long long") {
 			ss >> *((long long int *)((char *)&object + offsetValue));
 		}
 		if (valueType == "long long*") {
+			if (*((long long int **)((char **)&object + offsetValue)) == NULL) {
+				*((long long int **)((char **)&object + offsetValue)) = new long long int();
+			}
 			ss >> **((long long int **)((char *)&object + offsetValue));
 		}
 		if (valueType == "unsigned long long") {
 			ss >> *((unsigned long long  int *)((char *)&object + offsetValue));
 		}
 		if (valueType == "unsigned long long*") {
+			if (*((unsigned long long **)((char **)&object + offsetValue)) == NULL) {
+				*((unsigned long long **)((char **)&object + offsetValue)) = new unsigned long long();
+			}
 			ss >> **((unsigned long long  int **)((char *)&object + offsetValue));
 		}
 		if (valueType == "float") {
 			ss >> *((float *)((char *)&object + offsetValue));
 		}
 		if (valueType == "float*") {
+			if (*((float **)((char **)&object + offsetValue)) == NULL) {
+				*((float **)((char **)&object + offsetValue)) = new float();
+			}
 			ss >> **((float **)((char **)&object + offsetValue));
 		}
 		if (valueType == "double") {
 			ss >> *((double *)((char *)&object + offsetValue));
 		}
 		if (valueType == "double*") {
+			if (*((double **)((char **)&object + offsetValue)) == NULL) {
+				*((double **)((char **)&object + offsetValue)) = new double();
+			}
 			ss >> **((double **)((char **)&object + offsetValue));
 		}
 		if (valueType == "long double") {
 			ss >> *((long double *)((char *)&object + offsetValue));
 		}
 		if (valueType == "long double*") {
+			if (*((long double **)((char **)&object + offsetValue)) == NULL) {
+				*((long double **)((char **)&object + offsetValue)) = new long double();
+			}
 			ss >> **((long double **)((char **)&object + offsetValue));
 		}
 	}
@@ -1720,7 +1762,7 @@ public:
 	//用于解析基础类型，数组(只需要判断有没有[]就能确定是不是数组，结构体和基础类型都不具备[]条件)，结构体
 	template<typename T>
 	void FSerialize(string & json_, T & object_, BaseTag, string name = "") {
-		//cout << "进入array==========0 " << typeid(T).name() << endl;
+		cout << "进入array==========0 " << typeid(T).name() << endl;
 		//bool isArray = isArrayType("", FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		//cout << "是否是数组 ： " << isArray << endl;
 		//SerializeS(json_, object_, typename TagSTLAAAType<T>::Tag{}, name);
@@ -1803,7 +1845,7 @@ public:
 			objectinfo = getObjectInfoByType(FdogSerializer::Instance()->getTypeName(typeid(T).name()), objectType);
 			objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		}
-		//cout << "objectType = " << objectType << endl; 
+		cout << "objectType = " << objectType << endl; 
 		if (OBJECT_BASE == objectType) {
 			MetaInfo * metainfo1 = getMetaInfo(FdogSerializer::Instance()->getTypeName(typeid(object_).name()));
 			smatch result;
@@ -1838,7 +1880,7 @@ public:
 				smatch result;
 				string regex_key = "(\"" + metainfoObject->memberName + "\")";
 				string regex_value = baseRegex[metainfoObject->memberType];
-				//cout << "       反序列化获取的regex_value：" << regex_value << "  memberType = " << metainfoObject->memberType << endl;
+				cout << "       反序列化获取的regex_value：" << regex_value << "  memberType = " << metainfoObject->memberType << endl;
 				if (regex_value == "") {
 					if (metainfoObject->memberTypeInt == OBJECT_STRUCT) {
 						//cout << "------------" << "struct类型" << endl;
@@ -1887,7 +1929,7 @@ public:
 				if (regex_search(json_, result, *pattern)) {
 					string value = result.str(2).c_str();
 					//value = "{\"12\":{\"name\":\"zhangxu\",\"age\":21},\"13\":{\"name\":\"yujing\",\"age\":21}}";
-					//cout << endl << "正则表达式 获取的值：" << value << "   type = " << metainfoObject->memberTypeInt << endl;
+					cout << endl << "正则表达式 获取的值：" << value << "   type = " << metainfoObject->memberTypeInt << endl;
 					if (metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true) {
 						FdogSerializerBase::Instance()->JsonToBase(object_, metainfoObject, value);
 					}
@@ -2189,7 +2231,7 @@ public:
 	//用于解析基础类型，数组(只需要判断有没有[]就能确定是不是数组，结构体和基础类型都不具备[]条件)，结构体
 	template<typename T>
 	void FDeserialize(T & object_, string & json_, BaseTag, string name = "") {
-		//cout << "FDeserialize BaseTag json_ = " << json_ << endl;
+		cout << "FDeserialize BaseTag json_ = " << json_ << endl;
 		//bool isArray = isArrayType("", FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		//DeserializeS_s(object_, json_, isArray, name);
 		Deserialize(object_, json_, name);
@@ -2350,7 +2392,7 @@ namespace Fdog {
 		//cout << "进入FSerialize" << endl;
 		FdogSerializer::Instance()->FSerialize(json_, object_, typename TagDispatchTrait<T>::Tag{}, name);
 		//FdogSerializer::Instance()->Serialize(json_, object_, name);
-		json_ = "{" + json_ + "}";
+		//json_ = "{" + json_ + "}";
 	}
 
 	template<typename T>

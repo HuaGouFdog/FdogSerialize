@@ -110,17 +110,31 @@ wstring to_wstring(const string& str, const locale& loc = locale("chs"))
 //     return files;
 // }
 
+template<class T>
+int getLength(T* array) {
+
+	//return _msize(array) / sizeof(T);
+	return (sizeof(array));
+}
+
 int main() {
 
 	Yujin a;
 	//*a.age = 520;
 	//确保指针是NULl或者已经指向一个地址
-	a.age = new float(20.5f);  //&c;
-
-	cout << *a.age << endl;
+	a.age = new float[3]{1.3f, 3.2f, 43.5f};
+	cout << "getLength = " << getLength(a.age) << endl;
+	//a.age = new float(20.5f);  //&c;
+	//cout << *a.age << endl;
 	string b;
 	Fdog::FJson(b, a);
 	cout << "b = " << b << endl;
+
+	// Yujin c;
+	// //c.age = new float();
+	// Fdog::FObject(c, b);
+	// cout << "c.age = "<< *c.age << endl;
+
 
 
 	//获取应用程序目录

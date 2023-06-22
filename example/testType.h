@@ -37,8 +37,10 @@ struct TestType
 F_CLASS(Yujin) {
 public:
 	float * age;
-
-	REGISTERED_MEMBER_S(Yujin, age);
+	Yujin(): age(NULL) {
+		Yujin::InitFdogSerialize();
+	}
+	REGISTERED_MEMBER_C(Yujin, age);
 };
 
 F_CLASS(student) {

@@ -139,17 +139,21 @@ FdogSerializer::FdogSerializer() {
 
 	//有符号类型应该拥有正负号，正号忽视 ^(-|+)? 匹配负号
 	map<string, string> baseRegexTemp = {
-		{ "bool", "(\\d+)" },
-		{ "float", "(\\d+.\\d+)" },
-		{ "double", "(\\d+.\\d+)" },
-		{ "long double", "(\\d+.\\d+)" },
-		{ "char*", "\"(.*?)\"" },
-		{ "string", "\"(.*?)\"" },
-		{ "char", "(\\d+)" },{ "unsigned char", "(\\d+)" },
-		{ "int", "(\\d+)" },{ "unsigned int", "(\\d+)" },
-		{ "short", "(\\d+)" },{ "unsigned short", "(\\d+)" },
-		{ "long", "(\\d+)" },{ "unsigned long", "(\\d+)" },
-		{ "long long", "(\\d+)" },{ "unsigned long long", "(\\d+)" },
+		{ "bool", "(\\d+)" },{ "bool*", "(\\d+)" },
+		{ "float", "(\\d+.\\d+)" },{ "float*", "(\\d+.\\d+)" },
+		{ "double", "(\\d+.\\d+)" },{ "double*", "(\\d+.\\d+)" },
+		{ "long double", "(\\d+.\\d+)" },{ "long double*", "(\\d+.\\d+)" },
+		{ "char", "(\\d+)" },{ "char*", "\"(.*?)\"" },
+		{ "string", "\"(.*?)\"" },{ "string*", "\"(.*?)\"" },
+		{ "unsigned char", "(\\d+)" },{ "unsigned char*", "(\\d+)" },
+		{ "int", "(\\d+)" },{ "int*", "(\\d+)" },
+		{ "unsigned int", "(\\d+)" },{ "unsigned int*", "(\\d+)" },
+		{ "short", "(\\d+)" },{ "short*", "(\\d+)" },
+		{ "unsigned short", "(\\d+)" },{ "unsigned short*", "(\\d+)" },
+		{ "long", "(\\d+)" },{ "long*", "(\\d+)" },
+		{ "unsigned long", "(\\d+)" },{ "unsigned long*", "(\\d+)" },
+		{ "long long", "(\\d+)" },{ "long long*", "(\\d+)" },
+		{ "unsigned long long", "(\\d+)" },{ "unsigned long long*", "(\\d+)" },
 		{ "wstring", "\"(.*?)\"" },
 	};
 	this->baseRegex = baseRegexTemp;
