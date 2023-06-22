@@ -75,10 +75,10 @@ FdogSerializer::FdogSerializer() {
 	TypeName["long long*"] = "long long*";
 	TypeName["unsigned long long*"] = "unsigned long long*";
 	TypeName["float"] = "float";
-	TypeName["double"] = "double";
-	TypeName["long double"] = "long double";
 	TypeName["float*"] = "float*";
+	TypeName["double"] = "double";
 	TypeName["double*"] = "double*";
+	TypeName["long double"] = "long double";
 	TypeName["long double*"] = "long double*";
 	TypeName["std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >"] = "string";
 	TypeName["std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*"] = "string*";
@@ -108,10 +108,10 @@ FdogSerializer::FdogSerializer() {
 	TypeName["__int64 *"] = "long long*";
 	TypeName["unsigned __int64 *"] = "unsigned long long*";
 	TypeName["float"] = "float";
-	TypeName["double"] = "double";
-	TypeName["long double"] = "long double";
 	TypeName["float *"] = "float*";
+	TypeName["double"] = "double";
 	TypeName["double *"] = "double*";
+	TypeName["long double"] = "long double";
 	TypeName["long double *"] = "long double*";
 	TypeName["class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >"] = "string";
 	TypeName["class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > *"] = "string*";
@@ -128,7 +128,7 @@ FdogSerializer::FdogSerializer() {
 	vector<string> baseTypeTemp = {
 		"bool", "bool*",
 		"char", "unsigned char", "unsigned char*",
-		"int", "unsigned int", "int*", "unsigned int*", "unsigned __int64", "unsigned __int64*"
+		"int", "unsigned int", "unsigned int*", "int*", "unsigned __int64", "unsigned __int64*"
 		"short", "unsigned short", "short*", "unsigned short*",
 		"long", "unsigned long", "long*", "unsigned long*",
 		"long long", "unsigned long long", "long long*", "unsigned long long*",
@@ -426,7 +426,7 @@ string FdogSerializer::getKey(string json) {
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
 ************************************/
 memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
-	//cout << "getMemberAttribute = " << typeName << endl;
+	cout << "getMemberAttribute = " << typeName << endl;
 	memberAttribute resReturn;
 	smatch result;
 	if (FdogSerializer::isBaseType(typeName)) {
@@ -1179,7 +1179,7 @@ string FdogSerializer::getFdogString(string a, string json_) {
 			isCall = true;
 			f_sum--;
 		}
-		//cout << " i = " << i << endl;
+		cout << " i = " << i << endl;
 		if (isCall && h_sum == f_sum && f_sum == 0) {
 			string b = json_.substr(num + num_2, i - (num + num_2) + 1);
 			//cout << "b = " << b << " num + num_2 = "<< num + num_2 << " num + num_2 + i = " << i << " json_.length() =" << json_.length() << endl;

@@ -126,6 +126,10 @@ public:
 
 	template<class T>
 	string getValueByAddress(string valueType, T & object, int offsetValue) {
+		if (valueType == "char") {
+			auto value = *((char *)((char *)&object + offsetValue));
+			return to_string((int)value);
+		}
 		if (valueType == "char*") {
 			auto value = *((const char **)((char *)&object + offsetValue));
 			string str_value = value;
@@ -133,6 +137,11 @@ public:
 		}
 		if (valueType == "string") {
 			auto value = *((string *)((char *)&object + offsetValue));
+			string str_value = value;
+			return "\"" + str_value + "\"";
+		}
+		if (valueType == "string*") {
+			auto value = **((string **)((char *)&object + offsetValue));
 			string str_value = value;
 			return "\"" + str_value + "\"";
 		}
@@ -155,12 +164,20 @@ public:
 				return "false";
 			}
 		}
-		if (valueType == "char") {
-			auto value = *((char *)((char *)&object + offsetValue));
-			return to_string((int)value);
+		if (valueType == "bool*") {
+			auto value = **((bool **)((char *)&object + offsetValue));
+			if (value) {
+				return "true";
+			} else {
+				return "false";
+			}
 		}
 		if (valueType == "unsigned char") {
 			auto value = *((char *)((char *)&object + offsetValue));
+			return to_string((unsigned int)value);
+		}
+		if (valueType == "unsigned char*") {
+			auto value = **((char **)((char *)&object + offsetValue));
 			return to_string((unsigned int)value);
 		}
 		if (valueType == "int") {
@@ -168,44 +185,89 @@ public:
 			auto value = *((int *)((char *)&object + offsetValue));
 			return to_string(value);
 		}
+		if (valueType == "int*") {
+			cout << "get = " << ((int *)((char *)&object + offsetValue)) << endl;
+			auto value = **((int **)((char *)&object + offsetValue));
+			return to_string(value);
+		}
 		if (valueType == "unsigned int") {
 			auto value = *((unsigned int *)((char *)&object + offsetValue));
+			return to_string(value);
+		}
+		if (valueType == "unsigned int*") {
+			auto value = **((unsigned int **)((char *)&object + offsetValue));
 			return to_string(value);
 		}
 		if (valueType == "short") {
 			auto value = *((short int *)((char *)&object + offsetValue));
 			return to_string(value);
 		}
+		if (valueType == "short*") {
+			auto value = **((short int **)((char *)&object + offsetValue));
+			return to_string(value);
+		}
 		if (valueType == "unsigned short") {
 			auto value = *((unsigned short int *)((char *)&object + offsetValue));
+			return to_string(value);
+		}
+		if (valueType == "unsigned short*") {
+			auto value = **((unsigned short int **)((char *)&object + offsetValue));
 			return to_string(value);
 		}
 		if (valueType == "long") {
 			auto value = *((long int *)((char *)&object + offsetValue));
 			return to_string(value);
 		}
+		if (valueType == "long*") {
+			auto value = **((long int **)((char *)&object + offsetValue));
+			return to_string(value);
+		}
 		if (valueType == "unsigned long") {
 			auto value = *((unsigned long int *)((char *)&object + offsetValue));
+			return to_string(value);
+		}
+		if (valueType == "unsigned long*") {
+			auto value = **((unsigned long int **)((char *)&object + offsetValue));
 			return to_string(value);
 		}
 		if (valueType == "long long") {
 			auto value = *((long long int *)((char *)&object + offsetValue));
 			return to_string(value);
 		}
+		if (valueType == "long long*") {
+			auto value = **((long long int **)((char *)&object + offsetValue));
+			return to_string(value);
+		}
 		if (valueType == "unsigned long long") {
 			auto value = *((unsigned long long int *)((char *)&object + offsetValue));
+			return to_string(value);
+		}
+		if (valueType == "unsigned long long*") {
+			auto value = **((unsigned long long int **)((char *)&object + offsetValue));
 			return to_string(value);
 		}
 		if (valueType == "float") {
 			auto value = *((float *)((char *)&object + offsetValue));
 			return removeLastZero(value);
 		}
+		if (valueType == "float*") {
+			auto value = **((float **)((char *)&object + offsetValue));
+			return removeLastZero(value);
+		}
 		if (valueType == "double") {
 			auto value = *((double *)((char *)&object + offsetValue));
 			return removeLastZero(value);
 		}
+		if (valueType == "double*") {
+			auto value = **((double **)((char *)&object + offsetValue));
+			return removeLastZero(value);
+		}
 		if (valueType == "long double") {
 			auto value = *((long double *)((char *)&object + offsetValue));
+			return removeLastZero(value);
+		}
+		if (valueType == "long double*") {
+			auto value = **((long double **)((char *)&object + offsetValue));
 			return removeLastZero(value);
 		}
 		return "";
@@ -221,6 +283,9 @@ public:
 		if (valueType == "string") {
 			*((string *)((char *)&object + offsetValue)) = value;
 		}
+		if (valueType == "string*") {
+			**((string **)((char *)&object + offsetValue)) = value;
+		}
 		if (valueType == "wstring") {
 		#ifdef __GNUC__
 					//cout << "检测到wstring" << endl;
@@ -233,54 +298,93 @@ public:
 		}
 		std::stringstream ss;
 		ss.str(value);
+		if (valueType == "char") {
+			ss >> *((char *)((char *)&object + offsetValue));
+		}
 		if (valueType == "bool") {
 			ss >> *((bool *)((char *)&object + offsetValue));
 		}
-		if (valueType == "char") {
-			ss >> *((char *)((char *)&object + offsetValue));
+		if (valueType == "bool*") {
+			ss >> *((bool *)((char *)&object + offsetValue));
 		}
 		if (valueType == "unsigned char") {
 			ss >> *((unsigned char *)((char *)&object + offsetValue));
 		}
+		if (valueType == "unsigned char*") {
+			ss >> **((unsigned char **)((char *)&object + offsetValue));
+		}
 		if (valueType == "int") {
 			ss >> *((int *)((char *)&object + offsetValue));
+		}
+		if (valueType == "int*") {
+			ss >> **((int **)((char *)&object + offsetValue));
 		}
 		if (valueType == "unsigned int") {
 			ss >> *((unsigned int *)((char *)&object + offsetValue));
 		}
+		if (valueType == "unsigned int*") {
+			ss >> **((unsigned int **)((char *)&object + offsetValue));
+		}
 		if (valueType == "short") {
 			ss >> *((short int *)((char *)&object + offsetValue));
+		}
+		if (valueType == "short*") {
+			ss >> **((short int **)((char *)&object + offsetValue));
 		}
 		if (valueType == "unsigned short") {
 			ss >> *((unsigned short int *)((char *)&object + offsetValue));
 		}
+		if (valueType == "unsigned short*") {
+			ss >> **((unsigned short int **)((char *)&object + offsetValue));
+		}
 		if (valueType == "long") {
 			ss >> *((long int *)((char *)&object + offsetValue));
+		}
+		if (valueType == "long*") {
+			ss >> **((long int **)((char **)&object + offsetValue));
 		}
 		if (valueType == "unsigned long") {
 			ss >> *((unsigned long int *)((char *)&object + offsetValue));
 		}
+		if (valueType == "unsigned long*") {
+			ss >> **((unsigned long int **)((char *)&object + offsetValue));
+		}
 		if (valueType == "long long") {
 			ss >> *((long long int *)((char *)&object + offsetValue));
+		}
+		if (valueType == "long long*") {
+			ss >> **((long long int **)((char *)&object + offsetValue));
 		}
 		if (valueType == "unsigned long long") {
 			ss >> *((unsigned long long  int *)((char *)&object + offsetValue));
 		}
+		if (valueType == "unsigned long long*") {
+			ss >> **((unsigned long long  int **)((char *)&object + offsetValue));
+		}
 		if (valueType == "float") {
 			ss >> *((float *)((char *)&object + offsetValue));
+		}
+		if (valueType == "float*") {
+			ss >> **((float **)((char **)&object + offsetValue));
 		}
 		if (valueType == "double") {
 			ss >> *((double *)((char *)&object + offsetValue));
 		}
+		if (valueType == "double*") {
+			ss >> **((double **)((char **)&object + offsetValue));
+		}
 		if (valueType == "long double") {
 			ss >> *((long double *)((char *)&object + offsetValue));
+		}
+		if (valueType == "long double*") {
+			ss >> **((long double **)((char **)&object + offsetValue));
 		}
 	}
 
 	// 基础类型转json
 	template<class T>
 	void BaseToJson(string & json_, MetaInfo * metainfoobject, T & object_) {
-		//cout << "BaseToJson metainfoobject->memberType = " << metainfoobject->memberType << "&metainfoobject->memberName = " << metainfoobject->memberName << endl;
+		cout << "BaseToJson memberType = " << metainfoobject->memberType << "&memberName = " << metainfoobject->memberName << "&memberOffset = " << metainfoobject->memberOffset  << endl;
 		string value = getValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset);
 		if (metainfoobject->memberAliasName != "") {
 			json_ = json_ + "\"" + metainfoobject->memberAliasName + "\"" + ":" + value + ",";
@@ -316,13 +420,35 @@ template<typename T> struct TagDispatchTrait {
 	using Tag = ArrayTag;
 };
 
-template<> struct TagDispatchTrait<int> {
-	using Tag = BaseTag;
-};
-
-template<> struct TagDispatchTrait<string> {
-	using Tag = BaseTag;
-};
+//处理基础类型
+template<> struct TagDispatchTrait<bool> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<bool*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<char> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<char*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<unsigned char> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<unsigned char*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<int> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<int*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<unsigned int> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<unsigned int*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<short> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<short*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<unsigned short> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<unsigned short*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<long> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<long*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<unsigned long> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<unsigned long*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<long long> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<long long*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<unsigned long long> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<unsigned long long*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<float> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<float*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<double> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<double*> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<long double> {using Tag = BaseTag;};
+template<> struct TagDispatchTrait<long double*> {using Tag = BaseTag;};
 
 template<> struct TagDispatchTrait<vector<int>> {
 	using Tag = ArrayTag;
@@ -1228,7 +1354,7 @@ public:
 			for (auto metainfoObject : objectinfo.metaInfoObjectList) {
 				string json_s;
 				//添加一个判断 如果是普通类型，或者容器中是普通类型走普通接口，剩下的直接走类接口，提高效率
-				//cout <<"成员类型：" << metainfoObject->memberType << " -- " << metainfoObject->memberTypeInt << " -- " << metainfoObject->first <<":" << metainfoObject->second << " -- " << metainfoObject->memberOffset << endl;
+				cout <<"成员类型：" << metainfoObject->memberType << " -- " << metainfoObject->memberTypeInt << " -- " << metainfoObject->first <<":" << metainfoObject->second << " -- " << metainfoObject->memberOffset << endl;
 				if (metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true) {
 					FdogSerializerBase::Instance()->BaseToJson(json_s, metainfoObject, object_);
 					json_ = json_ + json_s;
@@ -1744,7 +1870,7 @@ public:
 	template<typename T>
 	void Deserialize(T & object_, string & json_, string name = "") {
 		//cout << "Deserialize json_ = " << json_ << endl; 
-		//cout << "typeid = " << FdogSerializer::Instance()->getTypeName(typeid(T).name()) << endl;
+		cout << "typeid = " << FdogSerializer::Instance()->getTypeName(typeid(T).name()) << endl;
 		ObjectInfo & objectinfo = FdogSerializer::Instance()->getObjectInfo(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		int objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		if (objectinfo.objectType == "NULL" && objectType != OBJECT_BASE && objectType != OBJECT_STRUCT) {
@@ -2063,9 +2189,9 @@ public:
 						}
 					}
 					if (metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberIsIgnore != true) {
-						string v = getFdogString("\"" + metainfoObject->memberName + "\":", json_);
+						//string v = getFdogString("\"" + metainfoObject->memberName + "\":", json_);
 						value = "{12:{\"name\":\"zhangxu\",\"age\":21},13:{\"name\":\"yujing\",\"age\":21}}";
-						//cout << "value = " << value << endl;
+						cout << "value = " << value << endl;
 						if (metainfoObject->first == "char*" && metainfoObject->second == "int") {
 							FDeserialize(*(map<char *, int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int, int>>::Tag{});
 						} else if (metainfoObject->first == "string" && metainfoObject->second == "int") {
@@ -2297,8 +2423,8 @@ namespace Fdog {
 	template<typename T>
 	void FJson(string & json_, T & object_, string name = "") {
 		//cout << "进入FSerialize" << endl;
-		//FdogSerializer::Instance()->FSerialize(json_, object_, typename TagDispatchTrait<T>::Tag{}, name);
-		FdogSerializer::Instance()->Serialize(json_, object_, name);
+		FdogSerializer::Instance()->FSerialize(json_, object_, typename TagDispatchTrait<T>::Tag{}, name);
+		//FdogSerializer::Instance()->Serialize(json_, object_, name);
 		json_ = "{" + json_ + "}";
 	}
 

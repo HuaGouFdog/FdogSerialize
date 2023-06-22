@@ -34,6 +34,13 @@ struct TestType
 // 	using Tag = BaseTag;
 // };
 
+F_CLASS(Yujin) {
+public:
+	float * age;
+
+	REGISTERED_MEMBER_S(Yujin, age);
+};
+
 F_CLASS(student) {
 public:
 	string name;
