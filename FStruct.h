@@ -450,45 +450,20 @@ template<> struct TagDispatchTrait<double*> {using Tag = BaseTag;};
 template<> struct TagDispatchTrait<long double> {using Tag = BaseTag;};
 template<> struct TagDispatchTrait<long double*> {using Tag = BaseTag;};
 
-template<> struct TagDispatchTrait<vector<int>> {
-	using Tag = ArrayTag;
-};
-
-template<> struct TagDispatchTrait<list<int>> {
-	using Tag = ArrayTag;
-};
-
-template<> struct TagDispatchTrait<set<int>> {
-	using Tag = ArrayTag;
-};
-
-template<> struct TagDispatchTrait<deque<int>> {
-	using Tag = ArrayTag;
-};
-
-template<> struct TagDispatchTrait<map<int, int>> {
-	using Tag = MapTag;
-};
-
-template<> struct TagDispatchTrait<unordered_map<int, int>> {
-	using Tag = MapTag;
-};
+template<> struct TagDispatchTrait<vector<int>> {using Tag = ArrayTag;};
+template<> struct TagDispatchTrait<list<int>> {using Tag = ArrayTag;};
+template<> struct TagDispatchTrait<set<int>> {using Tag = ArrayTag;};
+template<> struct TagDispatchTrait<deque<int>> {using Tag = ArrayTag;};
+template<> struct TagDispatchTrait<map<int, int>> {using Tag = MapTag;};
+template<> struct TagDispatchTrait<unordered_map<int, int>> {using Tag = MapTag;};
 
 // 区分非字符串和字符串 处理在FSerialize(map) key的值，可能是数值，可能是非数值
 struct NoStringTag {};
 struct StringTag {};
 
-template<typename T> struct TagString {
-	using Tag = NoStringTag;
-};
-
-template<> struct TagString<char *> {
-	using Tag = StringTag;
-};
-
-template<> struct TagString<string> {
-	using Tag = StringTag;
-};
+template<typename T> struct TagString {using Tag = NoStringTag;};
+template<> struct TagString<char *> {using Tag = StringTag;};
+template<> struct TagString<string> {using Tag = StringTag;};
 
 template<typename T>
 string F_toString_s(T object, NoStringTag) {
@@ -523,73 +498,23 @@ struct InitSetTag {};
 struct InitSetStrTag {};
 
 
-template<typename T> struct TagSTLType {
-	using Tag = InitBaseTag;
-};
-
-template<> struct TagSTLType<vector<int>> {
-	using Tag = InitVectorTag;
-};
-
-template<> struct TagSTLType<vector<char *>> {
-	using Tag = InitVectorStrTag;
-};
-
-template<> struct TagSTLType<vector<string>> {
-	using Tag = InitVectorStrTag;
-};
-
-template<> struct TagSTLType<list<int>> {
-	using Tag = InitListTag;
-};
-
-template<> struct TagSTLType<list<char *>> {
-	using Tag = InitListStrTag;
-};
-
-template<> struct TagSTLType<list<string>> {
-	using Tag = InitListStrTag;
-};
-
-template<> struct TagSTLType<set<int>> {
-	using Tag = InitSetTag;
-};
-
-template<> struct TagSTLType<set<char *>> {
-	using Tag = InitSetStrTag;
-};
-
-template<> struct TagSTLType<set<string>> {
-	using Tag = InitSetStrTag;
-};
-
-template<> struct TagSTLType<deque<int>> {
-	using Tag = InitDequeTag;
-};
-
-template<> struct TagSTLType<deque<char *>> {
-	using Tag = InitDequeStrTag;
-};
-
-template<> struct TagSTLType<deque<string>> {
-	using Tag = InitDequeStrTag;
-};
-
-template<> struct TagSTLType<map<int, int>> {
-	using Tag = InitMapTag;
-};
-
-template<> struct TagSTLType<map<string, int>> {
-	using Tag = InitMapStrTag;
-};
-
-template<> struct TagSTLType<unordered_map<int, int>> {
-	using Tag = InitMapTag;
-};
-
-template<> struct TagSTLType<unordered_map<string, int>> {
-	using Tag = InitMapStrTag;
-};
+template<typename T> struct TagSTLType {using Tag = InitBaseTag;};
+template<> struct TagSTLType<vector<int>> {using Tag = InitVectorTag;};
+template<> struct TagSTLType<vector<char *>> {using Tag = InitVectorStrTag;};
+template<> struct TagSTLType<vector<string>> {using Tag = InitVectorStrTag;};
+template<> struct TagSTLType<list<int>> {using Tag = InitListTag;};
+template<> struct TagSTLType<list<char *>> {using Tag = InitListStrTag;};
+template<> struct TagSTLType<list<string>> {using Tag = InitListStrTag;};
+template<> struct TagSTLType<set<int>> {using Tag = InitSetTag;};
+template<> struct TagSTLType<set<char *>> {using Tag = InitSetStrTag;};
+template<> struct TagSTLType<set<string>> {using Tag = InitSetStrTag;};
+template<> struct TagSTLType<deque<int>> {using Tag = InitDequeTag;};
+template<> struct TagSTLType<deque<char *>> {using Tag = InitDequeStrTag;};
+template<> struct TagSTLType<deque<string>> {using Tag = InitDequeStrTag;};
+template<> struct TagSTLType<map<int, int>> {using Tag = InitMapTag;};
+template<> struct TagSTLType<map<string, int>> {using Tag = InitMapStrTag;};
+template<> struct TagSTLType<unordered_map<int, int>> {using Tag = InitMapTag;};
+template<> struct TagSTLType<unordered_map<string, int>> {using Tag = InitMapStrTag;};
 
 template<typename T>
 void F_init_s(T & object, InitBaseTag, string first, string second = "", string key = "") {
