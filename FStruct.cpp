@@ -83,6 +83,7 @@ FdogSerializer::FdogSerializer() {
 	TypeName["std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >"] = "string";
 	TypeName["std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*"] = "string*";
 	TypeName["std::__cxx11::basic_string<wchar_t, std::char_traits<wchar_t>, std::allocator<wchar_t> >"] = "wstring";
+	TypeName["std::pair<int const, int>"] = "int";
 #elif _MSC_VER
 	//vc编译环境
 	TypeName["bool"] = "bool";
@@ -430,7 +431,7 @@ string FdogSerializer::getKey(string json) {
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
 ************************************/
 memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
-	cout << "getMemberAttribute = " << typeName << endl;
+	//cout << "getMemberAttribute = " << typeName << endl;
 	memberAttribute resReturn;
 	smatch result;
 	if (FdogSerializer::isBaseType(typeName)) {
@@ -893,7 +894,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 		}
 
 		if (json_[i] == ',' && json_[i - 1] == '"' && status == 2) {
-			cout << ",后面是\" 且 status = 2 出错" << endl;
+			//cout << ",后面是\" 且 status = 2 出错" << endl;
 			res.code = -1;
 		}
 
@@ -983,7 +984,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 					end = i;
 					string da = json_.substr(first, end - first);
 					if (da.npos != da.find(",")) {
-						cout << "失败" << endl;
+						//cout << "失败" << endl;
 						res.code = -1;
 					}
 					//cout << "获取到的值4：" << da << endl;
@@ -1024,7 +1025,7 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 					if (status == 2 && json_[i - 1] != '"') {
 						string da = json_.substr(first, end - first);
 						if (da.npos != da.find(",")) {
-							cout << "失败" << endl;
+							//cout << "失败" << endl;
 							res.code = -1;
 						}
 						//cout << "获取到的值71：" << da << endl;

@@ -119,21 +119,32 @@ int getLength(T* array) {
 
 int main() {
 
-	Yujin a;
-	//*a.age = 520;
-	//确保指针是NULl或者已经指向一个地址
-	a.age = new float[3]{1.3f, 3.2f, 43.5f};
-	cout << "getLength = " << getLength(a.age) << endl;
-	//a.age = new float(20.5f);  //&c;
-	//cout << *a.age << endl;
-	string b;
-	Fdog::FJson(b, a);
-	cout << "b = " << b << endl;
+	// Yujin a;
+	// a.yujin2.age = 10;
+	// //*a.age = 520;
+	// //确保指针是NULl或者已经指向一个地址
+	// a.age = new float(321.3f);
+
+	// Yujin2 aa;
+	// aa.age = 22;
+	// Yujin2 bb;
+	// bb.age = 33;
+
+	// a.ages.push_back(aa);
+	// a.ages.push_back(bb);
+	// //cout << "getLength = " << getLength(a.age) << endl;
+	// //a.age = new float(20.5f);  //&c;
+	// //cout << *a.age << endl;
+	// string b;
+	// Fdog::FJson(b, a);
+	// cout << "b = " << b << endl;
 
 	// Yujin c;
 	// //c.age = new float();
 	// Fdog::FObject(c, b);
-	// cout << "c.age = "<< *c.age << endl;
+	// //cout << "c.age = "<< *c.age << endl;
+	// cout << "c.age = "<< c.yujin2.age << endl;
+	// cout << "c.ages.age[0] = "<< c.ages[0].age << endl;
 
 
 
@@ -325,56 +336,59 @@ int main() {
 	// double dur;
 	// clock_t start, end;
 	// start = clock();
-	// school sch;
-	// sch.stu.name = "liuliu";
-	// sch.stu.age = 18;
-	// sch.tea.name = "wufang";
-	// sch.tea.age = 48;
+	school sch;
+	sch.stu.name = "liuliu";
+	sch.stu.age = 18;
+	sch.tea.name = "wufang";
+	sch.tea.age = 48;
 
-	// student stu3;
-	// stu3.name = "zhangxu";
-	// stu3.age = 21;
+	student stu3;
+	stu3.name = "zhangxu";
+	stu3.age = 21;
 
-	// string aaaaa ="";
-	// Fdog::FJson(aaaaa, stu3);
-	// cout << "aaaaa=" << aaaaa << endl;
+	string aaaaa ="";
+	Fdog::FJson(aaaaa, stu3);
+	//cout << "aaaaa=" << aaaaa << endl;
 
-	// student stu4;
-	// stu4.name = "yujing";
-	// stu4.age = 21;
-	// sch.stuList.push_back(stu3);
-	// sch.stuList.push_back(stu4);
-	// sch.intTesst.push_back(1);
-	// sch.intTesst.push_back(2);
-	// sch.intTesst2.push_back(2222);
-	// sch.intTesst2.push_back(3333);
-	// sch.intMap[12] = stu3;
-	// sch.intMap[13] = stu4;
-	// //cout << "长度 =" << sch.intTesst.size() << endl;
-	// 	string sch_json = "";
-	// 	//结构体转json
-	// 	Fdog::FJson(sch_json, sch);
-	// 	//结果 输出sch_json为：{"stu":{"name":"liuliu","age":18},"tea":{"name":"wufang","age":48}}
-	// 	cout << "字符串 = " << sch_json << endl;
-	// 	//string dsaasd =  "{\"stu\"1:{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48},\"stuList\":[{\"name\":\"zhangxu\",\"age\":21},{\"name\":\"yujing\",\"age\":21}]}";
-	// 	auto res = Fdog::JsonValidS(sch_json);
-	// 	cout << "字符串是否正确：" << res.code << endl;
-	// 	cout << "字符串错误提示：" << res.message << endl;
-	// 	//json转结构体
-	// 	school sch2;
-	// 	//sch2.stuList.resize(2);
-	// 	string sch2_json = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48},\"stuList\":[{\"name\":\"zhangxu\",\"age\":21},{\"name\":\"yujing\",\"age\":21}],\"intTesst\":[1,2],\"intTesst2\":[2222,3333],\"intMap\":{\"12\":\"name\":\"zhangxu\",\"age\":2,\"13\":\"name\":\"yujing\",\"age\":2}}";
-	// 	Fdog::FObject(sch2, sch_json);
-	// 	// //结果  
-	// 	cout << "name = " << sch2.stu.name << " age = " << sch2.stu.age << endl;
-	// 	cout << "name = " << sch2.tea.name << " age = " << sch2.tea.age << endl;
-	// 	for (int i = 0; i < sch2.stuList.size(); i++) {
-	// 		cout << "stuList name = " << sch2.stuList[i].name << " age = " << sch2.stuList[i].age << endl;
-	// 		cout << "intTesst = " << sch2.intTesst[i] << endl;
-	// 		cout << "intTesst2 = " << sch2.intTesst2[i] << endl;
-	// 		cout << "intMap[12] name = " << sch2.intMap[12].name << " age = " << sch2.intMap[12].age << endl;
-	// 		cout << "intMap[13] name = " << sch2.intMap[13].name << " age = " << sch2.intMap[13].age << endl;
-	// 	}
+	student stu4;
+	stu4.name = "yujing";
+	stu4.age = 21;
+	sch.stuList.push_back(stu3);
+	sch.stuList.push_back(stu4);
+	sch.intTesst.push_back(1);
+	sch.intTesst.push_back(2);
+	sch.intTesst2.push_back(2222);
+	sch.intTesst2.push_back(3333);
+	sch.intMap[12] = stu3;
+	sch.intMap[13] = stu4;
+	sch.intMap2[22] = 2222;
+	sch.intMap2[23] = 4444;
+	//cout << "长度 =" << sch.intTesst.size() << endl;
+		string sch_json = "";
+		//结构体转json
+		Fdog::FJson(sch_json, sch);
+		//结果 输出sch_json为：{"stu":{"name":"liuliu","age":18},"tea":{"name":"wufang","age":48}}
+		cout << "字符串 = " << sch_json << endl;
+		//string dsaasd =  "{\"stu\"1:{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48},\"stuList\":[{\"name\":\"zhangxu\",\"age\":21},{\"name\":\"yujing\",\"age\":21}]}";
+		//auto res = Fdog::JsonValidS(sch_json);
+		//cout << "字符串是否正确：" << res.code << endl;
+		//cout << "字符串错误提示：" << res.message << endl;
+		//json转结构体
+		school sch2;
+		string sch2_json = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48},\"stuList\":[{\"name\":\"zhangxu\",\"age\":21},{\"name\":\"yujing\",\"age\":21}],\"intTesst\":[1,2],\"intTesst2\":[2222,3333],\"intMap\":{\"12\":\"name\":\"zhangxu\",\"age\":2,\"13\":\"name\":\"yujing\",\"age\":2},\"intMap\":{\"22\":3321,\"23\":312}}";
+		Fdog::FObject(sch2, sch_json);
+		// //结果  
+		//cout << "name = " << sch2.stu.name << " age = " << sch2.stu.age << endl;
+		//cout << "name = " << sch2.tea.name << " age = " << sch2.tea.age << endl;
+		//for (int i = 0; i < sch2.stuList.size(); i++) {
+			// cout << "stuList name = " << sch2.stuList[i].name << " age = " << sch2.stuList[i].age << endl;
+			// cout << "intTesst = " << sch2.intTesst[i] << endl;
+			// cout << "intTesst2 = " << sch2.intTesst2[i] << endl;
+			cout << "intMap[12] name = " << sch2.intMap[12].name << " age = " << sch2.intMap[12].age << endl;
+			cout << "intMap[13] name = " << sch2.intMap[13].name << " age = " << sch2.intMap[13].age << endl;
+			cout << "intMap2[22] = " << sch2.intMap2[22] << endl;
+			cout << "intMap2[23] = " << sch2.intMap2[23] << endl;
+		//}
 
 	// end = clock();
 	// dur = (double)(end - start);

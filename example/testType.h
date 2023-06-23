@@ -34,13 +34,24 @@ struct TestType
 // 	using Tag = BaseTag;
 // };
 
+F_CLASS(Yujin2) {
+public:
+	int age;
+	Yujin2() {
+		Yujin2::InitFdogSerialize();
+	}
+	REGISTERED_MEMBER_C(Yujin2, age);
+};
+
 F_CLASS(Yujin) {
 public:
 	float * age;
+	vector<Yujin2> ages;
+	Yujin2 yujin2;
 	Yujin(): age(NULL) {
 		Yujin::InitFdogSerialize();
 	}
-	REGISTERED_MEMBER_C(Yujin, age);
+	REGISTERED_MEMBER_C(Yujin, age, ages, yujin2);
 };
 
 F_CLASS(student) {
@@ -71,7 +82,8 @@ public:
 	vector<int>  intTesst;
 	vector<long>  intTesst2;
 	map<int, student> intMap;
-	REGISTERED_MEMBER_S(school, stu, tea, stuList, intTesst, intTesst2, intMap);
+	map<int, int> intMap2;
+	REGISTERED_MEMBER_S(school, stu, tea, stuList, intTesst, intTesst2, intMap,intMap2);
 };
 // template<> struct TagDispatchTrait<vector<student>> {using Tag = ArrayTag;};
 // template<> struct TagSTLType<vector<student>> {using Tag = InitStructTag;};
@@ -80,6 +92,7 @@ public:
 //map容器中包含自定义类型需要添加REGISTERE_CONTAINER_M宏
 //
 REGISTERE_CONTAINER_M(int,student)
+
 
 class classtest {
 public:
