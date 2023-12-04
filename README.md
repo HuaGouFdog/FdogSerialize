@@ -2,7 +2,7 @@
 
 
 
-# :fire:FStruct:fire:
+# :christmas_tree:FStruct:christmas_tree:
 
 <img src="https://img-blog.csdnimg.cn/b9712c0943a14a00a96a7793831ae2bc.png" style="zoom: 15%;"/>
 
@@ -92,6 +92,8 @@ int main() {
 
 相对于其他序列化方式，它真的很简单。
 
+---
+
 ### :christmas_tree:类型支持
 
 | 序号  |    基础类型    |            说明            | 序号 |      基础类型      |       说明       |
@@ -107,7 +109,7 @@ int main() {
 
 基于C++的基础类型，FStruct支持如上的十六种类型，并支持其对应的**指针类型**，包括vector，list，map等容器，只要你的结构体中**最基本类型**在这十六种范围之内，便可完成转换。
 
-
+---
 
 ### :christmas_tree:特性支持
 
