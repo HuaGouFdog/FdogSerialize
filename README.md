@@ -2,25 +2,15 @@
 
 
 
-<<<<<<< HEAD
-# :christmas_tree:FStruct:christmas_tree:
-=======
-# :fire: FStruct :fire:
->>>>>>> 526e898a8b9193fce55442e27d67320f91fa901d
+# :christmas_tree:FStruct
 
 <img src="https://img-blog.csdnimg.cn/b9712c0943a14a00a96a7793831ae2bc.png" style="zoom: 15%;"/>
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FStruct is an open source library for C++ serialization, using a non-invasive way, no need to modify the original structure of the project, support the basic type, structure, STL container and other complex data types of serialization, support direct output object content, support to determine whether the JSON format is correct, support to obtain a JSON field value. Support custom alias, ignore fields, ignore case and other features, at least two lines of code to complete conversion.
-
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FStruct是一个用于C++序列化的开源库，采用非入侵方式，无需在项目原有结构体上进行修改，支持基础类型，结构体，STL容器等复杂数据类型的序列化，支持直接输出对象内容，支持判断JSON格式是否正确，支持获取JSON某个字段值，支持自定义别名，忽略字段，忽略大小写等特性，最少两行代码即可完成转换。
-
-
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;欢迎体验，如果对您有帮助，不妨给我一个 :star:，同时本人能力有限，若您有更好的解决方案，欢迎给我留言。:blush::blush::blush:
 
----
 
-### 
 
 ### :christmas_tree:使用方式
 
