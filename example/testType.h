@@ -4,7 +4,7 @@
 #ifdef __GNUC__
 #include "../FStruct.h"
 #elif _MSC_VER
-#include "FStruct.h"
+#include "../FStruct.h"
 #endif
 #include <sstream>
 #include <string>

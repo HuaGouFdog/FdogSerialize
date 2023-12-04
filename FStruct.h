@@ -154,13 +154,12 @@ public:
 		if (valueType == "wstring") {
 			auto value = *((wstring *)((char *)&object + offsetValue));
 		#ifdef __GNUC__
-					//wcout << "value = " << value << endl;
 					std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 					string str_value = converter.to_bytes(value);
 		#elif _MSC_VER
-					string str_value = FdogSerializer::Instance()->wstring2string(value);
+					//string str_value = FdogSerializer::Instance()->wstring2string(value);
 		#endif
-			return "\"" + str_value + "\"";
+			//return "\"" + str_value + "\"";
 		}
 		if (valueType == "bool") {
 			auto value = *((bool *)((char *)&object + offsetValue));
@@ -318,8 +317,6 @@ public:
 
 	template<class T>
 	void setValueByAddress(string valueType, T &object, int offsetValue, string value) {
-		//cout << "addr = " << *object << endl;
-		//cout << "setValueByAddress offsetValue = " << offsetValue << endl;
 		if (valueType == "char*") {
 			//这种写法有问题
 			*((char **)((char *)&object + offsetValue)) = new char[strlen(value.c_str())];
@@ -336,12 +333,10 @@ public:
 		}
 		if (valueType == "wstring") {
 		#ifdef __GNUC__
-					//cout << "检测到wstring" << endl;
 					std::wstring_convert< std::codecvt_utf8<wchar_t> > strCnv;
 					*((wstring *)((char *)&object + offsetValue)) = strCnv.from_bytes(value);
 		#elif _MSC_VER
-					//cout << "检测到wstring" << endl;
-					*((wstring *)((char *)&object + offsetValue)) = FdogSerializer::Instance()->string2wstring(value);
+					//*((wstring *)((char *)&object + offsetValue)) = FdogSerializer::Instance()->string2wstring(value);
 		#endif
 		}
 		std::stringstream ss;
@@ -471,7 +466,6 @@ public:
 	// 基础类型转json
 	template<class T>
 	void BaseToJson(string & json_, MetaInfo * metainfoobject, T & object_) {
-		//cout << "BaseToJson memberType = " << metainfoobject->memberType << "&memberName = " << metainfoobject->memberName << "&memberOffset = " << metainfoobject->memberOffset  << endl;
 		string value = getValueByAddress(metainfoobject->memberType, object_, metainfoobject->memberOffset);
 		if (value == "fdog_serialize_uninitialized") {
 			return;
@@ -611,8 +605,6 @@ template<> struct TagSTLType<unordered_map<string, int>> {using Tag = InitMapStr
 
 template<typename T>
 void F_init_s(T & object, InitBaseTag, string first, string second = "", string key = "") {
-	//cout << "走到这里===" << typeid(object).name() << endl;
-	//cout << "std::vector<T>::value_type = " << typeid(typename T::value_type).name() << endl;
 	typename T::value_type a;
 	//object.push_back(a)
 	//走到这里的都是自定义容器类型
@@ -625,7 +617,6 @@ void F_init_s(T & object, InitStructTag, string first, string second = "", strin
 
 template<typename T>
 void F_init_s(T & object, InitVectorTag, string first, string second = "", string key = "") {
-	// " F_init_s object size = " << object.size() << endl;
 	if (first == "char") {
 		object.push_back('0');
 	} else if (first == "unsigned char") {
@@ -659,7 +650,6 @@ void F_init_s(T & object, InitVectorTag, string first, string second = "", strin
 
 template<typename T>
 void F_init_s(T & object, InitVectorStrTag, string first, string second = "", string key = "") {
-	// " F_init_s object size = " << object.size() << endl;
 	if (first == "char*") {
 		object.push_back("");
 	} else if (first == "string") {
@@ -804,14 +794,11 @@ static vector<char *> temp;
 template<typename T>
 void F_init_s(T & object, InitSetStrTag, string first, string second = "", string key = "") {
 	int a = rand() % 100;
-	//cout << "a = " << a << endl;
 	if (first == "char*") {
 		stringstream sstr;
 		sstr << a;
 		char * cc = new char[4];
-		//cout << "cc = " << (char *)cc << "---"<< *cc << "---" << &cc << " sstr 地址：" << &sstr << endl;
 		strcpy(cc, (char *)sstr.str().data());
-		//cout << "cc = " << (char *)cc << "---"<< *cc << "---" << &cc << " sstr 地址：" << &sstr << endl;
 		object.insert(cc);
 		temp.push_back(cc);
 	} else if (first == "string") {
@@ -821,7 +808,6 @@ void F_init_s(T & object, InitSetStrTag, string first, string second = "", strin
 	} else {
 
 	}
-	//cout << "长度：" << object.size() << endl;
 }
 
 template<typename T>
@@ -843,7 +829,6 @@ void F_init_s(T & object, InitMapStrTag, string first, string second = "", strin
 	if (first == "string" && second == "int") {
 		stringstream sstr;
 		sstr << a;
-		//string value = key;
 		object.insert(make_pair(key, a));
 	}
 }
@@ -852,15 +837,11 @@ void F_init_s(T & object, InitMapStrTag, string first, string second = "", strin
 template<typename T> 
 void my_fun(T &obj, string first, string second = "", string key = "") 
 { 
-    //perform1(); 
-	// "普通变量" << endl;
 } 
 
 template<typename T> 
 void my_fun(std::vector<T> &obj, string first, string second = "", string key = "") 
 { 
-    //perform2();
-	//cout << "vector变量" << endl;
 	typename std::vector<T>::value_type a;
 	obj.push_back(a);
 }
@@ -868,48 +849,27 @@ void my_fun(std::vector<T> &obj, string first, string second = "", string key = 
 template<typename T> 
 void my_fun(std::set<T> &obj, string first, string second = "", string key = "") 
 { 
-    //perform2();
-	//cout << "set变量" << endl;
 } 
 
 template<typename X> 
 void my_fun(std::map<int, X> &obj, string first, string second = "", string key = "") 
 { 
-    //perform2();
-	//cout << "map变量3" << endl;
-	//typename std::map<T,X>::value_type a;
 	int a = atoi(key.c_str());
 	int * d = &a;
-	//int d = atoi("13");
 	X b;
-	//X e;
 	obj.insert(make_pair(*d, b));
-	//obj.insert(make_pair(d, e));
-
-	//cout << "std::map<T,X>::value_type = " << typeid(typename std::map<int,X>::value_type).name() << " addr = "<<  &obj[*d] << endl;
-	//cout << "std::map<T,X>::value_type = " << typeid(typename std::map<string,X>::value_type).name() << endl;
 } 
 
 template<typename X> 
 void my_fun(std::map<string, X> &obj, string first, string second = "", string key = "") 
 { 
-    //perform2();
-	//cout << "map变量2" << endl;
-	//typename std::map<T,X>::value_type a;
 	X b;
-	//X e;
 	obj.insert(make_pair(key, b));
-	//obj.insert(make_pair(key, e));
-
-	//cout << "std::map<T,X>::value_type = " << typeid(typename std::map<string,X>::value_type).name() << endl;
-	//cout << "std::map<T,X>::value_type = " << typeid(typename std::map<string,X>::value_type).name() << endl;
 } 
 
 template<typename T, typename X> 
 void my_fun(std::map<T,X> &obj, string first, string second = "", string key = "") 
 { 
-    //perform2();
-	//cout << "map变量" << endl;
 	typename std::map<T,X>::value_type a;
 	T c;
 	T d;
@@ -917,30 +877,11 @@ void my_fun(std::map<T,X> &obj, string first, string second = "", string key = "
 	X e;
 	obj.insert(make_pair(c, b));
 	obj.insert(make_pair(d, e));
-
-	//cout << "std::map<T,X>::value_type = " << typeid(typename std::map<T,X>::value_type).name() << " addr = "<<  &obj[c]  << endl;
-	//cout << "std::map<T,X>::value_type = " << typeid(typename std::map<T,X>::value_type).name() << " addr = "<<  &obj[d]  << endl;
 } 
 
 template<typename T>
 void F_init(T & object, int stlType, string first, string second = "", string key = "") {
-	//cout << "开始执行my_fun()" << endl;
 	my_fun(object, first, second, key); 
-	// if (stlType == OBJECT_VECTOR) {
-	// 	cout <<"F_init OBJECT_VECTOR" << endl;
-	// 	F_init_s(object, typename TagSTLType<T>::Tag{}, first);
-	// } else if (stlType == OBJECT_LIST) {
-	// 	F_init_s(object, typename TagSTLType<T>::Tag{}, first);
-	// } else if (stlType == OBJECT_DEQUE) {
-	// 	F_init_s(object, typename TagSTLType<T>::Tag{}, first);
-	// } else if (stlType == OBJECT_SET) {
-	// 	F_init_s(object, typename TagSTLType<T>::Tag{}, first);
-	// } else if (stlType == OBJECT_MAP) {
-	// 	F_init_s(object, typename TagSTLType<T>::Tag{}, first, second, key);
-	// } else if (stlType == OBJECT_UNORDERED_MAP) {
-	// 	//cout << "%$$$$$$$$ 进入" << endl;
-	// 	F_init_s(object, typename TagSTLType<T>::Tag{}, first, second, key);
-	// }
 }
 
 //用于解析
@@ -951,138 +892,6 @@ struct ArrayTag_zx {};
 template<typename T> struct TagDispatchTrait_zx {
 	using Tag = BaseTag_zx;
 };
-
-// template<> struct TagDispatchTrait_zx<T> {
-// 	using Tag = StructTag_zx;
-// };
-
-// template<typename T> struct TagDispatchTrait_zx {
-// 	using Tag = StructTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<char> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<unsigned char> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<char*> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<short int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<short unsigned int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<unsigned int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<long int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<long unsigned int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<long long int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<long long unsigned int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<float> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<double> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<long double> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<string> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const char> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const unsigned char> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<char* const> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const short int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const short unsigned int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const unsigned int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const long int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const long unsigned int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const long long int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const long long unsigned int> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const float> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const double> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<const long double> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<class std::set<bool>> {
-// 	using Tag = BaseTag_zx;
-// };
-
-// template<> struct TagDispatchTrait_zx<class std::deque<bool>> {
-// 	using Tag = BaseTag_zx;
-// };
 
 //GCC 5在编译时会将std::string类型按c++11下std::__cxx11::basic_string<char> 来处理
 //这里可能还需要判断一下是不是GCC5以下的版本
@@ -1247,8 +1056,8 @@ public:
 
 	#ifdef __GNUC__
 	#elif _MSC_VER
-		wstring string2wstring(string str);
-		string wstring2string(wstring wstr);
+		//wstring string2wstring(string str);
+		//string wstring2string(wstring wstr);
 	#endif
 
 	//通过宏定义加载的信息获取
@@ -1335,12 +1144,10 @@ public:
 	//序列化
 	template<typename T>
 	void Serialize(string & json_, T & object_, string name = "") {
-		//cout << "Serialize =" << abi::__cxa_demangle(typeid(T).name(),0,0,0) << endl;
 		//通过传进来的T判断是什么复合类型，ObjectInfo只保存结构体,如果是NULL可以确定传进来的不是struct类型
 		ObjectInfo objectinfo = FdogSerializer::Instance()->getObjectInfo(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		//获取的只能是结构体的信息，无法知道是什么复合类型，尝试解析类型 objectType其实是一个结构体类型名称
 		int objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
-		//cout << "getObjectTypeInt" << objectType << endl;
 		if (objectinfo.objectType == "NULL" && objectType != OBJECT_BASE && objectType != OBJECT_STRUCT) {
 			//说明不是struct类型和base类型尝试，尝试解析类型
 			objectinfo = getObjectInfoByType(FdogSerializer::Instance()->getTypeName(typeid(T).name()), objectType);
@@ -1348,10 +1155,8 @@ public:
 			//这里这个objectinfo应该还是空 所以拿objecttype的数值判断
 		}
 		int sum = objectinfo.metaInfoObjectList.size();
-		//cout << "sum：" << sum << endl;
 		int i = 1;
 		//获取到的objectType才是真正的类型，根据这个类型进行操作
-		// "objectType type = " << objectType  << " json_ : " << json_ << endl;
 		switch (objectType) {
 			//第一次调用进来表示其本身类型 只有两种 结构体或着基础类型
 		case OBJECT_BASE:
@@ -1359,11 +1164,8 @@ public:
 			MetaInfo * metainfo1 = nullptr;
 			metainfo1 = getMetaInfo(FdogSerializer::Instance()->getTypeName(typeid(object_).name()));
 			if (metainfo1 != nullptr) {
-				cout << "==================" << json_ << endl;
 				FdogSerializerBase::Instance()->BaseToJsonA(json_, metainfo1, object_);
-				cout << "==================" << json_ << endl;
 			} else {
-				//cout << "获取MetaInfo失败" << endl;
 			}
 		}
 		break;
@@ -1373,7 +1175,7 @@ public:
 				bool isCall = false;
 				string json_s;
 				//添加一个判断 如果是普通类型，或者容器中是普通类型走普通接口，剩下的直接走类接口，提高效率
-				cout <<"成员类型：" << metainfoObject->memberType << " -- " << metainfoObject->memberTypeInt << " -- " << metainfoObject->first <<":" << metainfoObject->second << " -- " << metainfoObject->memberOffset << endl;
+				//cout <<"成员类型：" << metainfoObject->memberType << " -- " << metainfoObject->memberTypeInt << " -- " << metainfoObject->first <<":" << metainfoObject->second << " -- " << metainfoObject->memberOffset << endl;
 				if (metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true) {
 					FdogSerializerBase::Instance()->BaseToJson(json_s, metainfoObject, object_);
 					json_ = json_ + json_s;
@@ -1500,7 +1302,6 @@ public:
 						FSerialize(json_s, *(vector<unsigned short> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
 						isCall = true;
 					} else if (metainfoObject->first == "int") {
-						//cout << "进入" << endl;
 						FSerialize(json_s, *(vector<int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<vector<int>>::Tag{});
 						isCall = true;
 					} else if (metainfoObject->first == "unsigned int") {
@@ -1533,7 +1334,6 @@ public:
 					}
 					json_s = "";
 				} else if (metainfoObject->memberTypeInt == OBJECT_LIST && metainfoObject->memberIsIgnore != true) {
-					//cout << "====获取的值：" << metainfoObject->first << endl;
 					if (metainfoObject->first == "bool") {
 						FSerialize(json_s, *(list<bool> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<list<bool>>::Tag{});
 						isCall = true;
@@ -1637,11 +1437,7 @@ public:
 						FSerialize(json_s, *(deque<long double> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<deque<int>>::Tag{});
 						isCall = true;
 					}
-					//Serialize_deque_type_judgment_all;
-					//Serialize_struct(json_s, json_, object_, metainfoObject, typename TagDispatchTrait_zx<T>::Tag{});
-					//json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
 					if (isCall) {
-						//cout << "执行 a + 1" << endl;
 						json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_s + "]" + ",";
 					}
 					json_s = "";
@@ -1718,11 +1514,9 @@ public:
 					} 
 					if (isCall) {
 						json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";
-						cout << "json_ =====" << json_ << endl;
 					}
 					json_s = "";
 				} else if (metainfoObject->memberTypeInt == OBJECT_UNORDERED_MAP && metainfoObject->memberIsIgnore != true) {
-					//cout << "走OBJECT_UNORDERED_MAP" << endl;
 					if (metainfoObject->first == "char*" && metainfoObject->second == "int") {
 						FSerialize(json_s, *(unordered_map<char *, int> *)((char *)&object_ + metainfoObject->memberOffset), TagDispatchTrait<unordered_map<int, int>>::Tag{});
 						isCall = true;
@@ -1745,17 +1539,12 @@ public:
 					json_s = "";
 				}
 				if (!isCall) {
-					cout << "执行Serialize_struct" << endl;
 					Serialize_struct(json_, json_s, object_, metainfoObject, typename TagDispatchTrait_zx<T>::Tag{});
 				}
 
 				if (i == sum) {
 					if (json_.length() > 0) {
-						//cout << "json_ = " << json_ << endl;
-						//cout << "json_s = " << json_s << endl;
-						//json_ = json_ + "\"" + metainfoObject->memberName + "\"" + ":" + "{" + json_s + "}" + ",";
 						removeLastComma(json_);
-						//json_ = "{" + json_ + "}" + ",";
 					}
 				}
 				json_s = "";
@@ -1770,43 +1559,16 @@ public:
 	//自定义结构体
 	template<typename T>
 	void Serialize_struct(string & json_, string & json_s, T & object_, MetaInfo * metainfoObject, StructTag_zx) {
-		//cout << "走到这里222" << endl;
 		object_.Serialize_struct_s(json_, json_s, object_, metainfoObject);
 		//json_ = "\"" + metainfoObject->memberName + "\"" + ":" + "[" + json_ + "]" + ",";
 	}
 	template<typename T>
 	void Serialize_struct(string & json_, string & json_s, T & object_, MetaInfo * metainfoObject, BaseTag_zx) {
-		//
-		//cout << "走到这里333" << endl;
 	}
-
-	// template<typename T>
-	// void SerializeS(string & json_, T & object_, BaseAndStructTag, string name = "") {
-	// 	//cout << "SerializeS1" << endl;
-	// 	Serialize(json_, object_, name);
-	// }
-
-	// template<typename T>
-	// void SerializeS(string & json_, T & object_, BaseArrayTag, string name = "") {
-	// 	//cout << "SerializeS2" << endl;
-	// 	for (auto & object_one : object_) {
-	// 		Serialize(json_, object_one);
-	// 	}
-	// }
-
-	// template<typename T>
-	// void SerializeS_s(string & json_, T & object_, bool isArray, string name = "") {
-	// 	SerializeS(json_, object_, typename TagSTLAAAType<T>::Tag{}, name);
-	// }
-
 
 	//用于解析基础类型，数组(只需要判断有没有[]就能确定是不是数组，结构体和基础类型都不具备[]条件)，结构体
 	template<typename T>
 	void FSerialize(string & json_, T & object_, BaseTag, string name = "") {
-		//cout << "进入array==========0 " << typeid(T).name() << endl;
-		//bool isArray = isArrayType("", FdogSerializer::Instance()->getTypeName(typeid(T).name()));
-		//cout << "是否是数组 ： " << isArray << endl;
-		//SerializeS(json_, object_, typename TagSTLAAAType<T>::Tag{}, name);
 		Serialize(json_, object_, name);
 		//这里需要判断类型 如果是基础类型直接使用name 不是基础类型，可以使用
 		if (isBaseType(FdogSerializer::Instance()->getTypeName(typeid(T).name()))) {
@@ -1824,45 +1586,34 @@ public:
 	//用于解析STL（map除外）其实上面接口也可以处理vector，但其他类型无法处理，所以这个处理STL
 	template<typename T>
 	void FSerialize(string & json_, T & object_, ArrayTag, string name = "") {
-		//cout << "进入array=====================1 " << typeid(T).name() << endl;
-		//cout << "长度2 = " << object_.size() << endl;
 		for (auto & object_one : object_) {
 			//ji
 			int objectType = isBaseType(FdogSerializer::Instance()->getTypeName(typeid(object_one).name()));
 			if (!objectType) {
 				json_ = json_ + "{";
 			}
-			//cout << "1=====" << endl;
 			Serialize(json_, object_one);
 
 			if (!objectType) {
 				json_ = json_ + "},";
 			}
-			//cout << "进入array=================2" << typeid(object_one).name()  << " json_ = " << json_<< endl;
 		}
 		if (json_.length() > 0) {
 			removeLastComma(json_);
 		}
-		//json_ = "{\"" + name + "\":[" + json_ + "]}";
-		//cout << "进入array=================3" << " json_ = " << json_<< endl;
 		//如果转换对象直接就是数组，可以再额外提供一个，或者说其他
 	}
 
 	//用于解析map
 	template<typename T>
 	void FSerialize(string & json_, T & object_, MapTag, string name = "") {
-		cout << "进入array==========2 " << typeid(T).name() << endl;
 		int i = 0;
-		//int len = object_.size();
 		for (auto & object_one : object_) {
 			//看情况，如果是结构体，需要花括号，基本类型不需要
 			json_ = json_ + "\"" + F_toString(object_one.first) + "\":";
-			//removeLastComma(json_);
 			string json_s = "";
 			Serialize(json_s, object_one.second);
 			int objectType = isBaseType(FdogSerializer::Instance()->getTypeName(typeid(object_one).name()));
-			cout << "type one = " << FdogSerializer::Instance()->getTypeName(typeid(object_one).name()) << endl;
-			cout << "objectType = " << objectType << endl;
 			if (!objectType) { 
 				json_ = json_ + "{" + json_s + "}";
 				json_ = json_ + ",";
@@ -1871,11 +1622,7 @@ public:
 			}
 			i++;
 		}
-		cout << "json_2 = " << json_ << endl;
 		removeLastComma(json_);
-		cout << "json_3 = " << json_ << endl;
-
-		//json_ = "{" + json_ + "}";
 	}
 
 	//用于过度
@@ -1887,8 +1634,6 @@ public:
 	//反序列化
 	template<typename T>
 	void Deserialize(T & object_, string & json_, string name = "") {
-		cout << "Deserialize json_ = " << json_ << endl; 
-		cout << "typeid = " << FdogSerializer::Instance()->getTypeName(typeid(T).name()) << endl;
 		ObjectInfo & objectinfo = FdogSerializer::Instance()->getObjectInfo(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		int objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		if (objectinfo.objectType == "NULL" && objectType != OBJECT_BASE && objectType != OBJECT_STRUCT) {
@@ -1896,7 +1641,6 @@ public:
 			objectinfo = getObjectInfoByType(FdogSerializer::Instance()->getTypeName(typeid(T).name()), objectType);
 			objectType = getObjectTypeInt(objectinfo.objectType, FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		}
-		//cout << "objectType = " << objectType << endl; 
 		if (OBJECT_BASE == objectType) {
 			MetaInfo * metainfo1 = getMetaInfo(FdogSerializer::Instance()->getTypeName(typeid(object_).name()));
 			smatch result;
@@ -1913,13 +1657,11 @@ public:
 				//     pattern = new regex(regex_key + ":" +regex_value,regex::icase);//icase用于忽略大小写
 				// }
 			}
-			//cout << "       反序列化获取的regex_value：" << regex_value << "  memberType = " << metainfo1->memberType << endl;
 			if (regex_search(json_, result, *pattern)) {
 				string value = result.str(2).c_str();
 				if (value == "") {
 					value = result.str(1).c_str();
 				}
-				//cout << "@@@@@@@@@@@@@反序列化value = " << value << endl;
 				FdogSerializerBase::Instance()->JsonToBase(object_, metainfo1, value);
 			}
 		}
@@ -1931,36 +1673,27 @@ public:
 				smatch result;
 				string regex_key = "(\"" + metainfoObject->memberName + "\")";
 				string regex_value = baseRegex[metainfoObject->memberType];
-				cout << "       反序列化获取的regex_value：" << regex_value << "  memberType = " << metainfoObject->memberType << endl;
 				if (regex_value == "") {
 					if (metainfoObject->memberTypeInt == OBJECT_STRUCT) {
-						//cout << "------------" << "struct类型" << endl;
 						regex_value = objectRegex;
 					} else if (metainfoObject->memberTypeInt == OBJECT_ARRAY) {
-						//cout << "------------" << "appay类型" << endl;
 						regex_value = arrayRegex;
 					} else if (metainfoObject->memberTypeInt == OBJECT_VECTOR) {
-						//cout << "------------" << "vector类型" << endl;
 						regex_value = arrayRegex;
 					} else if (metainfoObject->memberTypeInt == OBJECT_LIST) {
-						//cout << "------------" << "list类型" << endl;
 						regex_value = arrayRegex;
 					} else if (metainfoObject->memberTypeInt == OBJECT_SET) {
-						//cout << "------------" << "set类型" << endl;
 						regex_value = arrayRegex;
 					} else if (metainfoObject->memberTypeInt == OBJECT_DEQUE) {
-						//cout << "------------" << "deque类型" << endl;
 						regex_value = arrayRegex;
 					} else if (metainfoObject->memberTypeInt == OBJECT_MAP) {
-						cout << "------------" << "map类型" << endl;
 						regex_value = mapRegex;
 					} else if (metainfoObject->memberTypeInt == OBJECT_UNORDERED_MAP) {
-						cout << "------------" << "map类型" << endl;
 						regex_value = mapRegex;
 					}
 				} else {
-					//cout << "------------" << "base类型" << endl;
 				}
+				//删除正则表达式，用代码获取对应数据
 				//根据大小写判断
 				regex * pattern = nullptr;
 				if (metainfoObject->memberIsIgnoreLU == false) {
@@ -1970,12 +1703,7 @@ public:
 				}
 				if (regex_search(json_, result, *pattern)) {
 					string value = result.str(2).c_str();
-					cout << "json_========== = " << json_ << endl;
-					cout << "value========== = " << value << endl;
-					//value = "{\"12\":{\"name\":\"zhangxu\",\"age\":21},\"13\":{\"name\":\"yujing\",\"age\":21}}";
-					//cout << endl << "正则表达式 获取的值2222：" << value << "   type = " << metainfoObject->memberTypeInt << endl;
 					if (metainfoObject->memberTypeInt == OBJECT_BASE && metainfoObject->memberIsIgnore != true) {
-						//cout << "走这里" <<endl;
 						FdogSerializerBase::Instance()->JsonToBase(object_, metainfoObject, value);
 					} else if (metainfoObject->memberTypeInt == OBJECT_ARRAY && metainfoObject->memberIsIgnore != true) {
 						vector<string> json_array;
@@ -2085,7 +1813,6 @@ public:
 							FDeserialize(*(vector<char *> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
 							isCall = true;
 						} else if (metainfoObject->first == "string") {
-							//cout << "进入string" << endl;
 							FDeserialize(*(vector<string> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<vector<int>>::Tag{});
 							isCall = true;
 						} else if (metainfoObject->first == "short") {
@@ -2275,7 +2002,6 @@ public:
 					} else if (metainfoObject->memberTypeInt == OBJECT_MAP && metainfoObject->memberIsIgnore != true) {
 						//string v = getFdogString("\"" + metainfoObject->memberName + "\":", json_);
 						//value = "{12:{\"name\":\"zhangxu\",\"age\":21},13:{\"name\":\"yujing\",\"age\":21}}";
-						//cout << "value = " << value << endl;
 						if (metainfoObject->first == "char*" && metainfoObject->second == "int") {
 							FDeserialize(*(map<char *, int> *)((char *)&object_ + metainfoObject->memberOffset), value, TagDispatchTrait<map<int, int>>::Tag{});
 							isCall = true;
@@ -2321,67 +2047,24 @@ public:
 	//自定义结构体
 	template<typename T>
 	void Deserialize_struct(T & object_, string & value, MetaInfo * metainfoObject, StructTag_zx) {
-		//cout << "走到这里222" << endl;
 		object_.Deserialize_struct_s(object_, value, metainfoObject);
 	}
 	template<typename T>
 	void Deserialize_struct(T & object_, string & value, MetaInfo * metainfoObject, BaseTag_zx) {
 	}
 
-	// template<typename T>
-	// void DeserializeS(string & json_, T & object_, BaseAndStructTag, string name = "") {
-	// 	//cout << "DeserializeS BaseAndStructTag json_ = " << json_ << endl;
-	// 	Deserialize(object_, json_, name);
-	// }
-
-	// template<typename T>
-	// void DeserializeS(string & json_, T & object_, BaseArrayTag, string name = "") {
-	// 	vector<string> json_array;
-	// 	json_array = FdogSerializer::Instance()->CuttingArray(json_);
-	// 	//cout << "----" << json_array.size() << endl;
-	// 	for (auto & object_one : object_) {
-	// 		Deserialize(object_one, json_);
-	// 	}
-	// }
-
-	// template<typename T>
-	// void DeserializeS_s(T & object_, string & json_, bool isArray, string name = "") {
-	// 	// if(isArray){
-	// 	//     DeserializeS(json_, object_, TagSTLAAAType<int[2]>::Tag{}, name);
-	// 	// }else{
-
-	// 	DeserializeS(json_, object_, typename TagSTLAAAType<T>::Tag{}, name);
-	// 	//}
-	// }
-
 	//用于解析基础类型，数组(只需要判断有没有[]就能确定是不是数组，结构体和基础类型都不具备[]条件)，结构体
 	template<typename T>
 	void FDeserialize(T & object_, string & json_, BaseTag, string name = "") {
-		cout << "FDeserialize BaseTag json_ = " << json_ << endl;
-		//bool isArray = isArrayType("", FdogSerializer::Instance()->getTypeName(typeid(T).name()));
-		//DeserializeS_s(object_, json_, isArray, name);
 		Deserialize(object_, json_, name);
 	}
 
 	//用于解析STL（map除外）
 	template<typename T>
 	void FDeserialize(T & object_, string & json_, ArrayTag, string name = "") {
-		//cout << "FDeserialize ArrayTag json_ = " << json_ << endl;
-		//cout << "反序列化进入~array：" << json_  << endl;
-		//cout << "类型" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
-		//cout << "长度 = " << object_.size() << endl;
 		memberAttribute Member = getMemberAttribute(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		int objectType = 0;
 		objectType = isBaseType(Member.first);
-		//cout << " objectType = " << objectType <<endl;
-		//这个循环进不去
-		// for(auto & object_one : object_){
-		//     //判断内部类型是否为基础类型
-		//     objectType = isBaseType(FdogSerializer::Instance()->getTypeName(typeid(object_one).name()));
-		//     cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
-		//     break;
-		// }
-		//cout << "走到这里1"<<endl;
 		vector<string> json_array;
 		if (objectType) {
 			//搞基础
@@ -2398,40 +2081,24 @@ public:
 			removeLastComma(json_);
 			json_array = FdogSerializer::Instance()->CuttingArray(json_);
 		}
-		//cout << "走到这里2"<<endl;
 		int i = 0;
 		//这里需要注意，进来的STL容器长度为0，需要重新指定长度 需要想办法
 		//需要知道容易内部类型，然后作为参数传进去,如果长度小于需要转换的，就需要添加长度,STL有扩容机制
 		int len = json_array.size();
 		int len2 = object_.size();
-		//cout << "changdu:" << len  << "----" << len2 << endl;
-		// for (int i = 0; i< len; i++) {
-		//     cout << "json_array i:" << json_array[i] << endl;
-		// }
-		//object_.resize(2);
 		srand((int)time(NULL)); //用于set
 		for (int i = 0; i < json_array.size(); i++) {
-			//cout << "xunhuan1 :" << i << " & object_.size() = " << object_.size() << endl;
 			if (json_array.size() > object_.size()) {
 				F_init(object_, Member.valueTypeInt, Member.first);
-				//cout << "xunhuan2 :" << i << " & object_.size() = " << object_.size() << endl;
 			}
-			//cout << "xunhuan3 :" << i << " & object_.size() = " << object_.size() << endl;
 		}
-		//int len3 = object_.size();
-		//cout << "changdu:" << len  << "----" << len3 << endl;
-		//cout << "走到这里3 size = " << object_.size() <<endl;
 		for (auto & object_one : object_) {
-			//cout << "start size = "<< object_.size() << endl;
-			//cout << "json_array[i] = " << json_array[i] << endl;
-			//cout << "end i = "<< i << endl;
 			if (i > len) {
 				break;
 			}
 			Deserialize(object_one, json_array[i]);
 			i++;
 		}
-		//cout << "走到这里4"<<endl;
 		//这里释放init里面申请的内存
 		if (1) {
 			vector<char *>::iterator it = temp.begin();
@@ -2440,22 +2107,17 @@ public:
 				++it;
 			}
 		}
-		//cout << "走到这里5"<<endl;
 		temp.clear();
-		//cout << "走到这里6"<<endl;
 	}
 	//用于map
 	template<typename T>
 	void FDeserialize(T & object_, string & json_, MapTag) {
-		cout << "反序列化进入~map：" << json_ << endl;
-		cout << "类型" << abi::__cxa_demangle(typeid(object_).name(),0,0,0) << endl << endl;
 		memberAttribute Member = getMemberAttribute(FdogSerializer::Instance()->getTypeName(typeid(T).name()));
 		int objectType = 0;
 		objectType = isBaseType(Member.first);
 		for (auto & object_one : object_) {
 			//判断内部类型是否为基础类型
 			objectType = isBaseTypeByMap(FdogSerializer::Instance()->getTypeName(typeid(object_one).name()));
-			cout << "objectType=" << objectType << "--" << abi::__cxa_demangle(typeid(object_one).name(),0,0,0)<< endl;
 			break;
 		}
 		//这里有问题 objectType永远为0 找第二种方法
@@ -2463,7 +2125,6 @@ public:
 		vector<string> json_key;
 		objectType = 0;
 		if (objectType) {
-			//cout << "进入q = "<< objectType << endl;
 			smatch result;
 			regex pattern(mapRegex);
 			if (regex_search(json_, result, pattern)) {
@@ -2482,20 +2143,12 @@ public:
 		sort(json_array.begin(), json_array.end());
 		for (int i = 0; i < json_array.size(); i++) {
 			if (json_array.size() > object_.size()) {
-				//cout <<"##### 进入" << endl;
 				F_init(object_, Member.valueTypeInt, Member.first, Member.second, json_key[i]);
 			}
 		}
 		//这里有个问题，就是可能key的顺序不匹配
 		//这里存在问题，进来的STL容器长度为0，需要重新指定长度
-		//cout << "changdu:" << len << " object_ size = " << object_.size() << endl;
 		for (auto & object_one : object_) {
-			//cout << "进来啦 object_one.second = " << object_one.second << " json_array[i] = " << json_array[i] << endl;
-			//cout << " json_array[i] = " << json_array[i] << endl;
-			//提取key:
-			//object_one.first = getKey(json_array[i]);
-			//cout << "getKey = " << getKey(json_array[i]) << endl;
-			//定义变量
 			Deserialize(object_one.second, json_array[i]);
 			i++;
 		}
@@ -2515,17 +2168,12 @@ namespace Fdog {
 
 	template<typename T>
 	void FJson(string & json_, T & object_, string name = "") {
-		//cout << "进入FSerialize" << endl;
 		FdogSerializer::Instance()->FSerialize(json_, object_, typename TagDispatchTrait<T>::Tag{}, name);
-		//FdogSerializer::Instance()->Serialize(json_, object_, name);
-		//json_ = "{" + json_ + "}";
 	}
 
 	template<typename T>
 	void FObject(T & object_, string & json_, string name = "") {
-		//cout << "FObject json_ = " << json_ << endl;
 		FdogSerializer::Instance()->FDeserialize(object_, json_, typename TagDispatchTrait<T>::Tag{}, name);
-		//FdogSerializer::Instance()->FDeserialize(object_, json_, name);
 	}
 
 	template<typename T>

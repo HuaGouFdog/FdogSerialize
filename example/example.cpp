@@ -375,8 +375,8 @@ int main() {
 		//cout << "字符串错误提示：" << res.message << endl;
 		//json转结构体
 		school sch2;
-		string sch2_json = "{\"stu\":{\"name\":\"liuliu\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48},\"stuList\":[{\"name\":\"zhangxu\",\"age\":21},{\"name\":\"yujing\",\"age\":21}],\"intTesst\":[1,2],\"intTesst2\":[2222,3333],\"intMap\":{\"12\":\"name\":\"zhangxu\",\"age\":2,\"13\":\"name\":\"yujing\",\"age\":2},\"intMap\":{\"22\":3321,\"23\":312}}";
-		Fdog::FObject(sch2, sch_json);
+		string sch2_json = "{\"stu\":{\"name\":\"liuli}]],}u\",\"age\":18},\"tea\":{\"name\":\"wufang\",\"age\":48},\"stuList\":[{\"name\":\"zhangxu\",\"age\":21},{\"name\":\"yujing\",\"age\":21}],\"intTesst\":[1,2],\"intTesst2\":[2222,3333],\"intMap\":{\"12\":\"name\":\"zhangxu\",\"age\":2,\"13\":\"name\":\"yujing\",\"age\":2},\"intMap\":{\"22\":3321,\"23\":312}}";
+		Fdog::FObject(sch2, sch2_json);
 		// //结果  
 		//cout << "name = " << sch2.stu.name << " age = " << sch2.stu.age << endl;
 		//cout << "name = " << sch2.tea.name << " age = " << sch2.tea.age << endl;

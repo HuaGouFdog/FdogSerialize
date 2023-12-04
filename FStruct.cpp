@@ -309,7 +309,6 @@ ObjectInfo & FdogSerializer::getObjectInfo(string objectName) {
 }
 
 MetaInfo * FdogSerializer::getMetaInfo(string TypeName) {
-	//cout << "getMetaInfo - TypeName = "  << TypeName << endl;
 	for (auto metainfo : FdogSerializer::Instance()->baseInfoList) {
 		if (metainfo->memberType == TypeName) {
 			return metainfo;
@@ -330,10 +329,8 @@ std::string FdogSerializer::getTypeName(string TypeName) {
 #endif
 	auto iter = this->TypeName.find(TypeName);
 	if (iter != this->TypeName.end()) {
-		//cout << "getTypeName = " << iter->second << endl;
 		return iter->second;
 	}
-	//cout << "getTypeName = " << TypeName << endl;
 	return TypeName;
 }
 
@@ -431,7 +428,6 @@ string FdogSerializer::getKey(string json) {
 *   返回对应的成员类型(包括基本类型和自定义类型)，数组大小
 ************************************/
 memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
-	//cout << "getMemberAttribute = " << typeName << endl;
 	memberAttribute resReturn;
 	smatch result;
 	if (FdogSerializer::isBaseType(typeName)) {
@@ -440,13 +436,11 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 		resReturn.valueTypeInt = OBJECT_BASE;
 	}
 	else if (FdogSerializer::isVectorType("", typeName)) {
-		//cout << "=========>>1  typeName ============= = " << typeName << endl;
 		resReturn.valueType = typeName;
 		regex pattern(complexRegex[5]);
 		regex pattern2(complexRegex[53]);
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
-			//cout << "=========>>1  isVectorType 暂时有问题 ============= = " << value << endl;
 			//处理好
 			if (value == "string") {
 				resReturn.first = "string";
@@ -457,7 +451,6 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 		}
 		else if (regex_search(typeName, result, pattern2)) {
 			string value = result.str(1).c_str();
-			//cout << "=========>>2  isVectorType 暂时有问题 ============= = " << value << endl;
 			if (value == "string") {
 				resReturn.first = "string";
 			}
@@ -471,7 +464,6 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 		resReturn.valueType = typeName;
 		regex pattern(complexRegex[62]);
 		regex pattern2(complexRegex[63]);
-		//cout << "值=" << typeName << endl;
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
 			if (value == "std::__cxx11::basic_string<char" || value == "class std::basic_string<char") {
@@ -484,7 +476,6 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 				string value2 = result.str(2).c_str();
 				resReturn.second = value2;
 			}
-			//cout << "=========>>2  isMapType " << resReturn.first << endl;
 		}
 		else {
 			regex pattern2(complexRegex[63]);
@@ -502,7 +493,6 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 		regex pattern2(complexRegex[63]);
 		if (regex_search(typeName, result, pattern2)) {
 			string value = result.str(1).c_str();
-			//cout << "&&&&&&& = " << result.str(0).c_str() << endl;
 			if (value == "std::basic_string<char" || value == "class std::basic_string<char") {
 				resReturn.first = "string";
 				string value2 = result.str(4).c_str();
@@ -513,7 +503,6 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 				string value2 = result.str(2).c_str();
 				resReturn.second = value2;
 			}
-			//cout << "=========>>3  isMapType " << resReturn.first << endl; 
 		}
 		else {
 
@@ -525,44 +514,34 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 		regex pattern(complexRegex[7]);
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
-			//cout << "=========>>1  isListType " << value << endl;
 			resReturn.first = value;
 		}
 		resReturn.valueTypeInt = OBJECT_LIST;
-		//getTypeOfList
 	}
 	else if (FdogSerializer::isSetType("", typeName)) {
 		resReturn.valueType = typeName;
 		regex pattern(complexRegex[8]);
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
-			//cout << "=========>>1  isSetType " << value << endl;
 			resReturn.first = value;
 		}
 		resReturn.valueTypeInt = OBJECT_SET;
-		//getTypeOfList
 	}
 	else if (FdogSerializer::isDequeType("", typeName)) {
 		resReturn.valueType = typeName;
 		regex pattern(complexRegex[9]);
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
-			//cout << "=========>>1  isDequeType " << value << endl;
 			resReturn.first = value;
 		}
 		resReturn.valueTypeInt = OBJECT_DEQUE;
-		//getTypeOfList
 	}
 	else if (FdogSerializer::isArrayType("", typeName)) {
 		resReturn.valueType = typeName;
-		// ObjectInfo objectinfo = getObjectInfoByType(typeName, OBJECT_ARRAY);  
-		// resReturn.valueType = objectinfo.objectType;
 		regex pattern(complexRegex[4]);
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
-			//cout << "数组类型:" << value << " ";
 			string value2 = result.str(3).c_str();
-			//cout << "数组大小:" << value2;
 			resReturn.first = value;
 			resReturn.ArraySize = atoi(value2.data());
 		}
@@ -578,7 +557,6 @@ memberAttribute FdogSerializer::getMemberAttribute(string typeName) {
 }
 
 int FdogSerializer::getObjectTypeInt(string objectName, string typeName) {
-	//cout << "进入getObjectTypeInt typeName = " <<objectName << " -- " << typeName << endl;
 	if (FdogSerializer::Instance()->isBaseType(typeName)) {
 		return OBJECT_BASE;
 	}
@@ -609,7 +587,6 @@ ObjectInfo FdogSerializer::getObjectInfoByType(string typeName, int objectTypeIn
 		//截取值
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
-			//cout << "-----" << value << endl;
 			return getObjectInfo(value);
 			//除了复杂类型，还应该有基础类型
 		}
@@ -623,14 +600,12 @@ ObjectInfo FdogSerializer::getObjectInfoByType(string typeName, int objectTypeIn
 	case OBJECT_MAP:
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
-			//cout << "-----" << value << endl;
 			return getObjectInfo(value);
 		}
 		break;
 	case OBJECT_ARRAY:
 		if (regex_search(typeName, result, pattern)) {
 			string value = result.str(1).c_str();
-			//cout << "-----" << value << endl;
 			return getObjectInfo(value);
 		}
 		break;
@@ -640,33 +615,33 @@ ObjectInfo FdogSerializer::getObjectInfoByType(string typeName, int objectTypeIn
 }
 #ifdef __GNUC__
 #elif _MSC_VER
-wstring FdogSerializer::string2wstring(string str) {
-	wstring result;
-	//获取缓冲区大小，并申请空间，缓冲区大小按字符计算  
-	int len = MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.size(), NULL, 0);
-	TCHAR* buffer = new TCHAR[len + 1];
-	//多字节编码转换成宽字节编码  
-	MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.size(), buffer, len);
-	buffer[len] = '\0';             //添加字符串结尾  
-									//删除缓冲区并返回值  
-	result.append(buffer);
-	delete[] buffer;
-	return result;
-}
-
-string FdogSerializer::wstring2string(wstring wstr) {
-	string result;
-	//获取缓冲区大小，并申请空间，缓冲区大小事按字节计算的  
-	int len = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), wstr.size(), NULL, 0, NULL, NULL);
-	char* buffer = new char[len + 1];
-	//宽字节编码转换成多字节编码  
-	WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), wstr.size(), buffer, len, NULL, NULL);
-	buffer[len] = '\0';
-	//删除缓冲区并返回值  
-	result.append(buffer);
-	delete[] buffer;
-	return result;
-}
+//wstring FdogSerializer::string2wstring(string str) {
+//	wstring result;
+//	//获取缓冲区大小，并申请空间，缓冲区大小按字符计算  
+//	int len = MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.size(), NULL, 0);
+//	TCHAR* buffer = new TCHAR[len + 1];
+//	//多字节编码转换成宽字节编码  
+//	MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.size(), buffer, len);
+//	buffer[len] = '\0';             //添加字符串结尾  
+//									//删除缓冲区并返回值  
+//	result.append(buffer);
+//	delete[] buffer;
+//	return result;
+//}
+//
+//string FdogSerializer::wstring2string(wstring wstr) {
+//	string result;
+//	//获取缓冲区大小，并申请空间，缓冲区大小事按字节计算的  
+//	int len = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), wstr.size(), NULL, 0, NULL, NULL);
+//	char* buffer = new char[len + 1];
+//	//宽字节编码转换成多字节编码  
+//	WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), wstr.size(), buffer, len, NULL, NULL);
+//	buffer[len] = '\0';
+//	//删除缓冲区并返回值  
+//	result.append(buffer);
+//	delete[] buffer;
+//	return result;
+//}
 #endif
 
 int FdogSerializer::getObjectTypeByObjectInfo(string objectName) {
@@ -674,7 +649,6 @@ int FdogSerializer::getObjectTypeByObjectInfo(string objectName) {
 }
 
 bool FdogSerializer::isBaseType(string typeName) {
-	//cout << "isBaseType = " << typeName << endl;
 	vector<string>::iterator result = find(baseType.begin(), baseType.end(), typeName);
 	if (result != baseType.end()) {
 		return true;
@@ -790,8 +764,7 @@ bool FdogSerializer::isArrayType(string objectName, string typeName) {
 	if (regex_search(typeName, result, pattern)) {
 		string value = result.str(2).c_str();
 		string value2 = result.str(4).c_str();
-		//cout << "value = " << value << endl;
-		//cout << "value2 = " << value2 << endl;
+
 		if ((value + value2) == "[]") {
 			return true;
 		}
@@ -877,12 +850,10 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 	bool isadd = false;
 	res.code = 0;
 	for (int i = 0; i < len; i++) {
-		//cout << "i = " << i << endl;
 		if (json_[i] == '"') {
 			if (sum == 0 && status == -1) {
 				status = 0;
 				first = i;
-				//cout << "i = " << i << endl;
 			}
 		}
 		if (status == 3 && json_[i] == '{' && isadd == true) {
@@ -894,13 +865,11 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 		}
 
 		if (json_[i] == ',' && json_[i - 1] == '"' && status == 2) {
-			//cout << ",后面是\" 且 status = 2 出错" << endl;
 			res.code = -1;
 		}
 
 		if (json_[i] == '"' && json_[i + 1] == ':' && json_[i + 2] == '{') {
 			if (status == 0) {
-				//cout << "status = 3" << endl;
 				status = 3;
 				//sum++;
 				isadd = true;
@@ -909,7 +878,6 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 		else if (json_[i] == '"' && json_[i + 1] == ':' && json_[i + 2] == '[') {
 			if (status == 0) {
 				status = 4;
-				//sum++;
 				isadd = true;
 			}
 		}
@@ -917,7 +885,6 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 			if (status == 0) {
 				status = 1;
 				sum++;
-				//cout << "sum+1 =" << sum << endl;
 				xiabiao = i + 2;
 				isadd = true;
 			}
@@ -935,18 +902,15 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 				if (sum == 0) {
 					end = i;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "获取到的值1：" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
 			}
 			else if (json_[i + 1] == '}' && status == 1) {
 				sum--;
-				//cout << "sum-1 =" << sum << endl;
 				if (sum == 0) {
 					end = i;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "获取到的值1：" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
@@ -956,14 +920,12 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 				if (sum == 0) {
 					end = i;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "获取到的值1：" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
 			}
 			else {
 				if (sum - 1 == 0 && xiabiao < i) {
-					//cout << "字符串找不到匹配值" << endl;
 				}
 			}
 			if (json_[i + 1] == ']' && status == 4) {
@@ -971,7 +933,6 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 				if (sum == 0) {
 					end = i + 1;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "获取到的值3：" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
@@ -984,10 +945,8 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 					end = i;
 					string da = json_.substr(first, end - first);
 					if (da.npos != da.find(",")) {
-						//cout << "失败" << endl;
 						res.code = -1;
 					}
-					//cout << "获取到的值4：" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
@@ -998,7 +957,6 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 				if (sum == 0) {
 					end = i;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "获取到的值5：" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
@@ -1010,7 +968,6 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 				if (sum == 0) {
 					end = i;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "获取到的值6：" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
@@ -1025,16 +982,13 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 					if (status == 2 && json_[i - 1] != '"') {
 						string da = json_.substr(first, end - first);
 						if (da.npos != da.find(",")) {
-							//cout << "失败" << endl;
 							res.code = -1;
 						}
-						//cout << "获取到的值71：" << da << endl;
 						status = -1;
 						json_array.push_back(da);
 					}
 					else {
 						string da = json_.substr(first, end - first + 1);
-						//cout << "获取到的值72：" << da << endl;
 						status = -1;
 						json_array.push_back(da);
 					}
@@ -1046,7 +1000,6 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 				if (sum == 0) {
 					end = i;
 					string da = json_.substr(first, end - first + 1);
-					//cout << "获取到的值8：" << da << endl;
 					status = -1;
 					json_array.push_back(da);
 				}
@@ -1068,7 +1021,6 @@ result FdogSerializer::CuttingJson(vector<string> & json_array, string json_) {
 			count = count + json_array[i].length() + 1;
 		}
 		if (count + 1 != json_.length()) {
-			cout << "长度出错 :" << json_ << "---原字符串长度：" << json_.length() << "---现在长度:" << count + 1 << endl;
 			res.code = -1;
 		}
 	}
@@ -1097,7 +1049,7 @@ result FdogSerializer::IsSquareBracket(string json_) {
 	char end = json_[json_.length() - 1];
 	if (start != '[' || end != ']') {
 		res.code = -1;
-		res.message = "开头或结尾缺少方括号";
+		//res.message = "开头或结尾缺少方括号";
 		return res;
 	}
 	return res;
@@ -1110,7 +1062,7 @@ result FdogSerializer::IsCurlyBraces(string json_) {
 	char end = json_[json_.length() - 1];
 	if (start != '{' || end != '}') {
 		res.code = -1;
-		res.message = "开头或结尾缺少花括号";
+		//res.message = "开头或结尾缺少花括号";
 		return res;
 	}
 	res.code = 0;
@@ -1143,24 +1095,21 @@ result FdogSerializer::isMatch(string json_) {
 	}
 	res.code = -1;
 	if (h_sum > 0) {
-		res.message = "缺少花括号";
+		//res.message = "缺少花括号";
 	}
 	else if (f_sum > 0) {
-		res.message = "缺少方括号";
+		//res.message = "缺少方括号";
 	}
 	return res;
 }
 
 //截取字符串
 string FdogSerializer::getFdogString(string a, string json_) {
-	//cout << "a = " << a << " json_ =" << json_ << endl;
 	size_t num = json_.find(a);
 	size_t num_2 = a.length();
 	if (num > json_.length()) {
 		cout << "错误" << endl;
 	}
-	cout << "num = " << num << endl;
-	cout << "num2 = " << num_2 << endl;
 
 	bool isCall = false;
 	result res;
@@ -1184,12 +1133,11 @@ string FdogSerializer::getFdogString(string a, string json_) {
 			isCall = true;
 			f_sum--;
 		}
-		cout << " i = " << i << endl;
 		if (isCall && h_sum == f_sum && f_sum == 0) {
 			string b = json_.substr(num + num_2, i - (num + num_2) + 1);
-			//cout << "b = " << b << " num + num_2 = "<< num + num_2 << " num + num_2 + i = " << i << " json_.length() =" << json_.length() << endl;
 		}
 	}
+	return "";
 }
 
 //判断json正确性
@@ -1226,7 +1174,6 @@ bool FdogSerializer::__Exist(string json_, string key) {
 			//这里需要在找到的里面找对应字符串
 			string resp = "";
 			string jsonNew = "\"" + key.substr(0, num) + "\":";
-			cout << "n = " << num << endl;
 			auto num2 = json_.find(jsonNew);
 			if (num2 != json_.npos) {
 				if (json_[num2 + jsonNew.length()] == '{') {
@@ -1308,7 +1255,6 @@ string FdogSerializer::__GetStringValue(string json_, string key) {
 			//这里需要在找到的里面找对应字符串
 			string resp = "";
 			string jsonNew = "\"" + key.substr(0, num) + "\":";
-			cout << "n = " << num << endl;
 			auto num2 = json_.find(jsonNew);
 			if (num2 != json_.npos) {
 				if (json_[num2 + jsonNew.length()] == '{') {
