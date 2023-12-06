@@ -210,8 +210,6 @@ REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
 >
 > 目前仅保证linux环境正常，代码中有使用到C++11特性，使用到了正则表达式，linux编译，需保证gcc版本在4.9(4.8不支持正则表达式)
 >
-> windows暂未适配，敬请期待。
->
 > 
 >
 > linux编译方式1，使用g++编译：
@@ -234,13 +232,13 @@ REGISTEREDMEMBER_s(TYPE, metaInfoObjectList, arg1);
 >
 > 
 >
+> windows可以使用vs编译
+>
+> 
+>
 > 分支说明：
 >
-> master为不稳定分支，请勿使用
->
-> dev分支为本人开发测试分支，请勿使用
->
-> release分支为稳定分支，版本号越高，支持越多，请使用最新的release分支
+> 使用master即可
 
 
 
